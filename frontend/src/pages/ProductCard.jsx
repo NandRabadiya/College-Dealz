@@ -1,17 +1,66 @@
-import procard from "./productCard.json";
+// ProductCard.jsx
 import React from "react";
 import { Heart, Share2, MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { useAuth } from "./AuthContext";
+import procard from "./productCard.json"
 
 const ProductCard = () => {
+  // Get authentication context
+  const { isAuthenticated, setShowAuthDialog, setPendingAction } = useAuth();
+
+  // Handler for protected actions
+  const handleProtectedAction = (action, e) => {
+    // Prevent event bubbling if event exists
+    if (e) {
+      e.stopPropagation();
+    }
+
+    if (!isAuthenticated) {
+      setPendingAction(() => action);
+      setShowAuthDialog(true);
+    } else {
+      action();
+    }
+  };
+
+  // Action handlers
+  const handleProductClick = (product) => {
+    handleProtectedAction(() => {
+      // Navigate to product details or handle product click
+      console.log("Viewing product details:", product);
+    });
+  };
+
+  const handleWishlist = (product, e) => {
+    handleProtectedAction(() => {
+      // Add to wishlist logic
+      console.log("Adding to wishlist:", product);
+    }, e);
+  };
+
+  const handleChat = (product, e) => {
+    handleProtectedAction(() => {
+      // Start chat logic
+      console.log("Starting chat about:", product);
+    }, e);
+  };
+
+  // Share doesn't require authentication
+  const handleShare = (product, e) => {
+    e.stopPropagation();
+    console.log("Sharing product:", product);
+  };
+
   return (
     <div className="m-4">
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
         {procard.map((product, index) => (
           <div
             key={index}
-            className="group relative overflow-hidden rounded-lg border bg-card transition-all hover:shadow-lg"
+            className="group relative overflow-hidden rounded-lg border bg-card transition-all hover:shadow-lg cursor-pointer"
+            onClick={() => handleProductClick({ id: 1, name: "Sample Product" })}
           >
             {/* Image Container */}
             <div className="relative h-40 overflow-hidden">
@@ -24,8 +73,11 @@ const ProductCard = () => {
                 variant="ghost"
                 size="icon"
                 className="absolute right-2 top-2 bg-background/80 backdrop-blur-sm hover:bg-background/90"
+                onClick={(e) => handleWishlist(product, e)}
               >
-                <Heart className="h-5 w-5 text-primary" />
+                <Heart className={`h-5 w-5 text-primary ${
+                  isAuthenticated && product.isWishlisted ? 'fill-primary' : ''
+                }`} />
               </Button>
             </div>
 
@@ -54,11 +106,21 @@ const ProductCard = () => {
 
               {/* Action Buttons */}
               <div className="flex items-center justify-between gap-2 pt-2 border-t">
-                <Button variant="ghost" size="sm" className="flex-1">
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  className="flex-1"
+                  onClick={(e) => handleChat(product, e)}
+                >
                   <MessageCircle className="mr-2 h-4 w-4" />
                   Chat
                 </Button>
-                <Button variant="ghost" size="sm" className="flex-1">
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  className="flex-1"
+                  onClick={(e) => handleShare(product, e)}
+                >
                   <Share2 className="mr-2 h-4 w-4" />
                   Share
                 </Button>

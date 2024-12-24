@@ -1,5 +1,15 @@
-import React, { useState, useEffect } from "react";
-import { Search, MessageCircle, Plus, Heart, Menu, X, Sun, Moon } from "lucide-react";
+import React, { useEffect, useState } from "react";
+import {
+  Search,
+  MessageCircle,
+  Plus,
+  Heart,
+  Menu,
+  X,
+  Sun,
+  Moon,
+} from "lucide-react";
+import { useAuth } from "./AuthContext";
 import {
   Select,
   SelectContent,
@@ -19,10 +29,50 @@ import { Input } from "@/components/ui/input";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import logo from "../assets/photo/logo.png";
 
+
 const NavBar = () => {
   const [showMobileSearch, setShowMobileSearch] = useState(false);
   const [theme, setTheme] = useState("light");
+  const { isAuthenticated, setShowAuthDialog, setPendingAction } = useAuth();
 
+  // Handle protected actions
+  const handleProtectedAction = (action) => {
+    if (!isAuthenticated) {
+      setPendingAction(() => action);
+      setShowAuthDialog(true);
+    } else {
+      action();
+    }
+  };
+
+  // Define actions for each button
+  const handlePostDeal = () => {
+    handleProtectedAction(() => {
+      console.log("Navigating to post deal");
+      // Add navigation logic here
+    });
+  };
+
+  const handleWishlist = () => {
+    handleProtectedAction(() => {
+      console.log("Navigating to wishlist");
+      // Add navigation logic here
+    });
+  };
+
+  const handleChat = () => {
+    handleProtectedAction(() => {
+      console.log("Navigating to chat");
+      // Add navigation logic here
+    });
+  };
+
+  const handleProfile = () => {
+    handleProtectedAction(() => {
+      console.log("Navigating to profile");
+      // Add navigation logic here
+    });
+  };
   // Initialize theme from system preference or localStorage
   useEffect(() => {
     // Check if user has a saved preference
@@ -32,7 +82,8 @@ const NavBar = () => {
       document.documentElement.classList.toggle("dark", savedTheme === "dark");
     } else {
       // Check system preference
-      const systemTheme = window.matchMedia("(prefers-color-scheme: dark)").matches
+      const systemTheme = window.matchMedia("(prefers-color-scheme: dark)")
+        .matches
         ? "dark"
         : "light";
       setTheme(systemTheme);
@@ -113,6 +164,7 @@ const NavBar = () => {
         variant="ghost"
         size="icon"
         className={isMobile ? "w-full flex justify-start" : ""}
+        onClick={handleChat}
       >
         <MessageCircle className="h-5 w-5" />
         {isMobile && <span className="ml-2">Messages</span>}
@@ -121,6 +173,7 @@ const NavBar = () => {
         variant="ghost"
         size="icon"
         className={isMobile ? "w-full flex justify-start" : ""}
+        onClick={handlePostDeal}
       >
         <Plus className="h-5 w-5" />
         {isMobile && <span className="ml-2">Post a Deal</span>}
@@ -129,6 +182,7 @@ const NavBar = () => {
         variant="ghost"
         size="icon"
         className={isMobile ? "w-full flex justify-start" : ""}
+        onClick={handleWishlist}
       >
         <Heart className="h-5 w-5" />
         {isMobile && <span className="ml-2">Wishlist</span>}
@@ -161,7 +215,7 @@ const NavBar = () => {
                   <NavigationItems isMobile />
                   <SearchBar className="w-full" />
                   <ActionButtons isMobile />
-                  <div className="flex items-center space-x-4 mt-4">
+                  <div className="flex items-center space-x-4 mt-4 cursor-pointer" onClick={handleProfile}>
                     <Avatar>
                       <AvatarImage src="/api/placeholder/32/32" />
                       <AvatarFallback>UN</AvatarFallback>
