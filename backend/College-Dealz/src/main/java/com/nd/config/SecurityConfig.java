@@ -25,24 +25,15 @@ public class SecurityConfig {
         this.userDetailsService = userDetailsService;
     }
 
-
-//    @Bean
-//    public UserDetailsService userDetailsService() {
-//        UserDetails user1 = (UserDetails) User.builder()
-//                .name("admin123")
-//                .email("jkl@gmail.com")
-//                .password(passwordEncoder().encode("admin123"))
-//                .build();
-//
-//        UserDetails user2 = (UserDetails) User.builder()
-//                .name("user123")
-//                .email("abcd@gamil.com")
-//                .password(passwordEncoder().encode("pass"))
-//                .build();
-//
-//        return new InMemoryUserDetailsManager(user1, user2);
-//    }
-
+    @Bean
+    public UserDetailsService userDetailsService() {
+        UserDetails user = org.springframework.security.core.userdetails.User.builder()
+                .username("nand")
+                .password(passwordEncoder().encode("nand123"))
+                .roles("USER")
+                .build();
+        return new InMemoryUserDetailsManager(user);
+    }
 
 
     @Bean
