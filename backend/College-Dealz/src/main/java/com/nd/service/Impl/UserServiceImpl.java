@@ -82,46 +82,46 @@ public class UserServiceImpl implements UserService {
     }
 
     public User dtoToUser(UserDto userDto) {
-       // User user = this.modelMapper.map(userDto, User.class);
+       User user = this.modelMapper.map(userDto, User.class);
 
-        User user=new User();
-         user.setId(userDto.getId());
-         user.setName(userDto.getName());
-         user.setEmail(userDto.getEmail());
-
-         user.setPassword(userDto.getPassword());
+//        User user=new User();
+//         user.setId(userDto.getId());
+//         user.setName(userDto.getName());
+//         user.setEmail(userDto.getEmail());
+//
+//         user.setPassword(userDto.getPassword());
         return user;
     }
 
     public UserDto userToDto(User user) {
-       // UserDto userDto = this.modelMapper.map(user, UserDto.class);
-        UserDto userDto=new UserDto();
-
-        user.setId(userDto.getId());
-        user.setName(userDto.getName());
-        user.setEmail(userDto.getEmail());
-
-        user.setPassword(userDto.getPassword());
+       UserDto userDto = this.modelMapper.map(user, UserDto.class);
+//        UserDto userDto=new UserDto();
+//
+//        user.setId(userDto.getId());
+//        user.setName(userDto.getName());
+//        user.setEmail(userDto.getEmail());
+//
+//        user.setPassword(userDto.getPassword());
 
         return userDto;
     }
 
-//    @Override
-//    public UserDto registerNewUser(UserDto userDto) {
-//
-//        User user = this.modelMapper.map(userDto, User.class);
-//
-//        // encoded the password
-//        user.setPassword(this.passwordEncoder.encode(user.getPassword()));
-//
-//        // roles
-//        Role role = this.roleRepo.findById(AppConstants.NORMAL_USER).get();
-//
-//        user.getRoles().add(role);
-//
-//        User newUser = this.userRepo.save(user);
-//
-//        return this.modelMapper.map(newUser, UserDto.class);
-//    }
+    @Override
+    public UserDto registerNewUser(UserDto userDto) {
+
+        User user = this.modelMapper.map(userDto, User.class);
+
+        // encoded the password
+        user.setPassword(this.passwordEncoder.encode(user.getPassword()));
+
+        // roles
+        Role role = this.roleRepo.findById(AppConstants.NORMAL_USER).get();
+
+        user.getRoles().add(role);
+
+        User newUser = this.userRepo.save(user);
+
+        return this.modelMapper.map(newUser, UserDto.class);
+    }
 
 }

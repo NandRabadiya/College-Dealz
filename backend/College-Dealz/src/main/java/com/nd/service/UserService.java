@@ -17,7 +17,7 @@ public interface UserService {
 
 
 
-    //UserDto registerNewUser(UserDto user);
+    UserDto registerNewUser(UserDto user);
 
 
     UserDto createUser(UserDto user);
