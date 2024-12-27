@@ -5,10 +5,13 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useAuth } from "./AuthContext";
 import procard from "./productCard.json"
+import { useNavigate } from "react-router-dom";
+
 
 const ProductCard = () => {
   // Get authentication context
-  const { isAuthenticated, setShowAuthDialog, setPendingAction } = useAuth();
+  const { isAuthenticated, setPendingAction } = useAuth();
+  const navigate = useNavigate();
 
   // Handler for protected actions
   const handleProtectedAction = (action, e) => {
@@ -19,7 +22,7 @@ const ProductCard = () => {
 
     if (!isAuthenticated) {
       setPendingAction(() => action);
-      setShowAuthDialog(true);
+      navigate("/Authenticate");
     } else {
       action();
     }

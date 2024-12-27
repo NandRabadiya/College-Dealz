@@ -1,22 +1,35 @@
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import NavBar from "./pages/NavBar";
-import ProductCard from "./pages/ProductCard";
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+import { useState } from "react";
+import Home from "./pages/Home";
+import Authenticate from "./pages/Authenticate";
+import Dashboard from "./pages/Profile";
 import { AuthProvider } from "./pages/AuthContext";
 
+// PrivateRoute component
+const PrivateRoute = ({ element, isLoggedIn, redirectTo }) => {
+  return isLoggedIn ? element : <Navigate to={redirectTo} />;
+};
+
 function App() {
+  // Simulating user authentication status (replace with actual logic, e.g., context or Redux)
+  const [isLoggedIn, setIsLoggedIn] = useState(true);
+
   return (
     <Router>
       <AuthProvider>
-        <div className="min-h-screen bg-background">
-          <NavBar />
-          {/* Main content area */}
-          <main className="container mx-auto py-6">
-            <Routes>
-              <Route path="/" element={<ProductCard />} />
-              {/* Add more routes here as needed */}
-            </Routes>{" "}
-          </main>
-        </div>
+      <Routes>
+        {/* Public Route */}
+        <Route path="/" element={<Home />} />
+    
+        {/* Login/Register Route */}
+        <Route path="/Authenticate" element={<Authenticate />} />
+
+        {/* Protected Route */}
+        <Route
+          path="/dashboard"
+          element={<PrivateRoute isLoggedIn={isLoggedIn} redirectTo="/Authenticate" element={<Dashboard />} />}
+        />
+      </Routes>
       </AuthProvider>
     </Router>
   );

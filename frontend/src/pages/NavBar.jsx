@@ -11,13 +11,6 @@ import {
 } from "lucide-react";
 import { useAuth } from "./AuthContext";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
@@ -28,18 +21,19 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import logo from "../assets/photo/logo.png";
-
+import { Label } from "@/components/ui/label";
+import { useNavigate } from "react-router-dom";
 
 const NavBar = () => {
   const [showMobileSearch, setShowMobileSearch] = useState(false);
   const [theme, setTheme] = useState("light");
-  const { isAuthenticated, setShowAuthDialog, setPendingAction } = useAuth();
+  const { isAuthenticated } = useAuth();
+  const navigate = useNavigate();
 
   // Handle protected actions
   const handleProtectedAction = (action) => {
     if (!isAuthenticated) {
-      setPendingAction(() => action);
-      setShowAuthDialog(true);
+      navigate("/Authenticate");
     } else {
       action();
     }
@@ -73,17 +67,15 @@ const NavBar = () => {
       // Add navigation logic here
     });
   };
+
   // Initialize theme from system preference or localStorage
   useEffect(() => {
-    // Check if user has a saved preference
     const savedTheme = localStorage.getItem("theme");
     if (savedTheme) {
       setTheme(savedTheme);
       document.documentElement.classList.toggle("dark", savedTheme === "dark");
     } else {
-      // Check system preference
-      const systemTheme = window.matchMedia("(prefers-color-scheme: dark)")
-        .matches
+      const systemTheme = window.matchMedia("(prefers-color-scheme: dark)").matches
         ? "dark"
         : "light";
       setTheme(systemTheme);
@@ -127,16 +119,12 @@ const NavBar = () => {
         isMobile ? "flex-col space-y-4" : "items-center space-x-4"
       }`}
     >
-      <Select>
-        <SelectTrigger className={`${isMobile ? "w-full" : "w-[180px]"}`}>
-          <SelectValue placeholder="Select College" />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="college1">College 1</SelectItem>
-          <SelectItem value="college2">College 2</SelectItem>
-          <SelectItem value="college3">College 3</SelectItem>
-        </SelectContent>
-      </Select>
+      <div
+        className={`${isMobile ? "w-full" : "w-[180px]"} 
+      border border-gray-200 dark:border-gray-800 rounded-lg px-2 py-2.5 flex items-center justify-center`}
+      >
+        <Label>College</Label>
+      </div>
 
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
@@ -215,7 +203,10 @@ const NavBar = () => {
                   <NavigationItems isMobile />
                   <SearchBar className="w-full" />
                   <ActionButtons isMobile />
-                  <div className="flex items-center space-x-4 mt-4 cursor-pointer" onClick={handleProfile}>
+                  <div
+                    className="flex items-center space-x-4 mt-4 cursor-pointer"
+                    onClick={handleProfile}
+                  >
                     <Avatar>
                       <AvatarImage src="/api/placeholder/32/32" />
                       <AvatarFallback>UN</AvatarFallback>
