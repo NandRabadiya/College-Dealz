@@ -12,8 +12,8 @@ import java.util.Set;
 @Getter
 @Setter
 @NoArgsConstructor
-@AllArgsConstructor
 @Builder
+@AllArgsConstructor
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -27,7 +27,7 @@ public class User {
     private String name;
 
     @Column(nullable = false, unique = true)
-    private String email;
+    private String email = "nand@ddu.ac.in";
 
     @Column(nullable = false)
     private String password;

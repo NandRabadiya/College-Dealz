@@ -21,12 +21,12 @@ public class University {
     private int id;
 
     @Column(nullable = false)
-    private String name;
+    private String name="DDU";
 
-    @Column(nullable = false, unique = true)
-    private String domain;
+    @Column(nullable = false) //unique = true)
+    private String domain="@ddu.ac.in";
 
-    @Column(nullable = false)
+    @Column(nullable = true)
     private String location;
 
     @Column(name = "created_at")
