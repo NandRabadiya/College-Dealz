@@ -2,7 +2,6 @@ package com.nd.entities;
 
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.validator.constraints.Length;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
@@ -18,12 +17,14 @@ import java.util.Set;
 @NoArgsConstructor
 @Builder
 @AllArgsConstructor
+@ToString
 public class User implements UserDetails {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "user_id")
     private int id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "university_id")
     private University university;
 
@@ -31,7 +32,7 @@ public class User implements UserDetails {
     private String name;
 
     @Column(nullable = false, unique = true)
-    private String email = "nand@ddu.ac.in";
+    private String email;
 
     @Column(nullable = false)
     private String password;
@@ -83,6 +84,11 @@ public class User implements UserDetails {
         updatedAt = LocalDateTime.now();
     }
 
+    @Override
+    public String toString() {
+        return "User{id=" + id + ", name='" + name + "', email='" + email + "', roles=" + roles + "}";
+    }
+
 
     public int getId() {
         return id;
@@ -129,4 +135,11 @@ public class User implements UserDetails {
         this.password = password;
     }
 
+    public University getUniversity() {
+        return university;
+    }
+
+    public void setUniversity(University university) {
+        this.university = university;
+    }
 }

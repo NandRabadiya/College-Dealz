@@ -17,7 +17,8 @@ import java.util.Set;
 @AllArgsConstructor
 public class University {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "university_id")
     private int id;
 
     @Column(nullable = false)
@@ -47,5 +48,17 @@ public class University {
     @PreUpdate
     protected void onUpdate() {
         updatedAt = LocalDateTime.now();
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public String getDomain() {
+        return domain;
     }
 }
