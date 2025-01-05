@@ -3,14 +3,13 @@ import React from "react";
 import { Heart, Share2, MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { useAuth } from "./AuthContext";
 import procard from "./productCard.json"
 import { useNavigate } from "react-router-dom";
 
 
 const ProductCard = () => {
   // Get authentication context
-  const { isAuthenticated, setPendingAction } = useAuth();
+  const { isAuthenticated, setPendingAction } = false;
   const navigate = useNavigate();
 
   // Handler for protected actions
@@ -29,12 +28,13 @@ const ProductCard = () => {
   };
 
   // Action handlers
-  const handleProductClick = (product) => {
-    handleProtectedAction(() => {
-      // Navigate to product details or handle product click
-      console.log("Viewing product details:", product);
-    });
-  };
+  const handleProductClick = (productId) => {
+  // Store the productId for the pending action
+  localStorage.setItem('pendingProductId', productId);
+  // Open authentication modal
+  setAuthModalOpen(true);
+};
+
 
   const handleWishlist = (product, e) => {
     handleProtectedAction(() => {

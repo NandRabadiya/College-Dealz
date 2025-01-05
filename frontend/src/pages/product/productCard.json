@@ -1,0 +1,42 @@
+[
+    {
+      "id": 1,
+      "name": "Vintage Leather Jacket",
+      "price": "$199.99",
+      "seller_name": "VintageFinds",
+      "post_date": "2 days ago",
+      "image": "api/placeholder/400/320",
+      "isWishlisted": false,
+      "description": "Classic brown leather jacket from the 90s. Excellent condition with authentic wear pattern. Size M."
+    },
+    {
+      "id": 2,
+      "name": "Mountain Bike - Trek 3500",
+      "price": "$450.00",
+      "seller_name": "BikeEnthusiast",
+      "post_date": "1 week ago",
+      "image": "api/placeholder/400/320",
+      "isWishlisted": true,
+      "description": "Well-maintained Trek mountain bike. 21 speeds, recently serviced brakes and gears. Perfect for trails."
+    },
+    {
+      "id": 3,
+      "name": "iPhone 13 Pro - 256GB",
+      "price": "$699.99",
+      "seller_name": "TechTrader",
+      "post_date": "3 days ago",
+      "image": "iphone.png",
+      "isWishlisted": false,
+      "description": "Like new iPhone 13 Pro. Comes with original charger and box. Battery health 94%."
+    },
+    {
+      "id": 4,
+      "name": "Handmade Ceramic Vase Set",
+      "price": "$75.00",
+      "seller_name": "ArtisanCrafts",
+      "post_date": "5 days ago",
+      "image": "api/placeholder/400/320",
+      "isWishlisted": false,
+      "description": "Set of 3 handcrafted ceramic vases. Each piece unique with organic patterns. Perfect for home decor."
+    }
+  ]
