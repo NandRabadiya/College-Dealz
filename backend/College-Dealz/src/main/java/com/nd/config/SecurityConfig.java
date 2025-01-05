@@ -1,5 +1,6 @@
 package com.nd.config;
 import com.nd.entities.User;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationProvider;
@@ -33,6 +34,9 @@ public class SecurityConfig {
 //        return provider;
 //    }
 
+    @Autowired
+    private OAuthAuthenticationSuccessHandler handler;
+
 
         @Bean
         public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -41,6 +45,17 @@ public class SecurityConfig {
                     .authorizeHttpRequests(auth -> auth
                             .anyRequest().permitAll() // Require authentication for all requests
                     );
-                    return http.build();
+//                    return http.build();
+            http.oauth2Login(oauth -> {
+                oauth.successHandler(handler);
+            });
+
+            http.logout(logoutForm -> {
+                logoutForm.logoutUrl("/do-logout");
+                logoutForm.logoutSuccessUrl("/login?logout=true");
+            });
+
+            return http.build();
         }
+
     }
