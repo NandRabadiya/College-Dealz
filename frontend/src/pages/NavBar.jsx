@@ -64,6 +64,7 @@
     const handleProfile = () => {
       handleProtectedAction(() => {
         console.log("Navigating to profile");
+        navigate("/dashboard");
         // Add navigation logic here
       });
     };
@@ -207,7 +208,7 @@
                       className="flex items-center space-x-4 mt-4 cursor-pointer"
                       onClick={handleProfile}
                     >
-                      <Avatar>
+                      <Avatar onClick={handleProfile}>
                         <AvatarImage src="/api/placeholder/32/32" />
                         <AvatarFallback>UN</AvatarFallback>
                       </Avatar>

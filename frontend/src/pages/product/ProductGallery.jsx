@@ -5,6 +5,10 @@ import { Button } from '@/components/ui/button';
 const ProductGallery = ({ images = [] }) => {
   const [selectedIndex, setSelectedIndex] = useState(0);
 
+  if (images.length === 0) {
+    return <p>No images available for this product.</p>;
+  }
+
   const handlePrevious = () => {
     setSelectedIndex((current) => (current === 0 ? images.length - 1 : current - 1));
   };
@@ -22,7 +26,7 @@ const ProductGallery = ({ images = [] }) => {
           alt={`Product image ${selectedIndex + 1}`}
           className="h-full w-full object-cover rounded-lg bg-gray-100"
         />
-        
+
         {images.length > 1 && (
           <>
             <Button
@@ -52,7 +56,9 @@ const ProductGallery = ({ images = [] }) => {
             <button
               key={index}
               onClick={() => setSelectedIndex(index)}
-              className={`relative aspect-square overflow-hidden rounded-md ${selectedIndex === index ? 'ring-2 ring-primary ring-offset-2' : ''}`}
+              className={`relative aspect-square overflow-hidden rounded-md ${
+                selectedIndex === index ? 'ring-2 ring-primary ring-offset-2' : ''
+              }`}
             >
               <img
                 src={image}
@@ -68,4 +74,3 @@ const ProductGallery = ({ images = [] }) => {
 };
 
 export default ProductGallery;
-    

@@ -14,15 +14,15 @@ const Dashboard = () => {
         university: 'University of Nadiad',
     });
 
-    const [isEditing, setIsEditing] = useState(false);
+    const [isEditingProfile, setIsEditingProfile] = useState(false);
     const [editedName, setEditedName] = useState(user.name);
     const [editedImage, setEditedImage] = useState(null);
 
-    const [deals] = useState([
+    const [deals, setDeals] = useState([
         {
             id: 1,
             name: "Sample Product",
-            price: "$99",
+            price: 99,
             image: "product1.jpg",
             seller_name: user.name,
             post_date: "2 days ago",
@@ -30,22 +30,30 @@ const Dashboard = () => {
         {
             id: 2,
             name: "Another Product",
-            price: "$149",
+            price: 149,
             image: "product2.jpg",
             seller_name: user.name,
             post_date: "3 days ago",
         },
     ]);
 
+    const [isEditingDeal, setIsEditingDeal] = useState(false);
+    const [currentDeal, setCurrentDeal] = useState(null);
+
+    // Format price to currency
+    const formatPrice = (price) => new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR' }).format(price);
+
+    // Handle profile update
     const handleProfileUpdate = () => {
         setUser((prev) => ({
             ...prev,
             name: editedName,
             profilePicture: editedImage || prev.profilePicture,
         }));
-        setIsEditing(false);
+        setIsEditingProfile(false);
     };
 
+    // Handle image change for profile
     const handleImageChange = (e) => {
         const file = e.target.files[0];
         if (file) {
@@ -57,8 +65,18 @@ const Dashboard = () => {
         }
     };
 
-    const handleDeleteDeal = (dealId) => {
-        console.log('Deleting deal:', dealId);
+    // Handle deal edit
+    const handleEditDeal = (deal) => {
+        setCurrentDeal(deal);
+        setIsEditingDeal(true);
+    };
+
+    // Save edited deal
+    const handleSaveDeal = () => {
+        setDeals((prevDeals) =>
+            prevDeals.map((deal) => (deal.id === currentDeal.id ? currentDeal : deal))
+        );
+        setIsEditingDeal(false);
     };
 
     return (
@@ -80,7 +98,7 @@ const Dashboard = () => {
                                             variant="ghost"
                                             size="icon"
                                             className="absolute -bottom-2 -right-2 bg-background shadow-lg rounded-full"
-                                            onClick={() => setIsEditing(true)}
+                                            onClick={() => setIsEditingProfile(true)}
                                         >
                                             <Pencil className="h-4 w-4 text-primary" />
                                         </Button>
@@ -109,12 +127,11 @@ const Dashboard = () => {
                                             alt={deal.name}
                                             className="h-full w-full object-cover group-hover:scale-110 transition-transform duration-300"
                                         />
-                                        <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                                     </div>
                                     <CardContent className="p-4">
                                         <h3 className="font-bold text-lg text-gray-800 truncate">{deal.name}</h3>
                                         <div className="flex items-center justify-between mt-2">
-                                            <span className="text-lg font-semibold text-primary">{deal.price}</span>
+                                            <span className="text-lg font-semibold text-primary">{formatPrice(deal.price)}</span>
                                             <span className="text-sm text-gray-500">{deal.post_date}</span>
                                         </div>
                                         <div className="flex justify-end gap-2 mt-4">
@@ -122,7 +139,7 @@ const Dashboard = () => {
                                                 variant="ghost"
                                                 size="sm"
                                                 className="text-gray-500 hover:text-primary"
-                                                onClick={() => setIsEditing(true)}
+                                                onClick={() => handleEditDeal(deal)}
                                             >
                                                 <Pencil className="h-4 w-4 mr-2" />
                                                 Edit
@@ -131,7 +148,6 @@ const Dashboard = () => {
                                                 variant="ghost"
                                                 size="sm"
                                                 className="text-gray-500 hover:text-red-600"
-                                                onClick={() => handleDeleteDeal(deal.id)}
                                             >
                                                 <Trash2 className="h-4 w-4 mr-2" />
                                                 Delete
@@ -146,7 +162,7 @@ const Dashboard = () => {
             </div>
 
             {/* Edit Profile Dialog */}
-            <Dialog open={isEditing} onOpenChange={setIsEditing}>
+            <Dialog open={isEditingProfile} onOpenChange={setIsEditingProfile}>
                 <DialogContent className="max-w-lg bg-white rounded-lg p-6 shadow-lg">
                     <DialogHeader>
                         <DialogTitle className="text-lg font-semibold text-gray-800">Edit Profile</DialogTitle>
@@ -166,6 +182,35 @@ const Dashboard = () => {
                         </div>
                         <Button onClick={handleProfileUpdate} className="w-full bg-primary text-white">
                             Save Changes
+                        </Button>
+                    </div>
+                </DialogContent>
+            </Dialog>
+
+            {/* Edit Deal Dialog */}
+            <Dialog open={isEditingDeal} onOpenChange={setIsEditingDeal}>
+                <DialogContent className="max-w-lg bg-white rounded-lg p-6 shadow-lg">
+                    <DialogHeader>
+                        <DialogTitle className="text-lg font-semibold text-gray-800">Edit Deal</DialogTitle>
+                    </DialogHeader>
+                    <div className="space-y-4">
+                        <div>
+                            <label className="block text-sm font-medium text-gray-600 mb-2">Product Name</label>
+                            <Input
+                                value={currentDeal?.name || ''}
+                                onChange={(e) => setCurrentDeal((prev) => ({ ...prev, name: e.target.value }))}
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium text-gray-600 mb-2">Price</label>
+                            <Input
+                                type="number"
+                                value={currentDeal?.price || ''}
+                                onChange={(e) => setCurrentDeal((prev) => ({ ...prev, price: parseFloat(e.target.value) }))}
+                            />
+                        </div>
+                        <Button onClick={handleSaveDeal} className="w-full bg-primary text-white">
+                            Save Deal
                         </Button>
                     </div>
                 </DialogContent>

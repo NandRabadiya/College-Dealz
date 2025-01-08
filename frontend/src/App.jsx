@@ -10,6 +10,7 @@ import Authenticate from "./pages/authentication/Authenticate";
 import Dashboard from "./pages/dasboard/Profile";
 import ProductDetails from "./pages/product/ProductDetails";
 import PostADeal from "./pages/product/PostADeal";
+import NavBar from "./pages/NavBar";
 
 // PrivateRoute component
 const PrivateRoute = ({ element, isLoggedIn, redirectTo }) => {
@@ -21,7 +22,10 @@ function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(true);
 
   return (
+    <>
     <Router>
+    <NavBar/>
+
       <Routes>
         {/* Public Route */}
         <Route path="/" element={<Home />} />
@@ -32,7 +36,7 @@ function App() {
 
         {/* Protected Route */}
         <Route
-          path="/dashboard"
+          path="/dashboard" 
           element={
             <PrivateRoute
               isLoggedIn={isLoggedIn}
@@ -53,6 +57,7 @@ function App() {
         />
       </Routes>
     </Router>
+    </>
   );
 }
 

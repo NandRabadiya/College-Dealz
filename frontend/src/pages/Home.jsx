@@ -9,7 +9,7 @@ const Home = () => {
   return (
     <div>
       <div className="bg-background">
-          <NavBar/>
+          
           <main className="container mx-auto py-4">
             <ProductCard/>
             {/* <Profile/> */}
