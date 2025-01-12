@@ -1,9 +1,7 @@
 package com.nd.entities;
 
-import lombok.AllArgsConstructor;
+import lombok.*;
 import jakarta.persistence.*;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
 import org.hibernate.annotations.GenericGenerator;
 

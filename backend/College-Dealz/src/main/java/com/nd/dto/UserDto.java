@@ -81,19 +81,4 @@ public class UserDto {
     public void setEmail(String email) {
         this.email = email;
     }
-
-    public Set<String> getRoles() {
-        return roles;
-    }
-    public void setRoles(Set<String> roles) {
-        this.roles = roles;
-    }
-
-    public void setUniversityName(String universityName) {
-        this.universityName = universityName;
-    }
-
-    public String getUniversityName() {
-        return universityName;
-    }
 }
