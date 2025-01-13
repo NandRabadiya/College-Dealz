@@ -105,7 +105,7 @@ const Dashboard = () => {
                                     </div>
                                 </div>
                                 <div className="text-center space-y-3">
-                                    <h2 className="text-xl font-semibold text-gray-800">{user.name}</h2>
+                                    <h2 className="text-xl font-semibold text-foreground">{user.name}</h2>
                                     <p className="text-sm text-gray-500">{user.email}</p>
                                     <Badge variant="secondary" className="bg-blue-100 text-blue-600">
                                         {user.university}
@@ -117,7 +117,7 @@ const Dashboard = () => {
 
                     {/* Deals Section */}
                     <div className="md:col-span-2">
-                        <h2 className="text-2xl font-semibold text-gray-800 mb-6">Your Posted Deals</h2>
+                        <h2 className="text-2xl font-semibold text-accent-foreground mb-6">Your Posted Deals</h2>
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                             {deals.map((deal) => (
                                 <Card key={deal.id} className="shadow-md rounded-lg group">
@@ -129,7 +129,7 @@ const Dashboard = () => {
                                         />
                                     </div>
                                     <CardContent className="p-4">
-                                        <h3 className="font-bold text-lg text-gray-800 truncate">{deal.name}</h3>
+                                        <h3 className="font-bold text-lg text-foreground truncate">{deal.name}</h3>
                                         <div className="flex items-center justify-between mt-2">
                                             <span className="text-lg font-semibold text-primary">{formatPrice(deal.price)}</span>
                                             <span className="text-sm text-gray-500">{deal.post_date}</span>
@@ -163,17 +163,17 @@ const Dashboard = () => {
 
             {/* Edit Profile Dialog */}
             <Dialog open={isEditingProfile} onOpenChange={setIsEditingProfile}>
-                <DialogContent className="max-w-lg bg-white rounded-lg p-6 shadow-lg">
+                <DialogContent className="max-w-lg bg-background rounded-lg p-6 shadow-lg">
                     <DialogHeader>
-                        <DialogTitle className="text-lg font-semibold text-gray-800">Edit Profile</DialogTitle>
+                        <DialogTitle className="text-lg font-semibold text-foreground">Edit Profile</DialogTitle>
                     </DialogHeader>
                     <div className="space-y-4">
                         <div>
-                            <label className="block text-sm font-medium text-gray-600 mb-2">Profile Picture</label>
+                            <label className="block text-sm font-medium text-card-foreground mb-2">Profile Picture</label>
                             <Input type="file" onChange={handleImageChange} accept="image/*" />
                         </div>
                         <div>
-                            <label className="block text-sm font-medium text-gray-600 mb-2">Name</label>
+                            <label className="block text-sm font-medium text-card-foreground mb-2">Name</label>
                             <Input
                                 value={editedName}
                                 onChange={(e) => setEditedName(e.target.value)}
@@ -189,13 +189,13 @@ const Dashboard = () => {
 
             {/* Edit Deal Dialog */}
             <Dialog open={isEditingDeal} onOpenChange={setIsEditingDeal}>
-                <DialogContent className="max-w-lg bg-white rounded-lg p-6 shadow-lg">
+                <DialogContent className="max-w-lg bg-background rounded-lg p-6 shadow-lg">
                     <DialogHeader>
-                        <DialogTitle className="text-lg font-semibold text-gray-800">Edit Deal</DialogTitle>
+                        <DialogTitle className="text-lg font-semibold text-foreground">Edit Deal</DialogTitle>
                     </DialogHeader>
                     <div className="space-y-4">
                         <div>
-                            <label className="block text-sm font-medium text-gray-600 mb-2">Product Name</label>
+                            <label className="block text-sm font-medium text-foreground mb-2">Product Name</label>
                             <Input
                                 value={currentDeal?.name || ''}
                                 onChange={(e) => setCurrentDeal((prev) => ({ ...prev, name: e.target.value }))}
