@@ -17,7 +17,8 @@ import java.util.Set;
 @AllArgsConstructor
 public class University {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "university_id")
     private int id;
 
     @Column(nullable = false)
@@ -48,4 +49,6 @@ public class University {
     protected void onUpdate() {
         updatedAt = LocalDateTime.now();
     }
+
+
 }

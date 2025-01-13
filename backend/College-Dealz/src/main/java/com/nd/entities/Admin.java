@@ -18,7 +18,8 @@ import java.util.Set;
 public class Admin {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "admin_id")
     private int id;
 
     @Column(nullable = false)

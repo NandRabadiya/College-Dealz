@@ -1,11 +1,15 @@
 package com.nd.entities;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.validator.constraints.Length;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 
 import java.time.LocalDateTime;
+import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 @Entity
 @Table(name = "users")
@@ -14,12 +18,13 @@ import java.util.Set;
 @NoArgsConstructor
 @Builder
 @AllArgsConstructor
-public class User {
+public class User implements UserDetails {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "user_id")
     private int id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "university_id")
     private University university;
 
@@ -27,13 +32,14 @@ public class User {
     private String name;
 
     @Column(nullable = false, unique = true)
-    private String email = "nand@ddu.ac.in";
+    private String email;
 
-    @Column(nullable = false)
+
+    @Column(nullable = true)
     private String password;
 
     @Column(name = "profile_picture")
-    private String profilePicture;
+    private byte[] profilePicture;
 
     @Column(name = "created_at")
     private LocalDateTime createdAt;
@@ -42,6 +48,10 @@ public class User {
     private LocalDateTime updatedAt;
 
     private boolean enabled = true;
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    private List<Token> tokens;
+
 
     @Column(name = "email_verified")
     private boolean emailVerified = false;
@@ -70,9 +80,6 @@ public class User {
         updatedAt = LocalDateTime.now();
     }
 
-    public Set<Role> getRoles() {
-        return roles;
-    }
 
     @PreUpdate
     protected void onUpdate() {
@@ -80,39 +87,34 @@ public class User {
     }
 
 
-    public int getId() {
-        return id;
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return List.of();
     }
 
-    public void setId(int id) {
-        this.id = id;
+    @Override
+    public boolean isAccountNonExpired() {
+        return true;
     }
 
-    // Getter and Setter for Name
-    public String getName() {
-        return name;
+    @Override
+    public boolean isAccountNonLocked() {
+        return true;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return true;
     }
 
-    // Getter and Setter for Email
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    // Getter and Setter for Password
+    @Override
     public String getPassword() {
         return password;
     }
 
-    public void setPassword(String password) {
-        this.password = password;
+    @Override
+    public String getUsername() {
+        return email;
     }
 
 }

@@ -23,7 +23,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 
 @RestController
-@RequestMapping("/api/v1/users")
+@RequestMapping("/api/users")
 public class UserController {
 
     @Autowired
@@ -32,12 +32,11 @@ public class UserController {
     // POST-create user
     @PostMapping("/")
     public ResponseEntity<UserDto> createUser(@Valid @RequestBody UserDto userDto) {
-        UserDto createUserDto = this.userService.createUser(userDto);
+        UserDto createUserDto = this.userService.registerNewUser(userDto);
         return new ResponseEntity<>(createUserDto, HttpStatus.CREATED);
     }
 
     // PUT- update user
-
     @PutMapping("/{userId}")
     public ResponseEntity<UserDto> updateUser(@Valid @RequestBody UserDto userDto, @PathVariable("userId") Integer uid) {
         UserDto updatedUser = this.userService.updateUser(userDto, uid);
@@ -46,11 +45,11 @@ public class UserController {
 
     //ADMIN
     // DELETE -delete user
-    @PreAuthorize("hasRole('ADMIN')")
+   // @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{userId}")
     public ResponseEntity<ApiResponse> deleteUser(@PathVariable("userId") Integer uid) {
         this.userService.deleteUser(uid);
-        return new ResponseEntity<ApiResponse>(new ApiResponse("User deleted Successfully", true), HttpStatus.OK);
+        return new ResponseEntity<>(new ApiResponse("User deleted Successfully", true), HttpStatus.OK);
     }
 
     // GET - user get
