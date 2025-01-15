@@ -1,4 +1,4 @@
-// store.js
+// src/redux/store.js
 import { applyMiddleware } from "redux";
 import { thunk } from "redux-thunk";
 import { combineReducers, legacy_createStore } from "redux";

@@ -3,6 +3,7 @@ package com.nd.service;
 import com.nd.entities.User;
 import com.nd.repositories.TokenRepository;
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
@@ -18,10 +19,10 @@ import java.util.function.Function;
 @Service
 public class JwtService {
 
-    @Value("${application.security.jwt.secret-key}")
+    @Value("25356b706b45fbd59190233d355e138a866d25f66c3a1864511cf8245bbfc113")
     private String secretKey;
 
-    @Value("${application.security.jwt.access-token-expiration}")
+    @Value(value = "${application.security.jwt.access-token-expiration}")
     private long accessTokenExpire;
 
     @Value("${application.security.jwt.refresh-token-expiration}")
@@ -33,6 +34,8 @@ public class JwtService {
     public JwtService(TokenRepository tokenRepository) {
         this.tokenRepository = tokenRepository;
     }
+
+
 
     public String extractUsername(String token) {
         return extractClaim(token, Claims::getSubject);
@@ -76,7 +79,7 @@ public class JwtService {
 
     private Claims extractAllClaims(String token) {
         return Jwts.parserBuilder()
-                .setSigningKey(getSigninKey()) // Set the key used for verification
+                .setSigningKey(getSigningKey()) // Set the key used for verification
                 .build()
                 .parseClaimsJws(token)         // Parse the signed token
                 .getBody();                    // Extract the Claims payload
@@ -100,16 +103,44 @@ public class JwtService {
 
 
         return Jwts.builder()
-                .setSubject(user.getUsername()) // Set the subject (username)
+                .setSubject(user.getUsername())// Set the subject (username)
+                .claim("email", user.getEmail())
                 .setIssuedAt(new Date(System.currentTimeMillis())) // Issue time
                 .setExpiration(new Date(System.currentTimeMillis() + expireTime)) // Expiration time
-                .signWith(getSigninKey(), SignatureAlgorithm.HS256) // Signing key and algorithm
+                .signWith(getSigningKey(), SignatureAlgorithm.HS256) // Signing key and algorithm
                 .compact(); // Generate the compact JWT
     }
 
 
-    private SecretKey getSigninKey() {
-        byte[] keyBytes = Decoders.BASE64URL.decode(secretKey);
+    private SecretKey getSigningKey() {
+        if (secretKey == null || secretKey.isEmpty()) {
+            throw new IllegalArgumentException("JWT Secret Key is missing or empty.");
+        }
+        System.out.println("JWT Secret Key: " + secretKey);
+        byte[] keyBytes = Decoders.BASE64.decode(secretKey);
         return Keys.hmacShaKeyFor(keyBytes);
     }
+
+
+    public  String getEmailFromToken(String token) {
+
+        if (token == null || token.isEmpty()) {
+            // Log invalid token and return null or handle the error gracefully
+            System.out.println("Invalid token: token is null or empty");
+            return null;
+        }
+        try {
+            token=token.substring(7);
+            Claims claims = Jwts.parserBuilder()
+                    .setSigningKey(getSigningKey())
+                    .build()
+                    .parseClaimsJws(token)
+                    .getBody();
+            return claims.get("email", String.class);
+        } catch (JwtException e) {
+            // Log or handle the exception (invalid or expired token)
+            throw new RuntimeException("Invalid JWT Token", e);
+        }
+    }
+
 }

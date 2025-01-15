@@ -1,18 +1,25 @@
 import React from "react";
+import { useDispatch } from "react-redux"; // Use useDispatch to access Redux dispatch
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
+import { login } from "../../redux/Auth/actions"; // Import login action
 
 const loginSchema = z.object({
-  email: z.string().email("Invalid email address"),
+  email: z
+    .string()
+    .email("Invalid email address")
+    .refine((email) => /@(ddu\.ac\.in|gtu\.ac\.in)$/.test(email), "Email must be from @ddu.ac.in or @gtu.ac.in"), // Email validation
   password: z
     .string()
     .min(8, "Password must be at least 8 characters")
-    .regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/, 
-      "Password must include uppercase, lowercase, number, and special character")
+    .regex(
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/,
+      "Password must include uppercase, lowercase, number, and special character"
+    )
 });
 
 const LoginForm = ({ onSuccess, onError }) => {
@@ -21,11 +28,14 @@ const LoginForm = ({ onSuccess, onError }) => {
     mode: "onChange"
   });
 
+  const dispatch = useDispatch(); // Initialize dispatch
+
   const onSubmit = async (data) => {
     try {
-      // Mock authentication call
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      onSuccess(data);
+      // Dispatch login action
+      dispatch(login(data)); // Use data from form submission
+      console.log("login form", data);
+     // onSuccess("Logged in successfully!");
     } catch (error) {
       onError("Login failed");
     }

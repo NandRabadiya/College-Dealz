@@ -7,17 +7,22 @@ import { X } from "lucide-react";
 import LoginForm from "./Login";
 import SignupForm from "./Signup";
 import GoogleLoginButton from "./GoogleLoginButton";
+import { useLocation, useNavigate } from "react-router-dom";
+import { useDispatch } from "react-redux";
 
-
-console.log("Hello");
 const Authenticate = ({ isOpen, onClose }) => {
   const [errorMessage, setErrorMessage] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
+  const navigate = useNavigate();
+  const location = useLocation();
+  const dispatch = useDispatch();
+  const from = location.state?.from?.pathname || "/";
 
   const handleAuthSuccess = (message) => {
     setSuccessMessage(message);
     setErrorMessage("");
     setTimeout(() => onClose(), 1500);
+    navigate(from);
   };
 
   const handleAuthError = (message) => {

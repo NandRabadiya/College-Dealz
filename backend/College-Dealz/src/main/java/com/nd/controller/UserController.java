@@ -1,25 +1,16 @@
 package com.nd.controller;
 import java.util.List;
-import java.util.Map;
 
 
 import com.nd.dto.ApiResponse;
 import com.nd.dto.UserDto;
+import com.nd.entities.User;
 import com.nd.service.UserService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 
 @RestController
@@ -62,6 +53,16 @@ public class UserController {
     @GetMapping("/{userId}")
     public ResponseEntity<UserDto> getSingleUser(@PathVariable Integer userId) {
         return ResponseEntity.ok(this.userService.getUserById(userId));
+    }
+
+    //user-dashboard
+    @GetMapping("/dashboard")
+    public ResponseEntity<User> getUserProfileHandler(@RequestHeader("Authorization") String jwt) throws RuntimeException {
+        User user = userService.findUserByJwt(jwt);
+        System.out.println(jwt);
+        System.out.println(user);
+        user.setPassword(null);
+        return new ResponseEntity<>(user, HttpStatus.ACCEPTED);
     }
 
 }

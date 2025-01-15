@@ -1,20 +1,26 @@
 import React from "react";
+import { useDispatch } from "react-redux"; // Use useDispatch for Redux actions
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-
+import { signup } from "../../redux/Auth/actions"; // Import signup action
 
 const signupSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
-  email: z.string().email("Invalid email address"),
+  email: z
+    .string()
+    .email("Invalid email address")
+    .refine((email) => /@(ddu\.ac\.in|gtu\.ac\.in)$/.test(email), "Email must be from @ddu.ac.in or @gtu.ac.in"), // Email validation
   password: z
     .string()
     .min(8, "Password must be at least 8 characters")
-    .regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/, 
-      "Password must include uppercase, lowercase, number, and special character")
+    .regex(
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/,
+      "Password must include uppercase, lowercase, number, and special character"
+    )
 });
 
 const SignupForm = ({ onSuccess, onError }) => {
@@ -23,11 +29,13 @@ const SignupForm = ({ onSuccess, onError }) => {
     mode: "onChange"
   });
 
+  const dispatch = useDispatch(); // Initialize dispatch
+
   const onSubmit = async (data) => {
     try {
-      // Mock registration call
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      onSuccess(data);
+      // Dispatch signup action
+      dispatch(signup(data)); // Pass the data to signup action
+      onSuccess("Account created successfully!");
     } catch (error) {
       onError("Signup failed");
     }
