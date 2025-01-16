@@ -2,15 +2,13 @@ package com.nd.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.nd.entities.Provider;
-import com.nd.entities.Role;
+import com.nd.enums.Provider;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Size;
 import lombok.*;
 
 import java.util.Set;
-import java.util.UUID;
 
 @Getter
 @Setter

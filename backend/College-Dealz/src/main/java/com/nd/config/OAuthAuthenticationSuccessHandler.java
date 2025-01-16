@@ -6,7 +6,6 @@ import com.nd.exceptions.ResourceNotFoundException;
 import com.nd.repositories.RoleRepo;
 import com.nd.repositories.UniversityRepo;
 import com.nd.repositories.UserRepo;
-import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -20,18 +19,10 @@ import java.io.IOException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.security.oauth2.core.user.DefaultOAuth2User;
-import org.springframework.security.web.DefaultRedirectStrategy;
-import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
-import java.util.List;
 
-import jakarta.servlet.ServletException;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-
-import static com.nd.entities.Provider.GOOGLE;
+import static com.nd.enums.Provider.GOOGLE;
 
 @Component
 public class OAuthAuthenticationSuccessHandler implements AuthenticationSuccessHandler {

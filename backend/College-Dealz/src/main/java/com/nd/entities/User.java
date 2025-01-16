@@ -1,6 +1,6 @@
 package com.nd.entities;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
+import com.nd.enums.Provider;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.security.core.GrantedAuthority;

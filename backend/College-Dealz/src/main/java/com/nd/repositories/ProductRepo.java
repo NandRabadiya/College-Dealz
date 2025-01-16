@@ -18,7 +18,7 @@ public interface ProductRepo extends JpaRepository<Product, Integer> {
     List<Product> findAllByUniversity(@NotNull University university);
 
     @Query("SELECT p FROM Product p WHERE p.category = :category")
-    List<Product> findByCategory(Integer category);
+    List<Product> findByCategory(String category);
 
 
 

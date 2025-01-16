@@ -1,5 +1,7 @@
 package com.nd.entities;
 
+import com.nd.enums.Category;
+import com.nd.enums.Condition;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -33,13 +35,15 @@ public class Product {
     @Column(name = "price", nullable = false, precision = 10, scale = 2)
     private BigDecimal price;
 
-    @Size(max = 50)
-    @Column(name = "conditions", length = 50)
-    private String conditions;
-
     @NotNull
+    @Enumerated(EnumType.STRING) // Store as string in the database
+    @Column(name = "conditions", nullable = false)
+    private Condition condition;
+    @NotNull
+    @Enumerated(EnumType.STRING)
     @Column(name = "category", nullable = false)
-    private Integer category;
+    private Category category;
+
 
     @Column(name = "months_old")
     private Integer monthsOld;
