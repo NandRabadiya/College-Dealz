@@ -27,5 +27,11 @@ public interface UserRepo extends JpaRepository<User, Integer> {
 
     @Override
     Optional<User> findById(Integer integer);
+
+   // int getUserByEmail(String email);
+
+    @Query("SELECT u.id FROM User u WHERE u.email = :email")
+    Optional<Integer> getUserIdByEmail(@Param("email") String email);
+
 }
 

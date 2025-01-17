@@ -3,7 +3,9 @@ package com.nd.service;
 import com.nd.dto.AuthResponse;
 import com.nd.entities.Role;
 import com.nd.entities.Token;
+import com.nd.entities.University;
 import com.nd.entities.User;
+import com.nd.exceptions.ResourceNotFoundException;
 import com.nd.repositories.RoleRepo;
 import com.nd.repositories.TokenRepository;
 import com.nd.repositories.UniversityRepo;
@@ -22,6 +24,7 @@ import org.springframework.stereotype.Service;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 
 
 @Service
@@ -58,7 +61,16 @@ public class AuthenticationService {
 
         User user = new User();
         user.setName(request.getName());
-        user.setUniversity(universityRepo.getUniversitiesById(request.getUniversity()));
+
+        String domain = request.getEmail().substring(request.getEmail().indexOf("@") + 1);
+
+        University university = universityRepo.getUniversitiesByDomain(domain)
+                .orElseThrow(() -> new ResourceNotFoundException("University not found for domain: " + domain));
+
+
+
+
+        user.setUniversity(university);
         user.setEmail(request.getEmail());
         user.setPassword(passwordEncoder.encode(request.getPassword()));
 

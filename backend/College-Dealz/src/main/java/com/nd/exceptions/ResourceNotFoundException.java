@@ -20,6 +20,8 @@ public class ResourceNotFoundException extends RuntimeException {
     }
 
     public ResourceNotFoundException(String resourceName) {
+
+        System.out.println(resourceName);
     }
 
     

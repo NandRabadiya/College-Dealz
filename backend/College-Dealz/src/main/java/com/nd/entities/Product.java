@@ -11,6 +11,7 @@ import org.hibernate.annotations.ColumnDefault;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.util.List;
 
 @Getter
 @Setter
@@ -39,10 +40,15 @@ public class Product {
     @Enumerated(EnumType.STRING) // Store as string in the database
     @Column(name = "conditions", nullable = false)
     private Condition condition;
+
+
     @NotNull
     @Enumerated(EnumType.STRING)
     @Column(name = "category", nullable = false)
     private Category category;
+
+    @OneToMany(mappedBy = "product", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    private List<Image> images;
 
 
     @Column(name = "months_old")

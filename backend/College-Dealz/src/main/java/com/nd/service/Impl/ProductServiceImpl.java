@@ -9,6 +9,7 @@ import com.nd.exceptions.ResourceNotFoundException;
 import com.nd.repositories.ProductRepo;
 import com.nd.repositories.UniversityRepo;
 import com.nd.repositories.UserRepo;
+import com.nd.service.JwtService;
 import com.nd.service.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -29,19 +30,22 @@ public class ProductServiceImpl implements ProductService {
     @Autowired
     private UniversityRepo universityRepo;
 
-    @Override
-    public ProductDto createProduct(ProductDto productDto, int universityId, int sellerId) {
-        // Fetch University and Seller (User) entities
-        University university = universityRepo.findById(universityId)
-                .orElseThrow(() -> new ResourceNotFoundException("University not found with ID: " + universityId));
+    @Autowired
+    private JwtService jwtService;
 
-        User seller = userRepo.findById(sellerId)
-                .orElseThrow(() -> new ResourceNotFoundException("Seller not found with ID: " + sellerId));
+    @Override
+    public ProductDto createProduct(ProductDto productDto, String authHeader) throws ResourceNotFoundException {
+
+int seller_id= jwtService.getUserIdFromToken(authHeader);
+        productDto.setSellerId(seller_id);
+
+
+        productDto.setUniversityId(jwtService.getUniversityIdFromToken(authHeader));
+
 
         // Map ProductDto to Product entity
         Product product = mapToEntity(productDto);
-        product.setUniversity(university);
-        product.setSeller(seller);
+
         product.setCreatedAt(Instant.now());
         product.setUpdatedAt(Instant.now());
 
@@ -92,14 +96,21 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public List<ProductDto> getProductsBySellerId(Integer sellerId) {
+    public List<ProductDto> getProductsBySellerId(String authHeader) {
+
+        int sellerId= jwtService.getUserIdFromToken(authHeader);
+
+
+
         return productRepo.findBySellerId(sellerId).stream()
                 .map(this::mapToDto)
                 .collect(Collectors.toList());
     }
 
     @Override
-    public List<ProductDto> getProductsByUniversityId(Integer universityId) {
+    public List<ProductDto> getProductsByUniversityId(String authHeader) {
+
+        int universityId = jwtService.getUniversityIdFromToken(authHeader);
         return productRepo.findByUniversityId(universityId).stream()
                 .map(this::mapToDto)
                 .collect(Collectors.toList());
@@ -116,7 +127,7 @@ public class ProductServiceImpl implements ProductService {
 
     private Product mapToEntity(ProductDto productDto) {
         Product product = new Product();
-      //  product.setId(productDto.getId());
+     //   product.setId(productDto.getId());
         product.setName(productDto.getName());
         product.setDescription(productDto.getDescription());
         product.setPrice(productDto.getPrice());

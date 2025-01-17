@@ -6,7 +6,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.math.BigDecimal;
 import java.util.List;
 
 @RestController
@@ -24,11 +23,10 @@ public class ProductController {
 
     @PostMapping("/")
     public ResponseEntity<ProductDto> createProduct(
-            @RequestBody ProductDto productDto,
-            @RequestParam("universityId") int universityId,
-            @RequestParam("sellerId") int sellerId) {
+            @RequestBody ProductDto productDto, @RequestHeader("Authorization") String authHeader) {
 
-        ProductDto createdProduct = productService.createProduct(productDto, universityId, sellerId);
+        System.out.println("\nin create product controller\n");
+        ProductDto createdProduct = productService.createProduct(productDto, authHeader);
         return ResponseEntity.ok(createdProduct);
     }
 
@@ -39,15 +37,15 @@ public class ProductController {
         return ResponseEntity.ok(updatedProduct);
     }
 
-    @GetMapping("/university/{universityId}")
-    public ResponseEntity<List<ProductDto>> getProductsByUniversity(@PathVariable Integer universityId) {
-        List<ProductDto> products = productService.getProductsByUniversityId(universityId);
+    @GetMapping("/university")
+    public ResponseEntity<List<ProductDto>> getProductsByUniversity( @RequestHeader("Authorization") String authHeader) {
+        List<ProductDto> products = productService.getProductsByUniversityId(authHeader);
         return ResponseEntity.ok(products);
     }
 
-    @GetMapping("/seller/{sellerId}")
-    public ResponseEntity<List<ProductDto>> getProductsBySeller(@PathVariable Integer sellerId) {
-        List<ProductDto> products = productService.getProductsBySellerId(sellerId);
+    @GetMapping("/seller")
+    public ResponseEntity<List<ProductDto>> getProductsBySeller(@RequestHeader("Authorization") String authHeader) {
+        List<ProductDto> products = productService.getProductsBySellerId(authHeader);
         return ResponseEntity.ok(products);
     }
 

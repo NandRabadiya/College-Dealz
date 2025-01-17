@@ -1,19 +1,23 @@
 package com.nd.service;
 
 import com.nd.entities.User;
+import com.nd.exceptions.ResourceNotFoundException;
 import com.nd.repositories.TokenRepository;
+import com.nd.repositories.UserRepo;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import javax.crypto.SecretKey;
 import java.util.Date;
+import java.util.Optional;
 import java.util.function.Function;
 
 @Service
@@ -27,6 +31,9 @@ public class JwtService {
 
     @Value("${application.security.jwt.refresh-token-expiration}")
     private long refreshTokenExpire;
+
+    @Autowired
+    private UserRepo   userRepo;
 
 
     private final TokenRepository tokenRepository;
@@ -141,6 +148,27 @@ public class JwtService {
             // Log or handle the exception (invalid or expired token)
             throw new RuntimeException("Invalid JWT Token", e);
         }
+    }
+
+    public int getUserIdFromToken(String token) {
+
+        String email = getEmailFromToken(token);
+
+        Optional<Integer> userIdOptional = userRepo.getUserIdByEmail(email);
+        int userId = userIdOptional.orElseThrow(() -> new ResourceNotFoundException("User with email " + email + " not found"));
+
+
+        return userId;
+
+    }
+
+    public int getUniversityIdFromToken(String token) {
+        String email = getEmailFromToken(token);
+       User user=userRepo.findUByEmail(email);
+
+        return  user.getUniversity().getId();
+
+
     }
 
 }
