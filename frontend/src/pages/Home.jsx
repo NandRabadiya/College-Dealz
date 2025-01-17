@@ -1,12 +1,21 @@
 import React from 'react'
-import ProductCard from './ProductCard'
+import ProductCard from './product/ProductCard'
+import NavBar from './NavBar'
+import ProductDetails from './product/ProductDetails'
+import Profile from './dasboard/Profile'
+import Authenticate from './authentication/Authenticate'
 
 const Home = () => {
   return (
     <div>
-           <ProductCard/>
+      <div className="bg-background">
+          
+          <main className="container mx-auto py-4">
+            <ProductCard/>
+          </main>
+          </div>
     </div>
   )
 }
 
-export default Home
+export default Home;

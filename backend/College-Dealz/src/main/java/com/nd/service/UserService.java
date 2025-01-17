@@ -1,5 +1,6 @@
 package com.nd.service;
 import com.nd.dto.UserDto;
+import com.nd.entities.User;
 
 import java.util.List;
 import java.util.UUID;
@@ -32,6 +33,5 @@ public interface UserService {
 
 
 
-
-
+    User findUserByJwt(String jwt);
 }

@@ -7,9 +7,12 @@ import com.nd.entities.University;
 import com.nd.entities.User;
 import com.nd.exceptions.ResourceNotFoundException;
 import com.nd.repositories.RoleRepo;
+import com.nd.repositories.TokenRepository;
 import com.nd.repositories.UniversityRepo;
 import com.nd.repositories.UserRepo;
+import com.nd.service.JwtService;
 import com.nd.service.UserService;
+import jakarta.validation.constraints.Null;
 import lombok.*;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,6 +22,7 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+
 
 @Data
 @Service
@@ -38,6 +42,12 @@ public class UserServiceImpl implements UserService {
 
     @Autowired
     private UniversityRepo universityRepo;
+    @Autowired
+    private TokenRepository tokenRepository;
+    @Autowired
+    JwtService jwtService;
+
+
 
     public UserServiceImpl() {
     }
@@ -92,6 +102,24 @@ public class UserServiceImpl implements UserService {
         this.userRepo.delete(user);
 
     }
+
+
+    @Override
+    public User findUserByJwt(String jwt) {
+        String email = jwtService.getEmailFromToken(jwt);
+        return findUserByEmail(email);
+    }
+
+    private User findUserByEmail(String email) {
+        User user = userRepo.findUByEmail(email);
+
+       if(user!= null) {
+           return user;
+       }
+        System.out.println("User not found");
+       throw new RuntimeException("User not found");
+    }
+
 
     public User dtoToUser(UserDto userDto) {
         //  User user = this.modelMapper.map(userDto, User.class);

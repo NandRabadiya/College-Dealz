@@ -1,5 +1,6 @@
 package com.nd.service.Impl;
 
+import com.nd.entities.Chat;
 import com.nd.dto.ProductDto;
 import com.nd.entities.Product;
 import com.nd.entities.University;
