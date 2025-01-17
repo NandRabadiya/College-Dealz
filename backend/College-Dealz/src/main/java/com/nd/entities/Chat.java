@@ -1,10 +1,14 @@
 package com.nd.entities;
 
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.util.ArrayList;
 import java.util.List;
 
+@Getter
+@Setter
 @Entity
 @Table(name ="chats")
 public class Chat {
@@ -37,15 +41,6 @@ public class Chat {
         this.receiver = receiver;
         this.product = product;
         this.messages = new ArrayList<>();
-    }
-
-    // Getters and Setters
-    public int getId() {
-        return id;
-    }
-
-    public void setId(int id) {
-        this.id = id;
     }
 
     public void addMessage(Message message) {
