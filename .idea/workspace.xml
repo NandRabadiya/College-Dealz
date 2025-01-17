@@ -5,30 +5,29 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="c6564612-8fe2-49e4-bb4c-5d4305a5e686" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/sqldialects.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/College-Dealz.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/College-Dealz.iml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/College-Dealz/src/main/java/com/nd/config/SecurityConfig.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/College-Dealz/src/main/java/com/nd/config/SecurityConfig.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/College-Dealz/src/main/java/com/nd/controller/AuthenticationController.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/College-Dealz/src/main/java/com/nd/controller/AuthenticationController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/College-Dealz/src/main/java/com/nd/controller/UserController.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/College-Dealz/src/main/java/com/nd/controller/UserController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/College-Dealz/src/main/java/com/nd/repositories/UserRepo.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/College-Dealz/src/main/java/com/nd/repositories/UserRepo.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/College-Dealz/src/main/java/com/nd/service/Impl/UserServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/College-Dealz/src/main/java/com/nd/service/Impl/UserServiceImpl.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/College-Dealz/src/main/java/com/nd/service/JwtService.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/College-Dealz/src/main/java/com/nd/service/JwtService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/College-Dealz/src/main/java/com/nd/service/UserService.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/College-Dealz/src/main/java/com/nd/service/UserService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/College-Dealz/src/main/resources/application-vn.properties" beforeDir="false" afterPath="$PROJECT_DIR$/backend/College-Dealz/src/main/resources/application-vn.properties" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/College-Dealz/src/main/resources/application.properties" beforeDir="false" afterPath="$PROJECT_DIR$/backend/College-Dealz/src/main/resources/application.properties" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/main.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/main.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/College-Dealz/src/main/java/com/nd/service/Impl/ProductServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/College-Dealz/src/main/java/com/nd/service/Impl/ProductServiceImpl.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/App.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/App.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/pages/Home.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/pages/Home.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/pages/NavBar.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/pages/NavBar.jsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/frontend/src/pages/authentication/Authenticate.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/pages/authentication/Authenticate.jsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/frontend/src/pages/authentication/Login.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/pages/authentication/Login.jsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/frontend/src/pages/authentication/Signup.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/pages/authentication/Signup.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/redux/Auth/ActionTypes.js" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/redux/Auth/ActionTypes.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/redux/Auth/Reducer.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/redux/Auth/Reducer.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/pages/dasboard/Profile.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/pages/dasboard/Profile.jsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/frontend/src/redux/Auth/actions.js" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/redux/Auth/actions.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/redux/store.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/redux/store.jsx" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Class" />
+      </list>
+    </option>
   </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
@@ -104,6 +103,7 @@
       <workItem from="1736830923020" duration="908000" />
       <workItem from="1736833100074" duration="7647000" />
       <workItem from="1736934860708" duration="14980000" />
+      <workItem from="1737038554640" duration="5162000" />
     </task>
     <servers />
   </component>

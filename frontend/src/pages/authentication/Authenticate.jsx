@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -8,7 +8,7 @@ import LoginForm from "./Login";
 import SignupForm from "./Signup";
 import GoogleLoginButton from "./GoogleLoginButton";
 import { useLocation, useNavigate } from "react-router-dom";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 
 const Authenticate = ({ isOpen, onClose }) => {
   const [errorMessage, setErrorMessage] = useState("");
@@ -16,19 +16,36 @@ const Authenticate = ({ isOpen, onClose }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const dispatch = useDispatch();
-  const from = location.state?.from?.pathname || "/";
 
+  const isAuthenticated = useSelector(state => state.auth.isAuthenticated);
+
+  const redirectPath = 
+  location.state?.from?.pathname || 
+  sessionStorage.getItem('redirectPath') || 
+  '/';
   const handleAuthSuccess = (message) => {
     setSuccessMessage(message);
     setErrorMessage("");
-    setTimeout(() => onClose(), 1500);
-    navigate(from);
-  };
+   // Clear the stored path
+   sessionStorage.removeItem('redirectPath');
+    
+   // Redirect after a brief delay to show the success message
+   setTimeout(() => {
+     if (onClose) onClose();
+     navigate(redirectPath, { replace: true });
+   }, 1000);
+ };
 
   const handleAuthError = (message) => {
     setErrorMessage(message);
     setSuccessMessage("");
   };
+  useEffect(() => {
+    const token = localStorage.getItem('jwt');
+    if (token) {
+      handleAuthSuccess("Authentication successful!");
+    }
+  }, []);
 
   if (!isOpen) return null;
 
@@ -70,14 +87,14 @@ const Authenticate = ({ isOpen, onClose }) => {
 
             <TabsContent value="login">
               <LoginForm
-                onSuccess={() => handleAuthSuccess("Logged in successfully!")}
+                onSuccess={(message) => handleAuthSuccess(message)}
                 onError={(err) => handleAuthError(err)}
               />
             </TabsContent>
 
             <TabsContent value="signup">
               <SignupForm
-                onSuccess={() => handleAuthSuccess("Account created successfully!")}
+                onSuccess={(message) => handleAuthSuccess(message)}
                 onError={(err) => handleAuthError(err)}
               />
             </TabsContent>

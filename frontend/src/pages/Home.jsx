@@ -12,8 +12,6 @@ const Home = () => {
           
           <main className="container mx-auto py-4">
             <ProductCard/>
-            {/* <Profile/> */}
-          {/* <ProductDetails/> */}
           </main>
           </div>
     </div>

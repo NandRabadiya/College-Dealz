@@ -55,8 +55,8 @@ export const signup = (details) => async (dispatch) => {
   try {
     const response = await axios.post(`${API_BASE_URL}/register`, details);
     const user = response.data;
-    if (user.acces_token) {
-      localStorage.setItem("jwt", user.acces_token);
+    if (user.access_token) {
+      localStorage.setItem("jwt", user.access_token);
       dispatch(getUser(user.acces_token));
     }
     // Display success message from backend

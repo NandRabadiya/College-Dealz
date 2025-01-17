@@ -11,6 +11,7 @@ import Dashboard from "./pages/dasboard/Profile";
 import ProductDetails from "./pages/product/ProductDetails";
 import PostADeal from "./pages/product/PostADeal";
 import NavBar from "./pages/NavBar";
+import ProtectedRoute from "./Routes/ProtectedRoute";
 
 // PrivateRoute component
 const PrivateRoute = ({ element, isLoggedIn, redirectTo }) => {
@@ -23,40 +24,49 @@ function App() {
 
   return (
     <>
-    <Router>
-    <NavBar/>
+      <Router>
+        <NavBar />
 
-      <Routes>
-        {/* Public Route */}
-        <Route path="/" element={<Home />} />
-        <Route path="/product/:id" element={<ProductDetails />} />
+        <Routes>
+          {/* Public Route */}
+          <Route path="/" element={<Home />} />
+          {/* Login/Register Route */}
+          <Route
+            path="/Authenticate"
+            element={<Authenticate isOpen={true} />}
+          />
 
-        {/* Login/Register Route */}
-        <Route path="/Authenticate" element={<Authenticate isOpen={true} />} />
+          {/* Protected Route */}
 
-        {/* Protected Route */}
-        <Route
-          path="/dashboard" 
-          element={
-            <PrivateRoute
-              isLoggedIn={isLoggedIn}
-              redirectTo="/Authenticate"
-              element={<Dashboard />}
-            />
-          }
-        />
-        <Route
-          path="/post-a-deal"
-          element={
-            <PrivateRoute
-              element={<PostADeal />} // Use PascalCase for the component
-              isLoggedIn={isLoggedIn}
-              redirectTo="/authenticate"
-            />
-          }
-        />
-      </Routes>
-    </Router>
+          <Route
+            path="/dashboard"
+            element={
+              <ProtectedRoute>
+                <Dashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/product/:id"
+            element={
+              <ProtectedRoute>
+                <ProductDetails />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/post-a-deal"
+            element={
+              <ProtectedRoute>
+                <PostADeal />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* 404 Route */}
+          <Route path="*" element={<h1>404 Not Found</h1>} />
+        </Routes>
+      </Router>
     </>
   );
 }

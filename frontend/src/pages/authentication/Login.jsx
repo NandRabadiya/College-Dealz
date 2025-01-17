@@ -8,19 +8,24 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { login } from "../../redux/Auth/actions"; // Import login action
 
+const allowedDomains = ["ddu.ac.in", "gtu.ac.in"];
 const loginSchema = z.object({
   email: z
     .string()
     .email("Invalid email address")
-    .refine((email) => /@(ddu\.ac\.in|gtu\.ac\.in)$/.test(email), "Email must be from @ddu.ac.in or @gtu.ac.in"), // Email validation
+    .refine(
+      (email) => allowedDomains.some((domain) => email.endsWith(`@${domain}`)),
+      `Email must be from one of the following domains: ${allowedDomains.join(", ")}`
+    ),
   password: z
     .string()
     .min(8, "Password must be at least 8 characters")
     .regex(
       /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/,
       "Password must include uppercase, lowercase, number, and special character"
-    )
+    ),
 });
+
 
 const LoginForm = ({ onSuccess, onError }) => {
   const { register, handleSubmit, formState: { errors, isValid, isSubmitting } } = useForm({
@@ -32,14 +37,17 @@ const LoginForm = ({ onSuccess, onError }) => {
 
   const onSubmit = async (data) => {
     try {
-      // Dispatch login action
-      dispatch(login(data)); // Use data from form submission
-      console.log("login form", data);
-     // onSuccess("Logged in successfully!");
+      const resultAction = await dispatch(login(data)); // Wait for the Redux action to resolve
+      if (resultAction.type === "LOGIN_SUCCESS") { // Check action type for success
+        onSuccess("Logged in successfully!"); // Call success callback
+      } else {
+        onError(resultAction.payload?.message || "Login failed"); // Call error callback
+      }
     } catch (error) {
-      onError("Login failed");
+      onError("Login failed"); // Fallback error
     }
   };
+  
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">

@@ -1,5 +1,6 @@
 package com.nd.service.Impl;
 
+import com.nd.entities.Chat;
 import com.nd.entities.Product;
 import com.nd.repositories.ProductRepo;
 import com.nd.service.ProductService;
@@ -36,7 +37,12 @@ public class ProductServiceImpl implements ProductService {
             existingProduct.setMonthsOld(product.getMonthsOld());
             existingProduct.setLocation(product.getLocation());
             existingProduct.setUpdatedAt(Instant.now());
-            return productRepo.save(existingProduct);
+
+            Product savedProduct = productRepo.save(existingProduct);
+
+            Chat chat = new Chat();
+            chat.setProduct(savedProduct);
+            return null;
         } else {
             throw new RuntimeException("Product with ID " + productId + " not found.");
         }

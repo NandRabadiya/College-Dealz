@@ -33,13 +33,17 @@ const SignupForm = ({ onSuccess, onError }) => {
 
   const onSubmit = async (data) => {
     try {
-      // Dispatch signup action
-      dispatch(signup(data)); // Pass the data to signup action
-      onSuccess("Account created successfully!");
+      const resultAction = await dispatch(signup(data)); // Wait for the Redux action to resolve
+      if (resultAction.type === "SIGNUP_SUCCESS") { // Check action type for success
+        onSuccess("Account created successfully!"); // Call success callback
+      } else {
+        onError(resultAction.payload?.message || "Signup failed"); // Call error callback
+      }
     } catch (error) {
-      onError("Signup failed");
+      onError("Signup failed"); // Fallback error
     }
   };
+  
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">

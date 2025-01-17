@@ -21,18 +21,19 @@
   import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
   import logo from "../assets/photo/logo.png";
   import { Label } from "@/components/ui/label";
-  import { useNavigate } from "react-router-dom";
+  import { useLocation, useNavigate } from "react-router-dom";
 
   const NavBar = () => {
     const [showMobileSearch, setShowMobileSearch] = useState(false);
     const [theme, setTheme] = useState("light");
-    const [isAuthenticated, setIsAuthenticated] = useState(true); // Track authentication dynamically
+    const [isAuthenticated, setIsAuthenticated] = useState(Boolean(localStorage.getItem("jwt")));
     const navigate = useNavigate();
+    const location = useLocation();
 
     // Handle protected actions
     const handleProtectedAction = (action) => {
       if (!isAuthenticated) {
-        navigate("./Authenticate");
+        navigate("./Authenticate", { state: { from: location } });
       } else {
         action();
       }
