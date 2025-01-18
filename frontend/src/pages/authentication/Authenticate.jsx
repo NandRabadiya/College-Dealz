@@ -10,42 +10,39 @@ import GoogleLoginButton from "./GoogleLoginButton";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 
-const Authenticate = ({ isOpen, onClose }) => {
+const Authenticate = ({isOpen, onClose}) => {
   const [errorMessage, setErrorMessage] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
   const navigate = useNavigate();
   const location = useLocation();
   const dispatch = useDispatch();
-
   const isAuthenticated = useSelector(state => state.auth.isAuthenticated);
 
-  const redirectPath = 
-  location.state?.from?.pathname || 
-  sessionStorage.getItem('redirectPath') || 
-  '/';
+  const from = location.state?.from || "/";
+
+  console.log("Authenticate - location state:", location.state);
+  console.log("Authenticate - isAuthenticated:", isAuthenticated);
+
+
+  React.useEffect(() => {
+    if (isAuthenticated) {
+      console.log("Authenticate - redirecting to:", from);
+      navigate(from, { replace: true });
+    }
+  }, [isAuthenticated, navigate, location]);
+
   const handleAuthSuccess = (message) => {
     setSuccessMessage(message);
     setErrorMessage("");
-   // Clear the stored path
-   sessionStorage.removeItem('redirectPath');
-    
-   // Redirect after a brief delay to show the success message
-   setTimeout(() => {
-     if (onClose) onClose();
-     navigate(redirectPath, { replace: true });
-   }, 1000);
+    //navigate(from, { replace: true });
  };
+
 
   const handleAuthError = (message) => {
     setErrorMessage(message);
     setSuccessMessage("");
   };
-  useEffect(() => {
-    const token = localStorage.getItem('jwt');
-    if (token) {
-      handleAuthSuccess("Authentication successful!");
-    }
-  }, []);
+
 
   if (!isOpen) return null;
 

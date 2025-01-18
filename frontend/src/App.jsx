@@ -12,6 +12,9 @@ import ProductDetails from "./pages/product/ProductDetails";
 import PostADeal from "./pages/product/PostADeal";
 import NavBar from "./pages/NavBar";
 import ProtectedRoute from "./Routes/ProtectedRoute";
+import { useEffect } from "react";
+import { useDispatch } from "react-redux";
+import { getUser } from "./redux/Auth/actions";
 
 // PrivateRoute component
 const PrivateRoute = ({ element, isLoggedIn, redirectTo }) => {
@@ -20,7 +23,15 @@ const PrivateRoute = ({ element, isLoggedIn, redirectTo }) => {
 
 function App() {
   // Simulating user authentication status (replace with actual logic, e.g., context or Redux)
-  const [isLoggedIn, setIsLoggedIn] = useState(true);
+  // const [isLoggedIn, setIsLoggedIn] = useState(true);
+  const dispatch = useDispatch();
+  // In your App.jsx or main component
+  useEffect(() => {
+    const token = localStorage.getItem("jwt");
+    if (token) {
+      dispatch(getUser(token));
+    }
+  }, [dispatch]);
 
   return (
     <>
