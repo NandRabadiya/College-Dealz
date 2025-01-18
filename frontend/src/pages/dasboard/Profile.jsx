@@ -12,6 +12,9 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import UserDeals from "./UserDeals";
+import { logout } from ".././../redux/Auth/actions";
+import { useDispatch } from "react-redux";
+import { useNavigate } from "react-router-dom";
 
 const Dashboard = () => {
   const { user, isAuthenticated } = useSelector((state) => state.auth);
@@ -21,6 +24,9 @@ const Dashboard = () => {
     email: "guest@example.com",
     university: "N/A",
   });
+
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
 
   const [isEditingProfile, setIsEditingProfile] = useState(false);
   const [editedName, setEditedName] = useState(localUser.name);
@@ -75,6 +81,11 @@ const Dashboard = () => {
     }
   };
 
+  const handleLogout = () => {
+    dispatch(logout()); // Dispatch the logout action
+    navigate("/");
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <div className="container mx-auto px-4 py-8">
@@ -113,14 +124,19 @@ const Dashboard = () => {
                       ? localUser.university.name
                       : localUser.university}
                   </Badge>
+                  <Button
+                    className="w-full mt-4"
+                    onClick={handleLogout}
+                  >
+                    Logout
+                  </Button>
                 </div>
               </CardContent>
             </Card>
-            
           </div>
           <div className="md:col-span-2">
-              <UserDeals />
-            </div>
+            <UserDeals />
+          </div>
         </div>
       </div>
 
