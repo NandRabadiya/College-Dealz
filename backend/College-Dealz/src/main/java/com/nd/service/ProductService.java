@@ -3,6 +3,7 @@ package com.nd.service;
 import com.nd.dto.ProductDto;
 import com.nd.entities.Product;
 
+import java.io.IOException;
 import java.util.List;
 
 public interface ProductService {
@@ -16,4 +17,5 @@ public interface ProductService {
     List<ProductDto> getProductsBySellerId(String authHeader);
     List<ProductDto> getProductsByUniversityId(String authHeader);
     void deleteProduct(Integer productId);
+    ProductDto createProductWithImages(ProductDto productDto, String authHeader) throws IOException;
 }

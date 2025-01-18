@@ -47,7 +47,7 @@ public class Product {
     @Column(name = "category", nullable = false)
     private Category category;
 
-    @OneToMany(mappedBy = "product", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "product", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     private List<Image> images;
 
 

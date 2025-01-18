@@ -4,8 +4,10 @@ import com.nd.enums.Category;
 import com.nd.enums.Condition;
 import jakarta.validation.constraints.*;
 import lombok.Data;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 @Data
 public class ProductDto {
@@ -33,10 +35,15 @@ public class ProductDto {
     @Min(value = 0, message = "Months old cannot be negative")
     private Integer monthsOld;
 
-    @NotNull(message = "Seller ID cannot be null")
+   // @NotNull(message = "Seller ID cannot be null")
     private Integer sellerId; // Referencing seller by ID
 
-    @NotNull(message = "University ID cannot be null")
+    //@NotNull(message = "University ID cannot be null")
     private Integer universityId; // Referencing university by ID
+
+    private List<MultipartFile> images;
+
+    private List<String> imageUrls;
+
 
 }

@@ -1,20 +1,23 @@
 package com.nd.service.Impl;
 
-import com.nd.entities.Chat;
+import com.nd.entities.*;
 import com.nd.dto.ProductDto;
-import com.nd.entities.Product;
-import com.nd.entities.University;
-import com.nd.entities.User;
 import com.nd.exceptions.ResourceNotFoundException;
+import com.nd.repositories.ImageRepo;
 import com.nd.repositories.ProductRepo;
 import com.nd.repositories.UniversityRepo;
 import com.nd.repositories.UserRepo;
+import com.nd.service.ImageService;
 import com.nd.service.JwtService;
 import com.nd.service.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.Base64;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -32,6 +35,9 @@ public class ProductServiceImpl implements ProductService {
 
     @Autowired
     private JwtService jwtService;
+
+    @Autowired
+    private ImageRepo imageRepo;
 
     @Override
     public ProductDto createProduct(ProductDto productDto, String authHeader) throws ResourceNotFoundException {
@@ -55,6 +61,50 @@ int seller_id= jwtService.getUserIdFromToken(authHeader);
         // Map back to DTO and return
         return mapToDto(savedProduct);
 
+    }
+
+   // @Transactional
+    public ProductDto createProductWithImages(ProductDto productDto, String authHeader) throws IOException {
+
+        // Step 1: Populate seller ID and university ID from the token
+        int sellerId = jwtService.getUserIdFromToken(authHeader);
+        int universityId = jwtService.getUniversityIdFromToken(authHeader);
+
+        productDto.setSellerId(sellerId);
+        productDto.setUniversityId(universityId);
+
+        // Step 2: Use the existing createProduct method to save the product
+        ProductDto savedProductDto = createProduct(productDto, authHeader);
+
+        // Step 3: Retrieve the saved product entity from the database
+        Product savedProduct = productRepo.findById(savedProductDto.getId())
+                .orElseThrow(() -> new IllegalArgumentException("Product not found with ID: " + savedProductDto.getId()));
+
+        // Step 4: Save associated images
+        List<Image> images = new ArrayList<>();
+        if (productDto.getImages() != null) {
+            for (MultipartFile file : productDto.getImages()) {
+                Image image = new Image();
+                image.setProduct(savedProduct);
+                image.setFileName(file.getOriginalFilename());
+                image.setContentType(file.getContentType());
+                image.setImageData(file.getBytes());
+                image.setCreatedAt(Instant.now());
+                image.setUpdatedAt(Instant.now());// Save image as byte array
+                images.add(image);
+
+            }
+            imageRepo.saveAll(images);
+        }else {
+            throw new ResourceNotFoundException("Images are not submited with product");
+        }
+
+        savedProduct.setImages(images);
+
+        // Step 5: Save the updated product to ensure images are linked
+        productRepo.save(savedProduct);
+
+        return savedProductDto;
     }
 
     @Override
@@ -109,6 +159,8 @@ int seller_id= jwtService.getUserIdFromToken(authHeader);
 
     @Override
     public List<ProductDto> getProductsByUniversityId(String authHeader) {
+System.out.println(authHeader);
+System.out.println(jwtService.getUniversityIdFromToken(authHeader));
 
         int universityId = jwtService.getUniversityIdFromToken(authHeader);
         return productRepo.findByUniversityId(universityId).stream()
@@ -154,6 +206,22 @@ int seller_id= jwtService.getUserIdFromToken(authHeader);
         productDto.setMonthsOld(product.getMonthsOld());
         productDto.setSellerId(product.getSeller().getId());
         productDto.setUniversityId(product.getUniversity().getId());
+
+
+        // Map associated images to URLs or base64-encoded data
+        List<String> imageUrls = product.getImages().stream()
+                .map(image -> {
+                    if (image.getS3Url() != null && !image.getS3Url().isEmpty()) {
+                        return image.getS3Url(); // Use S3 URL if available
+                    } else {
+                        // Convert byte[] to Base64 string
+                        return "data:" + image.getContentType() + ";base64," +
+                                Base64.getEncoder().encodeToString(image.getImageData());
+                    }
+                })
+                .toList();
+        productDto.setImageUrls(imageUrls);
+
         return productDto;
     }
 }

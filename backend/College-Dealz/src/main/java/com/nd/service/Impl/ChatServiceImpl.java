@@ -3,26 +3,36 @@ package com.nd.service.Impl;
 import com.nd.dto.ChatDTO;
 import com.nd.dto.MessageDTO;
 import com.nd.entities.Chat;
-import com.nd.entities.Message;
 import com.nd.entities.Product;
 import com.nd.entities.User;
-import com.nd.repositories.ChatRepository;
+import com.nd.repositories.ChatRepo;
 import com.nd.repositories.ProductRepo;
 import com.nd.repositories.UserRepo;
 import com.nd.service.ChatService;
-import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
-@RequiredArgsConstructor
 public class ChatServiceImpl implements ChatService {
 
-    private final ChatRepository chatRepository;
+    @Autowired
+    private final ChatRepo chatRepository;
+
+    @Autowired
     private final UserRepo userRepository;
+
+    @Autowired
     private final ProductRepo productRepository;
+
+    public ChatServiceImpl(ChatRepo chatRepository, UserRepo userRepository, ProductRepo productRepository) {
+        this.chatRepository = chatRepository;
+        this.userRepository = userRepository;
+        this.productRepository = productRepository;
+    }
 
     @Override
     public ChatDTO createChat(ChatDTO chatDTO) {
@@ -54,6 +64,7 @@ public class ChatServiceImpl implements ChatService {
     @Override
     public List<ChatDTO> getChatsBySenderId(int senderId) {
         return chatRepository.findBySenderUserId(senderId)
+                .orElse(Collections.emptyList())
                 .stream()
                 .map(this::mapToDTO)
                 .collect(Collectors.toList());
@@ -62,6 +73,7 @@ public class ChatServiceImpl implements ChatService {
     @Override
     public List<ChatDTO> getChatsByReceiverId(int receiverId) {
         return chatRepository.findByReceiverUserId(receiverId)
+                .orElse(Collections.emptyList())
                 .stream()
                 .map(this::mapToDTO)
                 .collect(Collectors.toList());
@@ -70,6 +82,7 @@ public class ChatServiceImpl implements ChatService {
     @Override
     public List<ChatDTO> getChatsByProductId(int productId) {
         return chatRepository.findByProductProductId(productId)
+                .orElse(Collections.emptyList())
                 .stream()
                 .map(this::mapToDTO)
                 .collect(Collectors.toList());

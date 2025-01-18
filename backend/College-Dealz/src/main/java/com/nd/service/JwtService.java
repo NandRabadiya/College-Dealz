@@ -109,13 +109,13 @@ public class JwtService {
         System.out.println("\n\n In generate token method of the jwt service \n\n ");
 
 
-        return Jwts.builder()
-                .setSubject(user.getUsername())// Set the subject (username)
-                .claim("email", user.getEmail())
-                .setIssuedAt(new Date(System.currentTimeMillis())) // Issue time
-                .setExpiration(new Date(System.currentTimeMillis() + expireTime)) // Expiration time
-                .signWith(getSigningKey(), SignatureAlgorithm.HS256) // Signing key and algorithm
-                .compact(); // Generate the compact JWT
+            return Jwts.builder()
+                    .setSubject(user.getUsername())// Set the subject (username)
+                    .claim("email", user.getEmail())
+                    .setIssuedAt(new Date(System.currentTimeMillis())) // Issue time
+                    .setExpiration(new Date(System.currentTimeMillis() + expireTime)) // Expiration time
+                    .signWith(getSigningKey(), SignatureAlgorithm.HS256) // Signing key and algorithm
+                    .compact(); // Generate the compact JWT
     }
 
 
@@ -129,46 +129,81 @@ public class JwtService {
     }
 
 
-    public  String getEmailFromToken(String token) {
-
+    public String getEmailFromToken(String token) {
         if (token == null || token.isEmpty()) {
             // Log invalid token and return null or handle the error gracefully
             System.out.println("Invalid token: token is null or empty");
             return null;
         }
         try {
-            token=token.substring(7);
+            // Remove "Bearer " prefix if present
+            token = token.startsWith("Bearer ") ? token.substring(7) : token;
+
+            // Parse the token to extract claims
             Claims claims = Jwts.parserBuilder()
                     .setSigningKey(getSigningKey())
                     .build()
                     .parseClaimsJws(token)
                     .getBody();
-            return claims.get("email", String.class);
+
+            System.out.println("Token Claims: " + claims);
+
+            // Try to retrieve email from the claims
+            String email = claims.get("email", String.class);
+
+            if (email == null || email.isEmpty()) {
+                // Fallback to "sub" claim if email is null or empty
+                String subject = claims.getSubject();
+                if (isValidEmail(subject)) {
+                    return subject;
+                } else {
+                    throw new ResourceNotFoundException("Subject is not a valid email address.");
+                }
+            }
+
+            // Return email if found
+            return email;
+
         } catch (JwtException e) {
             // Log or handle the exception (invalid or expired token)
             throw new RuntimeException("Invalid JWT Token", e);
         }
     }
 
-    public int getUserIdFromToken(String token) {
+    private boolean isValidEmail(String email) {
+        // Simple regex to validate email format
+        String emailRegex = "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$";
+        return email != null && email.matches(emailRegex);
+    }
 
+    public int getUserIdFromToken(String token) {
         String email = getEmailFromToken(token);
 
+        // Attempt to fetch the user ID by email
         Optional<Integer> userIdOptional = userRepo.getUserIdByEmail(email);
-        int userId = userIdOptional.orElseThrow(() -> new ResourceNotFoundException("User with email " + email + " not found"));
 
-
-        return userId;
-
+        // If user is not found, throw a ResourceNotFoundException with a clear message
+        return userIdOptional.orElseThrow(() ->
+                new ResourceNotFoundException("User with email '" + email + "' not found"));
     }
 
     public int getUniversityIdFromToken(String token) {
         String email = getEmailFromToken(token);
-       User user=userRepo.findUByEmail(email);
 
-        return  user.getUniversity().getId();
+        // Fetch the user by email and handle cases where the user is not found
+        User user = userRepo.findUByEmail(email);
+        if (user == null) {
+            throw new ResourceNotFoundException("User with email '" + email + "' not found");
+        }
 
+        // Check if the user has a university associated and handle the null case
+        if (user.getUniversity() == null) {
+            throw new ResourceNotFoundException(
+                    "University information is not available for user with email '" + email + "'");
+        }
 
+        // Return the university ID if everything is valid
+        return user.getUniversity().getId();
     }
 
 }

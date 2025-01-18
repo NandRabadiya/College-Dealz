@@ -2,8 +2,11 @@ package com.nd.controller;
 
 import com.nd.dto.ProductDto;
 import com.nd.service.ProductService;
+import org.apache.catalina.filters.AddDefaultCharsetFilter;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -19,6 +22,21 @@ public class ProductController {
     public ResponseEntity<ProductDto> getProductById(@PathVariable Integer productId) {
         ProductDto productDto = productService.getProductById(productId);
         return ResponseEntity.ok(productDto);
+    }
+
+
+    @PostMapping("/create")
+    public ResponseEntity<?> createProductWithImages(
+            @Validated @ModelAttribute ProductDto productDto,
+            @RequestHeader("Authorization") String authHeader) {
+        try {
+            ProductDto createdProduct = productService.createProductWithImages(productDto, authHeader);
+            return ResponseEntity.ok(createdProduct);
+        } catch (IllegalArgumentException ex) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
+        } catch (Exception ex) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error: " + ex.getMessage());
+        }
     }
 
     @PostMapping("/")
@@ -39,7 +57,11 @@ public class ProductController {
 
     @GetMapping("/university")
     public ResponseEntity<List<ProductDto>> getProductsByUniversity( @RequestHeader("Authorization") String authHeader) {
+
+        System.out.println("\nin getProductsByUniversity controller\n");
         List<ProductDto> products = productService.getProductsByUniversityId(authHeader);
+
+
         return ResponseEntity.ok(products);
     }
 
