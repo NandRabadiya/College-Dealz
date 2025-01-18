@@ -59,7 +59,7 @@ int seller_id= jwtService.getUserIdFromToken(authHeader);
         Product savedProduct = productRepo.save(product);
 
         // Map back to DTO and return
-        return mapToDto(savedProduct);
+        return mapToDtowithoutImage(savedProduct);
 
     }
 
@@ -91,6 +91,8 @@ int seller_id= jwtService.getUserIdFromToken(authHeader);
                 image.setImageData(file.getBytes());
                 image.setCreatedAt(Instant.now());
                 image.setUpdatedAt(Instant.now());// Save image as byte array
+
+               System.out.println(image.getImageData() + image.getFileName());
                 images.add(image);
 
             }
@@ -99,16 +101,18 @@ int seller_id= jwtService.getUserIdFromToken(authHeader);
             throw new ResourceNotFoundException("Images are not submited with product");
         }
 
-        savedProduct.setImages(images);
+       savedProduct.setImages(images);
 
         // Step 5: Save the updated product to ensure images are linked
-        productRepo.save(savedProduct);
+     Product savedProductwithImage =  productRepo.save(savedProduct);
 
-        return savedProductDto;
+     ProductDto savedProductDtoWithImage = mapToDto(savedProductwithImage);
+
+        return savedProductDtoWithImage;
     }
 
     @Override
-    public ProductDto updateProduct(Integer productId, ProductDto productDto) {
+    public ProductDto updateProduct(Integer productId, ProductDto productDto) throws  IOException {
         Product existingProduct = productRepo.findById(productId)
                 .orElseThrow(() -> new RuntimeException("Product with ID " + productId + " not found."));
 
@@ -121,7 +125,36 @@ int seller_id= jwtService.getUserIdFromToken(authHeader);
         existingProduct.setUpdatedAt(Instant.now());
 
         Product updatedProduct = productRepo.save(existingProduct);
-        return mapToDto(updatedProduct);
+
+
+        List<Image> images = new ArrayList<>();
+        if (productDto.getImages() != null) {
+            for (MultipartFile file : productDto.getImages()) {
+                Image image = new Image();
+                image.setProduct(existingProduct);
+                image.setFileName(file.getOriginalFilename());
+                image.setContentType(file.getContentType());
+                image.setImageData(file.getBytes());
+                image.setCreatedAt(Instant.now());
+                image.setUpdatedAt(Instant.now());// Save image as byte array
+
+                System.out.println(image.getImageData() + image.getFileName());
+                images.add(image);
+
+            }
+            imageRepo.saveAll(images);
+        }else {
+            throw new ResourceNotFoundException("Images are not submited with product");
+        }
+
+        existingProduct.setImages(images);
+
+        // Step 5: Save the updated product to ensure images are linked
+        Product savedProductwithImage =  productRepo.save(existingProduct);
+
+        ProductDto savedProductDtoWithImage = mapToDto(savedProductwithImage);
+
+        return savedProductDtoWithImage;
     }
 
     @Override
@@ -224,4 +257,21 @@ System.out.println(jwtService.getUniversityIdFromToken(authHeader));
 
         return productDto;
     }
+
+    private ProductDto mapToDtowithoutImage(Product product) {
+        ProductDto productDto = new ProductDto();
+        productDto.setId(product.getId());
+        productDto.setName(product.getName());
+        productDto.setDescription(product.getDescription());
+        productDto.setPrice(product.getPrice());
+        productDto.setCondition(product.getCondition());
+        productDto.setCategory(product.getCategory());
+        productDto.setMonthsOld(product.getMonthsOld());
+        productDto.setSellerId(product.getSeller().getId());
+        productDto.setUniversityId(product.getUniversity().getId());
+
+        return productDto;
+    }
+
+
 }

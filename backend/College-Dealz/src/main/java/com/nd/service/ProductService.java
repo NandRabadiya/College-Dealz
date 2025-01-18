@@ -10,7 +10,7 @@ public interface ProductService {
 
     ProductDto createProduct(ProductDto productDto, String authHeader);
 
-    ProductDto updateProduct(Integer productId, ProductDto productDto);
+    ProductDto updateProduct(Integer productId, ProductDto productDto) throws IOException;
     ProductDto getProductById(Integer productId);
     List<ProductDto> getAllProducts();
     List<ProductDto> getProductsByCategory(String category);
