@@ -1,19 +1,25 @@
-import React, { useEffect, useState } from 'react';
-import { useSelector } from 'react-redux';
-import { Pencil, Trash2 } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Input } from '@/components/ui/input';
-import { Badge } from '@/components/ui/badge';
-import { Card, CardContent } from '@/components/ui/card';
+import React, { useEffect, useState } from "react";
+import { useSelector } from "react-redux";
+import { Pencil, Trash2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent } from "@/components/ui/card";
+import UserDeals from "./UserDeals";
 
 const Dashboard = () => {
-  const { user } = useSelector((state) => state.auth); // Access user from Redux state
+  const { user, isAuthenticated } = useSelector((state) => state.auth);
   const [localUser, setLocalUser] = useState({
-    profilePicture: 'account.png',
-    name: 'Guest',
-    email: 'guest@example.com',
-    university: 'N/A',
+    profilePicture: "account.png",
+    name: "Guest",
+    email: "guest@example.com",
+    university: "N/A",
   });
 
   const [isEditingProfile, setIsEditingProfile] = useState(false);
@@ -24,21 +30,28 @@ const Dashboard = () => {
   const [isEditingDeal, setIsEditingDeal] = useState(false);
   const [currentDeal, setCurrentDeal] = useState(null);
 
+  useEffect(() => {
+    console.log("Dashboard - User from Redux:", user);
+    console.log("Dashboard - isAuthenticated:", isAuthenticated);
+  }, [user, isAuthenticated]);
   // Populate local state with Redux user data
   useEffect(() => {
     if (user) {
       setLocalUser({
-        profilePicture: user.profilePicture || 'account.png',
+        profilePicture: user.profilePicture || "account.png",
         name: user.name,
         email: user.email,
-        university: user.university || 'N/A',
+        university: user.university?.name || user.university || "N/A",
       });
     }
   }, [user]);
 
   // Format price to currency (example for future deal use)
   const formatPrice = (price) =>
-    new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR' }).format(price);
+    new Intl.NumberFormat("en-IN", {
+      style: "currency",
+      currency: "INR",
+    }).format(price);
 
   // Handle profile update
   const handleProfileUpdate = () => {
@@ -88,15 +101,26 @@ const Dashboard = () => {
                   </div>
                 </div>
                 <div className="text-center space-y-3">
-                  <h2 className="text-xl font-semibold text-foreground">{localUser.name}</h2>
+                  <h2 className="text-xl font-semibold text-foreground">
+                    {localUser.name}
+                  </h2>
                   <p className="text-sm text-gray-500">{localUser.email}</p>
-                  <Badge variant="secondary" className="bg-blue-100 text-blue-600">
-                    {localUser.university}
+                  <Badge
+                    variant="secondary"
+                    className="bg-blue-100 text-blue-600"
+                  >
+                    {typeof localUser.university === "object"
+                      ? localUser.university.name
+                      : localUser.university}
                   </Badge>
                 </div>
               </CardContent>
             </Card>
+            
           </div>
+          <div className="md:col-span-2">
+              <UserDeals />
+            </div>
         </div>
       </div>
 
@@ -104,22 +128,35 @@ const Dashboard = () => {
       <Dialog open={isEditingProfile} onOpenChange={setIsEditingProfile}>
         <DialogContent className="max-w-lg bg-background rounded-lg p-6 shadow-lg">
           <DialogHeader>
-            <DialogTitle className="text-lg font-semibold text-foreground">Edit Profile</DialogTitle>
+            <DialogTitle className="text-lg font-semibold text-foreground">
+              Edit Profile
+            </DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-card-foreground mb-2">Profile Picture</label>
-              <Input type="file" onChange={handleImageChange} accept="image/*" />
+              <label className="block text-sm font-medium text-card-foreground mb-2">
+                Profile Picture
+              </label>
+              <Input
+                type="file"
+                onChange={handleImageChange}
+                accept="image/*"
+              />
             </div>
             <div>
-              <label className="block text-sm font-medium text-card-foreground mb-2">Name</label>
+              <label className="block text-sm font-medium text-card-foreground mb-2">
+                Name
+              </label>
               <Input
                 value={editedName}
                 onChange={(e) => setEditedName(e.target.value)}
                 className="border-gray-300 focus:ring-primary focus:border-primary"
               />
             </div>
-            <Button onClick={handleProfileUpdate} className="w-full bg-primary text-white">
+            <Button
+              onClick={handleProfileUpdate}
+              className="w-full bg-primary text-white"
+            >
               Save Changes
             </Button>
           </div>

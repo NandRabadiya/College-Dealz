@@ -11,18 +11,27 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { X, Image as ImageIcon } from "lucide-react";
-import { Card, CardHeader, CardContent, CardTitle, CardFooter } from "@/components/ui/card";
+import {
+  Card,
+  CardHeader,
+  CardContent,
+  CardTitle,
+  CardFooter,
+} from "@/components/ui/card";
+import { API_BASE_URL } from "../Api/api";
 
-const PostADeal = ({ onClose }) => {
+const PostADeal = ({ onClose, editDeal }) => {
   // ... previous state and handlers remain the same ...
   const [formData, setFormData] = useState({
-    name: "",
-    description: "",
-    price: "",
-    condition: "",
-    category: "",
-    monthsOld: "",
-    images: []
+    name: editDeal?.name || "",
+    description: editDeal?.description || "",
+    price: editDeal?.price || "",
+    condition: editDeal?.condition || "",
+    category: editDeal?.category || "",
+    monthsOld: editDeal?.monthsOld || "",
+    images: Array.isArray(editDeal?.images)
+      ? editDeal.images.map((url) => ({ preview: url }))
+      : [],
   });
   const [errors, setErrors] = useState({});
 
@@ -33,7 +42,8 @@ const PostADeal = ({ onClose }) => {
     if (!formData.price || formData.price <= 0)
       newErrors.price = "Price must be greater than ₹0.";
     if (!formData.monthsOld) newErrors.monthsOld = "Age in months is required.";
-    if (formData.images.length === 0) newErrors.images = "At least one image is required.";
+    if (formData.images.length === 0)
+      newErrors.images = "At least one image is required.";
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -59,23 +69,23 @@ const PostADeal = ({ onClose }) => {
   const handleImageUpload = (e) => {
     const files = Array.from(e.target.files);
     const totalImages = formData.images.length + files.length;
-    
+
     if (totalImages > 7) {
       setErrors({
         ...errors,
-        images: "Maximum 7 images allowed"
+        images: "Maximum 7 images allowed",
       });
       return;
     }
 
-    const newImages = files.map(file => ({
+    const newImages = files.map((file) => ({
       file,
-      preview: URL.createObjectURL(file)
+      preview: URL.createObjectURL(file),
     }));
 
-    setFormData(prevData => ({
+    setFormData((prevData) => ({
       ...prevData,
-      images: [...prevData.images, ...newImages]
+      images: [...prevData.images, ...newImages],
     }));
 
     if (errors.images) {
@@ -86,9 +96,9 @@ const PostADeal = ({ onClose }) => {
   };
 
   const removeImage = (index) => {
-    setFormData(prevData => ({
+    setFormData((prevData) => ({
       ...prevData,
-      images: prevData.images.filter((_, i) => i !== index)
+      images: prevData.images.filter((_, i) => i !== index),
     }));
   };
 
@@ -99,21 +109,54 @@ const PostADeal = ({ onClose }) => {
     });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (validate()) {
-      console.log(formData);
-      onClose();
+      try {
+        const token = localStorage.getItem("token"); // Get your auth token
+        const formDataToSend = new FormData();
+
+        Object.keys(formData).forEach((key) => {
+          if (key !== "images") {
+            formDataToSend.append(key, formData[key]);
+          }
+        });
+
+        formData.images.forEach((image, index) => {
+          if (image.file) {
+            formDataToSend.append("images", image.file);
+          }
+        });
+
+        const response = await fetch(
+          `${API_BASE_URL}/api/products/${editDeal ? editDeal.id : ""}`,
+          {
+            method: editDeal ? "PUT" : "POST",
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+            body: formDataToSend,
+          }
+        );
+
+        if (response.ok) {
+          onClose();
+        }
+      } catch (error) {
+        console.log("Error submitting deal:", error);
+      }
     }
   };
-
   return (
     <div className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm flex items-center justify-center">
       <div className="w-full h-full md:h-auto md:max-h-[90vh] flex items-start justify-center overflow-hidden">
         <Card className="w-full max-w-lg mx-4 my-2 border shadow-lg animate-in fade-in-0 relative">
           <CardHeader className="sticky top-0 z-10 bg-background border-b">
             <div className="flex justify-between items-center">
-              <CardTitle className="text-2xl font-bold">Post a Deal</CardTitle>
+              <CardTitle className="text-2xl font-bold">
+                {" "}
+                {editDeal ? "Edit Deal" : "Post a Deal"}
+              </CardTitle>
               <Button
                 variant="ghost"
                 size="icon"
@@ -124,20 +167,24 @@ const PostADeal = ({ onClose }) => {
               </Button>
             </div>
           </CardHeader>
-          
+
           <div className="overflow-y-auto max-h-[calc(90vh-8rem)]">
             <CardContent className="p-4">
               <form id="dealForm" onSubmit={handleSubmit} className="space-y-6">
                 {/* Name */}
                 <div className="space-y-2">
-                  <Label htmlFor="name" className="text-sm font-medium">Name</Label>
+                  <Label htmlFor="name" className="text-sm font-medium">
+                    Name
+                  </Label>
                   <Input
                     id="name"
                     name="name"
                     value={formData.name}
                     onChange={handleChange}
                     placeholder="Enter the name of the item"
-                    className={`${errors.name ? "border-red-500" : ""} transition-colors`}
+                    className={`${
+                      errors.name ? "border-red-500" : ""
+                    } transition-colors`}
                   />
                   {errors.name && (
                     <p className="text-sm text-red-500">{errors.name}</p>
@@ -147,7 +194,9 @@ const PostADeal = ({ onClose }) => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   {/* Price */}
                   <div className="space-y-2">
-                    <Label htmlFor="price" className="text-sm font-medium">Price</Label>
+                    <Label htmlFor="price" className="text-sm font-medium">
+                      Price
+                    </Label>
                     <div className="relative">
                       <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
                         ₹
@@ -159,7 +208,9 @@ const PostADeal = ({ onClose }) => {
                         value={formData.price}
                         onChange={handleChange}
                         placeholder="0.00"
-                        className={`pl-7 ${errors.price ? "border-red-500" : ""} transition-colors`}
+                        className={`pl-7 ${
+                          errors.price ? "border-red-500" : ""
+                        } transition-colors`}
                       />
                     </div>
                     {errors.price && (
@@ -169,7 +220,9 @@ const PostADeal = ({ onClose }) => {
 
                   {/* Months Old */}
                   <div className="space-y-2">
-                    <Label htmlFor="monthsOld" className="text-sm font-medium">Age (months)</Label>
+                    <Label htmlFor="monthsOld" className="text-sm font-medium">
+                      Age (months)
+                    </Label>
                     <Input
                       type="number"
                       id="monthsOld"
@@ -177,7 +230,9 @@ const PostADeal = ({ onClose }) => {
                       value={formData.monthsOld}
                       onChange={handleChange}
                       placeholder="0"
-                      className={`${errors.monthsOld ? "border-red-500" : ""} transition-colors`}
+                      className={`${
+                        errors.monthsOld ? "border-red-500" : ""
+                      } transition-colors`}
                     />
                     {errors.monthsOld && (
                       <p className="text-sm text-red-500">{errors.monthsOld}</p>
@@ -188,7 +243,9 @@ const PostADeal = ({ onClose }) => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   {/* Category */}
                   <div className="space-y-2">
-                    <Label htmlFor="category" className="text-sm font-medium">Category</Label>
+                    <Label htmlFor="category" className="text-sm font-medium">
+                      Category
+                    </Label>
                     <Select
                       value={formData.category}
                       onValueChange={handleCategoryChange}
@@ -208,7 +265,9 @@ const PostADeal = ({ onClose }) => {
 
                   {/* Condition */}
                   <div className="space-y-2">
-                    <Label htmlFor="condition" className="text-sm font-medium">Condition</Label>
+                    <Label htmlFor="condition" className="text-sm font-medium">
+                      Condition
+                    </Label>
                     <Select
                       value={formData.condition}
                       onValueChange={(value) =>
@@ -231,7 +290,9 @@ const PostADeal = ({ onClose }) => {
 
                 {/* Description */}
                 <div className="space-y-2">
-                  <Label htmlFor="description" className="text-sm font-medium">Description</Label>
+                  <Label htmlFor="description" className="text-sm font-medium">
+                    Description
+                  </Label>
                   <Textarea
                     id="description"
                     name="description"
@@ -245,17 +306,22 @@ const PostADeal = ({ onClose }) => {
                 {/* Images */}
                 <div className="space-y-4">
                   <div className="flex justify-between items-center mb-1">
-                    <Label className="text-sm font-medium">Product Images</Label>
+                    <Label className="text-sm font-medium">
+                      Product Images
+                    </Label>
                     {errors.images && (
-                    <p className="text-sm text-red-500">{errors.images}</p>
-                  )}
+                      <p className="text-sm text-red-500">{errors.images}</p>
+                    )}
                     <span className="text-sm text-muted-foreground">
                       {7 - formData.images.length} images remaining
                     </span>
                   </div>
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-4 pb-3">
                     {formData.images.map((image, index) => (
-                      <div key={index} className="relative group aspect-square">
+                      <div
+                        key={image.file?.name || index}
+                        className="relative group aspect-square"
+                      >
                         <img
                           src={image.preview}
                           alt={`Product ${index + 1}`}
@@ -294,7 +360,6 @@ const PostADeal = ({ onClose }) => {
                       </div>
                     )}
                   </div>
-                  
                 </div>
               </form>
             </CardContent>
@@ -302,7 +367,7 @@ const PostADeal = ({ onClose }) => {
 
           <CardFooter className="sticky bottom-0 z-10 bg-background border-t p-4">
             <Button type="submit" form="dealForm" className="w-full">
-              Post Deal
+              {editDeal ? "Save Changes" : "Post Deal"}
             </Button>
           </CardFooter>
         </Card>

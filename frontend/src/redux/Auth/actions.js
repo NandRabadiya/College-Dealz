@@ -24,18 +24,39 @@ export const loginFailure = (error) => ({
 export const login = (credentials) => async (dispatch) => {
   dispatch(loginRequest());
   try {
+    console.log("Login - Making request with:", credentials);
     const response = await axios.post(`${API_BASE_URL}/login`, credentials);
-    const user = response.data;
-    //console.log("user",user);
-    if (user.access_token) {
-      localStorage.setItem("jwt", user.access_token);
-      dispatch(getUser(user.access_token));
+    console.log("Login - Response:", response.data);
+
+    const { data } = response;
+
+    if (data.access_token) {
+      localStorage.setItem("jwt", data.access_token);
+      dispatch(loginSuccess({ user: data }));
+      try {
+        const userResponse = await axios.get(
+          `${API_BASE_URL}/api/users/dashboard`,
+          {
+            headers: {
+              Authorization: `Bearer ${data.access_token}`,
+            },
+          }
+        );
+        console.log("User details fetched:", userResponse.data);
+        dispatch({ type: GET_USER_SUCCESS, payload: userResponse.data });
+      } catch (error) {
+        console.error("Error fetching user details:", error);
+        dispatch({ type: GET_USER_FAILURE, payload: error.message });
+      }
+      console.log("Login - Success dispatched");
+      return { type: "LOGIN_SUCCESS" };
+    } else {
+      throw new Error("No access token received");
     }
-    // Display success message from backend
-    const message = user.message || "Login successful!";
-    dispatch(loginSuccess({ user, message }));
   } catch (error) {
-    dispatch(loginFailure(error.response?.data?.message || "Login failed"));
+    const errorMessage = error.response?.data?.message || "Login failed";
+    dispatch(loginFailure(errorMessage));
+    return { type: "LOGIN_FAILURE", payload: { message: errorMessage } };
   }
 };
 
@@ -82,7 +103,8 @@ export const getUser = (token) => {
       dispatch({ type: GET_USER_SUCCESS, payload: user });
       console.log("req User ", user);
     } catch (error) {
-      const errorMessage = error.message;
+      const errorMessage =
+        error.response?.data?.message || "Failed to get user details";
       dispatch({ type: GET_USER_FAILURE, payload: errorMessage });
     }
   };
