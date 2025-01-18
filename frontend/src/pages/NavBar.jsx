@@ -31,9 +31,9 @@
     const location = useLocation();
 
     // Handle protected actions
-    const handleProtectedAction = (action) => {
+    const handleProtectedAction = (path,action) => {
       if (!isAuthenticated) {
-        navigate("./Authenticate", { state: { from: location } });
+        navigate("/Authenticate", { state: { from: path } });
       } else {
         action();
       }
@@ -41,7 +41,7 @@
 
     // Define actions for each button
     const handlePostDeal = () => {
-      handleProtectedAction(() => {
+      handleProtectedAction("/post-a-deal",() => {
         navigate("/post-a-deal");
         console.log("Navigating to post deal");
         // Add navigation logic here
@@ -49,21 +49,21 @@
     };
 
     const handleWishlist = () => {
-      handleProtectedAction(() => {
+      handleProtectedAction("/",() => {
         console.log("Navigating to wishlist");
         // Add navigation logic here
       });
     };
 
     const handleChat = () => {
-      handleProtectedAction(() => {
+      handleProtectedAction("",() => {
         console.log("Navigating to chat");
         // Add navigation logic here
       });
     };
 
     const handleProfile = () => {
-      handleProtectedAction(() => {
+      handleProtectedAction("/dashboard",() => {
         console.log("Navigating to profile");
         navigate("/dashboard");
         // Add navigation logic here
