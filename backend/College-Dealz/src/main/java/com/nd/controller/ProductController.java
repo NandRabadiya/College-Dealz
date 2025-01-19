@@ -49,11 +49,27 @@ public class ProductController {
         return ResponseEntity.ok(createdProduct);
     }
 
+//    @PutMapping("/{productId}")
+//    public ResponseEntity<ProductDto> updateProduct(@PathVariable Integer productId,
+//                                                    @ModelAttribute ProductDto productDto) throws IOException {
+//        ProductDto updatedProduct = productService.updateProduct(productId, productDto);
+//        return ResponseEntity.ok(updatedProduct);
+//    }
+
     @PutMapping("/{productId}")
-    public ResponseEntity<ProductDto> updateProduct(@PathVariable Integer productId,
-                                                    @ModelAttribute ProductDto productDto) throws IOException {
-        ProductDto updatedProduct = productService.updateProduct(productId, productDto);
-        return ResponseEntity.ok(updatedProduct);
+    public ResponseEntity<?> updateProduct(
+            @PathVariable Integer productId,
+            @ModelAttribute ProductDto productDto,
+            @RequestHeader("Authorization") String authHeader) {
+        try {
+            ProductDto updatedProduct = productService.updateProduct(productId, productDto);
+            return ResponseEntity.ok(updatedProduct);
+        } catch (IllegalArgumentException ex) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
+        } catch (Exception ex) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Error updating product: " + ex.getMessage());
+        }
     }
 
     @GetMapping("/university")
