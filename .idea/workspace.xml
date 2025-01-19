@@ -5,13 +5,9 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="c6564612-8fe2-49e4-bb4c-5d4305a5e686" name="Changes" comment="Image API and &#10;product curd with Image">
-      <change beforePath="$PROJECT_DIR$/.idea/modules.xml" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/College-Dealz/src/main/java/com/nd/config/SecurityConfig.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/College-Dealz/src/main/java/com/nd/config/SecurityConfig.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/backend/College-Dealz/src/main/java/com/nd/controller/ProductController.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/College-Dealz/src/main/java/com/nd/controller/ProductController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/College-Dealz/src/main/resources/application.properties" beforeDir="false" afterPath="$PROJECT_DIR$/backend/College-Dealz/src/main/resources/application.properties" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/pages/dasboard/UserDeals.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/pages/dasboard/UserDeals.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/pages/product/PostADeal.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/pages/product/PostADeal.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/College-Dealz/src/main/java/com/nd/service/Impl/ProductServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/College-Dealz/src/main/java/com/nd/service/Impl/ProductServiceImpl.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -46,6 +42,9 @@
   &quot;associatedIndex&quot;: 0
 }</component>
   <component name="ProjectId" id="2qpRoDILp8VeDT8QBsgWtEmAk8E" />
+  <component name="ProjectLevelVcsManager">
+    <ConfirmationsSetting value="1" id="Add" />
+  </component>
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
@@ -105,7 +104,9 @@
       <workItem from="1737176029662" duration="7679000" />
       <workItem from="1737191762147" duration="2169000" />
       <workItem from="1737206046561" duration="4385000" />
-      <workItem from="1737283769944" duration="8310000" />
+      <workItem from="1737283769944" duration="8738000" />
+      <workItem from="1737301311024" duration="597000" />
+      <workItem from="1737303278858" duration="2544000" />
     </task>
     <task id="LOCAL-00001" summary="Image API and &#10;product curd with Image">
       <option name="closed" value="true" />

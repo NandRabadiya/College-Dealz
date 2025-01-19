@@ -49,13 +49,6 @@ public class ProductController {
         return ResponseEntity.ok(createdProduct);
     }
 
-//    @PutMapping("/{productId}")
-//    public ResponseEntity<ProductDto> updateProduct(@PathVariable Integer productId,
-//                                                    @ModelAttribute ProductDto productDto) throws IOException {
-//        ProductDto updatedProduct = productService.updateProduct(productId, productDto);
-//        return ResponseEntity.ok(updatedProduct);
-//    }
-
     @PutMapping("/{productId}")
     public ResponseEntity<?> updateProduct(
             @PathVariable Integer productId,
