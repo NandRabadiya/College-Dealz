@@ -19,21 +19,60 @@ import {
   CardFooter,
 } from "@/components/ui/card";
 import { API_BASE_URL } from "../Api/api";
+import { useEffect } from "react";
+
+// Define enums to match backend
+const CATEGORY_ENUM = {
+  ELECTRONICS: "ELECTRONICS",
+  FURNITURE: "FURNITURE",
+  CLOTHING: "CLOTHING",
+  BOOKS: "BOOKS",
+  OTHER: "OTHER",
+};
+
+const CONDITION_ENUM = {
+  NEW: "NEW",
+  LIKE_NEW: "LIKE_NEW",
+  GOOD: "GOOD",
+  FAIR: "FAIR",
+  POOR: "POOR",
+};
 
 const PostADeal = ({ onClose, editDeal }) => {
   // ... previous state and handlers remain the same ...
+  useEffect(() => {
+    if (editDeal) {
+      console.log("Edit deal data received:", editDeal);
+      // Initialize form with properly mapped data
+      setFormData({
+        name: editDeal.name || "",
+        description: editDeal.description || "",
+        price: editDeal.price || "",
+        condition: editDeal.condition || "",
+        category: editDeal.category || "",
+        monthsOld: editDeal.monthsOld || "",
+        images: (editDeal.imageUrls || []).map((url) => ({
+          preview: url,
+          existingUrl: url,
+        })),
+        id: editDeal.id // Explicitly store the ID
+      });
+    }
+  }, [editDeal]);
+
   const [formData, setFormData] = useState({
-    name: editDeal?.name || "",
-    description: editDeal?.description || "",
-    price: editDeal?.price || "",
-    condition: editDeal?.condition || "",
-    category: editDeal?.category || "",
-    monthsOld: editDeal?.monthsOld || "",
-    images: Array.isArray(editDeal?.images)
-      ? editDeal.images.map((url) => ({ preview: url }))
-      : [],
+    name: "",
+    description: "",
+    price: "",
+    condition: "",
+    category: "",
+    monthsOld: "",
+    images: [],
+    id: null
   });
   const [errors, setErrors] = useState({});
+  const [submitError, setSubmitError] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // All the handlers remain exactly the same...
   const validate = () => {
@@ -42,6 +81,8 @@ const PostADeal = ({ onClose, editDeal }) => {
     if (!formData.price || formData.price <= 0)
       newErrors.price = "Price must be greater than ₹0.";
     if (!formData.monthsOld) newErrors.monthsOld = "Age in months is required.";
+    if (!formData.category) newErrors.category = "Category is required.";
+    if (!formData.condition) newErrors.condition = "Condition is required.";
     if (formData.images.length === 0)
       newErrors.images = "At least one image is required.";
     setErrors(newErrors);
@@ -53,17 +94,18 @@ const PostADeal = ({ onClose, editDeal }) => {
     const sanitizedValue =
       name === "price" || name === "monthsOld" ? Math.max(0, value) : value;
 
-    setFormData((prevData) => {
-      const updatedData = { ...prevData, [name]: sanitizedValue };
-      const updatedErrors = { ...errors };
-      if (name === "name" && updatedData.name.trim()) delete updatedErrors.name;
-      if (name === "price" && +updatedData.price > 0)
-        delete updatedErrors.price;
-      if (name === "monthsOld" && +updatedData.monthsOld > 0)
-        delete updatedErrors.monthsOld;
-      setErrors(updatedErrors);
-      return updatedData;
-    });
+    setFormData((prevData) => ({
+      ...prevData,
+      [name]: sanitizedValue,
+    }));
+    // Clear error for the field being changed
+    if (errors[name]) {
+      setErrors((prev) => {
+        const newErrors = { ...prev };
+        delete newErrors[name];
+        return newErrors;
+      });
+    }
   };
 
   const handleImageUpload = (e) => {
@@ -102,49 +144,125 @@ const PostADeal = ({ onClose, editDeal }) => {
     }));
   };
 
+  const handleConditionChange = (value) => {
+    setFormData((prev) => ({
+      ...prev,
+      condition: value,
+    }));
+    if (errors.condition) {
+      setErrors((prev) => {
+        const newErrors = { ...prev };
+        delete newErrors.condition;
+        return newErrors;
+      });
+    }
+  };
+
   const handleCategoryChange = (value) => {
-    setFormData({
-      ...formData,
+    setFormData((prev) => ({
+      ...prev,
       category: value,
-    });
+    }));
+    if (errors.category) {
+      setErrors((prev) => {
+        const newErrors = { ...prev };
+        delete newErrors.category;
+        return newErrors;
+      });
+    }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (validate()) {
-      try {
-        const token = localStorage.getItem("token"); // Get your auth token
-        const formDataToSend = new FormData();
+    setSubmitError("");
 
-        Object.keys(formData).forEach((key) => {
-          if (key !== "images") {
-            formDataToSend.append(key, formData[key]);
-          }
-        });
+    if (!validate()) return;
+    // Additional validation for edit mode
+    if (editDeal && !editDeal.id) {
+      setSubmitError("Invalid product ID for editing");
+      console.error("Edit mode active but no product ID provided:", editDeal);
+      return;
+    }
 
-        formData.images.forEach((image, index) => {
-          if (image.file) {
-            formDataToSend.append("images", image.file);
-          }
-        });
-
-        const response = await fetch(
-          `${API_BASE_URL}/api/products/${editDeal ? editDeal.id : ""}`,
-          {
-            method: editDeal ? "PUT" : "POST",
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-            body: formDataToSend,
-          }
-        );
-
-        if (response.ok) {
-          onClose();
-        }
-      } catch (error) {
-        console.log("Error submitting deal:", error);
+    try {
+      setIsSubmitting(true);
+      const token = localStorage.getItem("jwt");
+      if (!token) {
+        setSubmitError("Authentication token not found. Please login again.");
+        return;
       }
+      const formDataToSend = new FormData();
+
+      // Append basic product details
+      formDataToSend.append("name", formData.name);
+      formDataToSend.append("description", formData.description);
+      formDataToSend.append("price", formData.price);
+      formDataToSend.append("condition", formData.condition);
+      formDataToSend.append("category", formData.category);
+      formDataToSend.append("monthsOld", formData.monthsOld);
+
+      // Handle new image files
+      formData.images
+        .filter((img) => img.file)
+        .forEach((image) => {
+          formDataToSend.append("images", image.file);
+        });
+
+      // Handle existing images
+      const existingImages = formData.images
+        .filter((img) => img.existingUrl)
+        .map((img) => img.existingUrl);
+
+      formDataToSend.append("existingImages", JSON.stringify(existingImages));
+     
+       // Construct URL based on mode
+       const baseUrl = `${API_BASE_URL}/api/products`;
+       const url = formData.id ? `${baseUrl}/${formData.id}` : `${baseUrl}/create`;
+       const method = formData.id ? "PUT" : "POST";
+
+      console.log("Making request to:", url);
+      console.log("Method:", method);
+      console.log("Form data ID:", formData.id);
+
+      const response = await fetch(url, {
+        method,
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        body: formDataToSend,
+        
+      });
+      // Try to parse JSON response, but handle non-JSON responses gracefully
+
+      if (!response.ok) {
+        let errorMessage = `HTTP error! status: ${response.status}`;
+        try {
+          const errorData = await response.json();
+          errorMessage = errorData.message || errorMessage;
+        } catch {
+          console.error("Non-JSON error response received.");
+        }
+        throw new Error(errorMessage);
+      }
+      
+      // If we get here, the request was successful
+      // Clean up any object URLs we created
+      formData.images.forEach((image) => {
+        if (image.preview && !image.existingUrl) {
+          URL.revokeObjectURL(image.preview);
+        }
+      });
+
+      if (onClose) {
+        onClose(true); // Pass true to indicate successful submission
+      }
+    } catch (error) {
+      console.error("Error submitting deal:", error);
+      setSubmitError(
+        error.message || "An unexpected error occurred. Please try again."
+      );
+    } finally {
+      setIsSubmitting(false);
     }
   };
   return (
@@ -154,7 +272,6 @@ const PostADeal = ({ onClose, editDeal }) => {
           <CardHeader className="sticky top-0 z-10 bg-background border-b">
             <div className="flex justify-between items-center">
               <CardTitle className="text-2xl font-bold">
-                {" "}
                 {editDeal ? "Edit Deal" : "Post a Deal"}
               </CardTitle>
               <Button
@@ -254,13 +371,26 @@ const PostADeal = ({ onClose, editDeal }) => {
                         <SelectValue placeholder="Select a category" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="electronics">Electronics</SelectItem>
-                        <SelectItem value="furniture">Furniture</SelectItem>
-                        <SelectItem value="clothing">Clothing</SelectItem>
-                        <SelectItem value="books">Books</SelectItem>
-                        <SelectItem value="other">Other</SelectItem>
+                        <SelectItem value={CATEGORY_ENUM.ELECTRONICS}>
+                          Electronics
+                        </SelectItem>
+                        <SelectItem value={CATEGORY_ENUM.FURNITURE}>
+                          Furniture
+                        </SelectItem>
+                        <SelectItem value={CATEGORY_ENUM.CLOTHING}>
+                          Clothing
+                        </SelectItem>
+                        <SelectItem value={CATEGORY_ENUM.BOOKS}>
+                          Books
+                        </SelectItem>
+                        <SelectItem value={CATEGORY_ENUM.OTHER}>
+                          Other
+                        </SelectItem>
                       </SelectContent>
                     </Select>
+                    {errors.category && (
+                      <p className="text-sm text-red-500">{errors.category}</p>
+                    )}
                   </div>
 
                   {/* Condition */}
@@ -270,21 +400,30 @@ const PostADeal = ({ onClose, editDeal }) => {
                     </Label>
                     <Select
                       value={formData.condition}
-                      onValueChange={(value) =>
-                        handleChange({ target: { name: "condition", value } })
-                      }
+                      onValueChange={handleConditionChange}
                     >
                       <SelectTrigger className="w-full">
                         <SelectValue placeholder="Select condition" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="new">New</SelectItem>
-                        <SelectItem value="like-new">Like New</SelectItem>
-                        <SelectItem value="good">Good</SelectItem>
-                        <SelectItem value="fair">Fair</SelectItem>
-                        <SelectItem value="poor">Poor</SelectItem>
+                        <SelectItem value={CONDITION_ENUM.NEW}>New</SelectItem>
+                        <SelectItem value={CONDITION_ENUM.LIKE_NEW}>
+                          Like New
+                        </SelectItem>
+                        <SelectItem value={CONDITION_ENUM.GOOD}>
+                          Good
+                        </SelectItem>
+                        <SelectItem value={CONDITION_ENUM.FAIR}>
+                          Fair
+                        </SelectItem>
+                        <SelectItem value={CONDITION_ENUM.POOR}>
+                          Poor
+                        </SelectItem>
                       </SelectContent>
                     </Select>
+                    {errors.condition && (
+                      <p className="text-sm text-red-500">{errors.condition}</p>
+                    )}
                   </div>
                 </div>
 
@@ -342,7 +481,8 @@ const PostADeal = ({ onClose, editDeal }) => {
                       <div className="relative aspect-square">
                         <Input
                           type="file"
-                          accept="image/*"
+                          name="images"
+                          accept="images/*"
                           multiple
                           onChange={handleImageUpload}
                           className="hidden"
@@ -366,8 +506,17 @@ const PostADeal = ({ onClose, editDeal }) => {
           </div>
 
           <CardFooter className="sticky bottom-0 z-10 bg-background border-t p-4">
-            <Button type="submit" form="dealForm" className="w-full">
-              {editDeal ? "Save Changes" : "Post Deal"}
+            <Button
+              type="submit"
+              form="dealForm"
+              className="w-full"
+              disabled={isSubmitting}
+            >
+              {isSubmitting
+                ? "Saving..."
+                : editDeal
+                ? "Save Changes"
+                : "Post Deal"}
             </Button>
           </CardFooter>
         </Card>
