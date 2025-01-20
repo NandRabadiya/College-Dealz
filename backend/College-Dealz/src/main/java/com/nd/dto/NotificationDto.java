@@ -18,7 +18,7 @@ public class NotificationDto {
     private Integer userId; // Representing the User entity by its ID
 
   //  @NotBlank(message = "Type cannot be blank")
-    @Size(max = 50, message = "Type must not exceed 50 characters")
+ //   @Size( message = "Type must not exceed 50 characters")
     private NotificationType type;
 
    // @NotBlank(message = "Title cannot be blank")

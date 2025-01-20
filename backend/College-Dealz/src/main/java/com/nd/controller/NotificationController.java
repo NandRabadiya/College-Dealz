@@ -20,7 +20,7 @@ public class NotificationController {
         this.jwtService = jwtUtil;
     }
 
-    @GetMapping
+    @GetMapping("/")
     public List<NotificationDto> getUserNotifications(@RequestHeader("Authorization") String authHeader) {
         // Extract userId from JWT token
         int userId = jwtService.getUserIdFromToken(authHeader);
@@ -34,4 +34,12 @@ public class NotificationController {
         int addedByUserId = jwtService.getUserIdFromToken(authHeader);
         notificationService.createNotificationForAllUsers(addedByUserId, itemId);
     }
+
+    @PostMapping("/mark-as-read/{id}")
+    public void markAsRead(@PathVariable int id) {
+
+        notificationService.markNotificationAsRead(id);
+
+    }
+
 }

@@ -5,6 +5,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface NotificationRepo extends JpaRepository<Notification, Integer> {
@@ -15,4 +16,6 @@ public interface NotificationRepo extends JpaRepository<Notification, Integer> {
 
     @Query("SELECT n FROM Notification n WHERE n.user.id = :userId ORDER BY n.createdAt DESC")
     Optional<Notification> findByUserIdOrderByCreatedAtDesc(@Param("userId") Integer userId);
+
+
 }
