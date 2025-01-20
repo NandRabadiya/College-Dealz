@@ -6,9 +6,9 @@
   <component name="ChangeListManager">
     <list default="true" id="c6564612-8fe2-49e4-bb4c-5d4305a5e686" name="Changes" comment="Product Service with images &#10;completed.">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/College-Dealz/src/main/java/com/nd/config/SecurityConfig.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/College-Dealz/src/main/java/com/nd/config/SecurityConfig.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/College-Dealz/src/main/java/com/nd/repositories/NotificationRepo.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/College-Dealz/src/main/java/com/nd/repositories/NotificationRepo.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/pages/notification/Notification.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/pages/notification/Notification.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/pages/product/ProductCard.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/pages/product/ProductCard.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/pages/product/ProductDetails.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/pages/product/ProductDetails.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/pages/product/ProductGallery.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/pages/product/ProductGallery.jsx" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
