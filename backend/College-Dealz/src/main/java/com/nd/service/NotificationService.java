@@ -9,4 +9,6 @@ public interface NotificationService {
     List<NotificationDto> getUserNotifications(int userId);
 
     void createNotificationForAllUsers(int addedByUserId, int itemId);
+
+    void markNotificationAsRead(int notificationId);
 }

@@ -17,6 +17,7 @@ import java.time.Instant;
 public class Notification {
     @Id
     @Column(name = "notification_id", nullable = false)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
     @NotNull
@@ -24,9 +25,8 @@ public class Notification {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    @Size(max = 50)
-    @NotNull
-    @Column(name = "type", length = 50)
+   // @Size(max = 50)
+    @Column(name = "type")
     private NotificationType type;
 
     @Size(max = 255)

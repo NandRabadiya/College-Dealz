@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -61,6 +62,18 @@ public class NotificationServiceImpl implements NotificationService {
                 .collect(Collectors.toList());
 
         notificationRepository.saveAll(notifications); // Save all notifications in a single batch
+    }
+
+    @Override
+    public void markNotificationAsRead(int notificationId) {
+
+        Notification notification = notificationRepository.findById(notificationId)
+                .orElseThrow(() -> new RuntimeException("Notification not found with ID: " + notificationId));
+
+    notification.setIsRead(true);
+
+    notificationRepository.save(notification);
+
     }
 
     // Helper method to map Entity to DTO
