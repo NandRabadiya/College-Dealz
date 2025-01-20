@@ -1,5 +1,6 @@
 package com.nd.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -17,17 +18,22 @@ public class Chat {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
+    @JsonIgnore
     @ManyToOne
     @JoinColumn(name = "sender_id", referencedColumnName = "user_id")
     private User sender;
 
+    @JsonIgnore
     @ManyToOne
     @JoinColumn(name = "receiver_id", referencedColumnName = "user_id")
     private User receiver;
 
-    @ManyToOne
+    @JsonIgnore
+    @OneToOne
     @JoinColumn(name = "product_id", referencedColumnName = "product_id")
     private Product product;  // This is the context of the chat
+
+
 
     @OneToMany(mappedBy = "chat", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Message> messages;

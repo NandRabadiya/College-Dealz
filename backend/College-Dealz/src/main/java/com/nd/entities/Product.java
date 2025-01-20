@@ -51,6 +51,10 @@ public class Product {
     private List<Image> images;
 
 
+    @OneToOne(mappedBy = "product", cascade = CascadeType.ALL)
+    private Chat chat;
+
+
     @Column(name = "months_old")
     private Integer monthsOld;
 
@@ -66,6 +70,7 @@ public class Product {
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "seller_id", nullable = false)
     private User seller;
+
 
     @NotNull
     @ManyToOne(fetch = FetchType.LAZY, optional = false)

@@ -5,6 +5,8 @@ import com.nd.entities.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -23,6 +25,8 @@ public interface UserRepo extends JpaRepository<User, Integer> {
     Optional<User> findByEmailWithRoles(@Param("email") String email);
 //
 //    Optional<Object> findByUsername(String username);
+@Query("SELECT u.id FROM User u WHERE u.university.id = :universityId")
+List<Integer> findUserIdsByUniversityId(@Param("universityId") Integer universityId);
 
 
     @Override

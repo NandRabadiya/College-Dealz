@@ -4,10 +4,53 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="c6564612-8fe2-49e4-bb4c-5d4305a5e686" name="Changes" comment="Image API and &#10;product curd with Image">
+    <list default="true" id="c6564612-8fe2-49e4-bb4c-5d4305a5e686" name="Changes" comment="Product Service with images &#10;completed.">
+      <change afterPath="$PROJECT_DIR$/backend/College-Dealz/src/main/java/com/nd/config/WebsocketConfig.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/College-Dealz/src/main/java/com/nd/controller/MessageController.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/College-Dealz/src/main/java/com/nd/controller/NotificationController.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/College-Dealz/src/main/java/com/nd/dto/NotificationDto.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/College-Dealz/src/main/java/com/nd/entities/Notification.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/College-Dealz/src/main/java/com/nd/enums/NotificationType.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/College-Dealz/src/main/java/com/nd/exceptions/ChatException.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/College-Dealz/src/main/java/com/nd/exceptions/ProductException.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/College-Dealz/src/main/java/com/nd/exceptions/UserException.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/College-Dealz/src/main/java/com/nd/repositories/MessageRepo.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/College-Dealz/src/main/java/com/nd/repositories/NotificationRepo.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/College-Dealz/src/main/java/com/nd/service/Impl/MessageServiceImpl.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/College-Dealz/src/main/java/com/nd/service/Impl/NotificationServiceImpl.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/College-Dealz/src/main/java/com/nd/service/MessageService.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/College-Dealz/src/main/java/com/nd/service/NotificationService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/dataSources.local.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/dataSources.local.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/jpa.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/jpa.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/College-Dealz/src/main/java/com/nd/controller/ProductController.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/College-Dealz/src/main/java/com/nd/controller/ProductController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/College-Dealz/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/backend/College-Dealz/pom.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/College-Dealz/src/main/java/com/nd/dto/MessageDTO.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/College-Dealz/src/main/java/com/nd/dto/MessageDTO.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/College-Dealz/src/main/java/com/nd/dto/ProductDto.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/College-Dealz/src/main/java/com/nd/dto/ProductDto.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/College-Dealz/src/main/java/com/nd/entities/Chat.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/College-Dealz/src/main/java/com/nd/entities/Chat.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/College-Dealz/src/main/java/com/nd/entities/Message.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/College-Dealz/src/main/java/com/nd/entities/Message.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/College-Dealz/src/main/java/com/nd/entities/Product.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/College-Dealz/src/main/java/com/nd/entities/Product.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/College-Dealz/src/main/java/com/nd/repositories/ProductRepo.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/College-Dealz/src/main/java/com/nd/repositories/ProductRepo.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/College-Dealz/src/main/java/com/nd/repositories/UserRepo.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/College-Dealz/src/main/java/com/nd/repositories/UserRepo.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/College-Dealz/src/main/java/com/nd/service/Impl/ChatServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/College-Dealz/src/main/java/com/nd/service/Impl/ChatServiceImpl.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/backend/College-Dealz/src/main/java/com/nd/service/Impl/ProductServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/College-Dealz/src/main/java/com/nd/service/Impl/ProductServiceImpl.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/College-Dealz/src/main/java/com/nd/service/ProductService.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/College-Dealz/src/main/java/com/nd/service/ProductService.java" afterDir="false" />
+=========
+    <list default="true" id="61f1f9df-4ba7-42fc-b58a-7b97f0b70348" name="Changes" comment="Product api changed and introduce product dto">
+      <change beforePath="$PROJECT_DIR$/.idea/dataSources.local.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/dataSources.local.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/College-Dealz/src/main/java/com/nd/entities/University.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/College-Dealz/src/main/java/com/nd/entities/University.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/College-Dealz/src/main/java/com/nd/entities/User.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/College-Dealz/src/main/java/com/nd/entities/User.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/College-Dealz/src/main/resources/application.properties" beforeDir="false" afterPath="$PROJECT_DIR$/backend/College-Dealz/src/main/resources/application.properties" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/App.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/App.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/Routes/ProtectedRoute.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/Routes/ProtectedRoute.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/pages/NavBar.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/pages/NavBar.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/pages/authentication/Authenticate.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/pages/authentication/Authenticate.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/pages/authentication/Login.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/pages/authentication/Login.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/pages/dasboard/Profile.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/pages/dasboard/Profile.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/pages/product/PostADeal.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/pages/product/PostADeal.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/redux/Auth/Reducer.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/redux/Auth/Reducer.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/redux/Auth/actions.js" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/redux/Auth/actions.js" afterDir="false" />
+>>>>>>>>> Temporary merge branch 2
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -17,12 +60,19 @@
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
       <list>
+        <option value="AnnotationType" />
+        <option value="com.intellij.jpb.JpaEntity" />
         <option value="Interface" />
         <option value="Class" />
       </list>
     </option>
   </component>
   <component name="Git.Settings">
+    <option name="RECENT_BRANCH_BY_REPOSITORY">
+      <map>
+        <entry key="$PROJECT_DIR$" value="frontend" />
+      </map>
+    </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
   <component name="GitHubPullRequestSearchHistory">{
@@ -31,10 +81,10 @@
     &quot;assignee&quot;: &quot;VenuVirparia&quot;
   }
 }</component>
-  <component name="GithubPullRequestsUISettings">{
-  &quot;selectedUrlAndAccountId&quot;: {
-    &quot;url&quot;: &quot;https://github.com/VenuVirparia/College-Dealz&quot;,
-    &quot;accountId&quot;: &quot;b8484678-2dbe-47cf-aacb-5a3cd2ca4983&quot;
+  <component name="GithubPullRequestsUISettings"><![CDATA[{
+  "selectedUrlAndAccountId": {
+    "url": "https://github.com/VenuVirparia/College-Dealz",
+    "accountId": "b8484678-2dbe-47cf-aacb-5a3cd2ca4983"
   }
 }</component>
   <component name="ProjectColorInfo">{
@@ -42,9 +92,12 @@
   &quot;associatedIndex&quot;: 0
 }</component>
   <component name="ProjectId" id="2qpRoDILp8VeDT8QBsgWtEmAk8E" />
+=========
+  <component name="ProjectId" id="2rYpxXYfNGwZYMPFngBciGg1Pwa" />
   <component name="ProjectLevelVcsManager">
     <ConfirmationsSetting value="1" id="Add" />
   </component>
+>>>>>>>>> Temporary merge branch 2
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
@@ -60,7 +113,7 @@
     &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
     &quot;SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
     &quot;Spring Boot.CollegeDealzApplication.executor&quot;: &quot;Run&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;frontend&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;backend&quot;,
     &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
     &quot;last_opened_file_path&quot;: &quot;C:/Users/venup/OneDrive/Desktop/College-Dealz&quot;,
     &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
@@ -103,10 +156,15 @@
       <workItem from="1737038554640" duration="5162000" />
       <workItem from="1737176029662" duration="7679000" />
       <workItem from="1737191762147" duration="2169000" />
-      <workItem from="1737206046561" duration="4385000" />
-      <workItem from="1737283769944" duration="8738000" />
-      <workItem from="1737301311024" duration="597000" />
-      <workItem from="1737303278858" duration="2544000" />
+=========
+      <updated>1736746113569</updated>
+      <workItem from="1736746118184" duration="2169000" />
+      <workItem from="1736867411850" duration="2896000" />
+      <workItem from="1737005264791" duration="12531000" />
+      <workItem from="1737116612261" duration="1242000" />
+      <workItem from="1737118264171" duration="10180000" />
+      <workItem from="1737175105691" duration="3641000" />
+>>>>>>>>> Temporary merge branch 2
     </task>
     <task id="LOCAL-00001" summary="Image API and &#10;product curd with Image">
       <option name="closed" value="true" />
@@ -116,25 +174,35 @@
       <option name="project" value="LOCAL" />
       <updated>1737189077080</updated>
     </task>
-    <option name="localTasksCounter" value="2" />
+    <task id="LOCAL-00002" summary="Product Service with images &#10;completed.">
+      <option name="closed" value="true" />
+      <created>1737194223516</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1737194223516</updated>
+    </task>
+    <option name="localTasksCounter" value="3" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="3" />
   </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="Product Controller from authentication header" />
     <MESSAGE value="Image API and &#10;product curd with Image" />
-    <option name="LAST_COMMIT_MESSAGE" value="Image API and &#10;product curd with Image" />
-  </component>
-  <component name="XDebuggerManager">
-    <breakpoint-manager>
-      <breakpoints>
-        <breakpoint enabled="true" type="java-exception">
-          <properties class="java.lang.IllegalArgumentException" package="java.lang" />
-          <option name="timeStamp" value="1" />
-        </breakpoint>
-      </breakpoints>
-    </breakpoint-manager>
+    <MESSAGE value="Product Service with images &#10;completed." />
+    <option name="LAST_COMMIT_MESSAGE" value="Product Service with images &#10;completed." />
   </component>
 </project>
