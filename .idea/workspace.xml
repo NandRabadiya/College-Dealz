@@ -4,75 +4,23 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="c6564612-8fe2-49e4-bb4c-5d4305a5e686" name="Changes" comment="Product Service with images &#10;completed.">
-      <change afterPath="$PROJECT_DIR$/backend/College-Dealz/src/main/java/com/nd/config/WebsocketConfig.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/backend/College-Dealz/src/main/java/com/nd/controller/MessageController.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/backend/College-Dealz/src/main/java/com/nd/controller/NotificationController.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/backend/College-Dealz/src/main/java/com/nd/dto/NotificationDto.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/backend/College-Dealz/src/main/java/com/nd/entities/Notification.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/backend/College-Dealz/src/main/java/com/nd/enums/NotificationType.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/backend/College-Dealz/src/main/java/com/nd/exceptions/ChatException.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/backend/College-Dealz/src/main/java/com/nd/exceptions/ProductException.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/backend/College-Dealz/src/main/java/com/nd/exceptions/UserException.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/backend/College-Dealz/src/main/java/com/nd/repositories/MessageRepo.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/backend/College-Dealz/src/main/java/com/nd/repositories/NotificationRepo.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/backend/College-Dealz/src/main/java/com/nd/service/Impl/MessageServiceImpl.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/backend/College-Dealz/src/main/java/com/nd/service/Impl/NotificationServiceImpl.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/backend/College-Dealz/src/main/java/com/nd/service/MessageService.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/backend/College-Dealz/src/main/java/com/nd/service/NotificationService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/dataSources.local.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/dataSources.local.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/jpa.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/jpa.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/College-Dealz/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/backend/College-Dealz/pom.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/College-Dealz/src/main/java/com/nd/dto/MessageDTO.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/College-Dealz/src/main/java/com/nd/dto/MessageDTO.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/College-Dealz/src/main/java/com/nd/dto/ProductDto.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/College-Dealz/src/main/java/com/nd/dto/ProductDto.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/College-Dealz/src/main/java/com/nd/entities/Chat.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/College-Dealz/src/main/java/com/nd/entities/Chat.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/College-Dealz/src/main/java/com/nd/entities/Message.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/College-Dealz/src/main/java/com/nd/entities/Message.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/College-Dealz/src/main/java/com/nd/entities/Product.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/College-Dealz/src/main/java/com/nd/entities/Product.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/College-Dealz/src/main/java/com/nd/repositories/ProductRepo.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/College-Dealz/src/main/java/com/nd/repositories/ProductRepo.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/College-Dealz/src/main/java/com/nd/repositories/UserRepo.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/College-Dealz/src/main/java/com/nd/repositories/UserRepo.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/College-Dealz/src/main/java/com/nd/service/Impl/ChatServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/College-Dealz/src/main/java/com/nd/service/Impl/ChatServiceImpl.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/College-Dealz/src/main/java/com/nd/service/Impl/ProductServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/College-Dealz/src/main/java/com/nd/service/Impl/ProductServiceImpl.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/College-Dealz/src/main/java/com/nd/service/ProductService.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/College-Dealz/src/main/java/com/nd/service/ProductService.java" afterDir="false" />
-=========
-    <list default="true" id="61f1f9df-4ba7-42fc-b58a-7b97f0b70348" name="Changes" comment="Product api changed and introduce product dto">
+    <list default="true" id="75f814e9-2a3c-4b2a-81b9-efdc48cd6e43" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/frontend/src/pages/notification/Notification.jsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/dataSources.local.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/dataSources.local.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/College-Dealz/src/main/java/com/nd/entities/University.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/College-Dealz/src/main/java/com/nd/entities/University.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/College-Dealz/src/main/java/com/nd/entities/User.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/College-Dealz/src/main/java/com/nd/entities/User.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/College-Dealz/src/main/java/com/nd/config/SecurityConfig.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/College-Dealz/src/main/java/com/nd/config/SecurityConfig.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/backend/College-Dealz/src/main/resources/application.properties" beforeDir="false" afterPath="$PROJECT_DIR$/backend/College-Dealz/src/main/resources/application.properties" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/package-lock.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/package.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/frontend/src/App.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/App.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/Routes/ProtectedRoute.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/Routes/ProtectedRoute.jsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/frontend/src/pages/NavBar.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/pages/NavBar.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/pages/authentication/Authenticate.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/pages/authentication/Authenticate.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/pages/authentication/Login.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/pages/authentication/Login.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/pages/dasboard/Profile.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/pages/dasboard/Profile.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/pages/product/PostADeal.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/pages/product/PostADeal.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/redux/Auth/Reducer.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/redux/Auth/Reducer.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/redux/Auth/actions.js" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/redux/Auth/actions.js" afterDir="false" />
->>>>>>>>> Temporary merge branch 2
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
-  <component name="FileTemplateManagerImpl">
-    <option name="RECENT_TEMPLATES">
-      <list>
-        <option value="AnnotationType" />
-        <option value="com.intellij.jpb.JpaEntity" />
-        <option value="Interface" />
-        <option value="Class" />
-      </list>
-    </option>
-  </component>
   <component name="Git.Settings">
-    <option name="RECENT_BRANCH_BY_REPOSITORY">
-      <map>
-        <entry key="$PROJECT_DIR$" value="frontend" />
-      </map>
-    </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
   <component name="GitHubPullRequestSearchHistory">{
@@ -81,41 +29,27 @@
     &quot;assignee&quot;: &quot;VenuVirparia&quot;
   }
 }</component>
-  <component name="GithubPullRequestsUISettings"><![CDATA[{
-  "selectedUrlAndAccountId": {
-    "url": "https://github.com/VenuVirparia/College-Dealz",
-    "accountId": "b8484678-2dbe-47cf-aacb-5a3cd2ca4983"
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;https://github.com/VenuVirparia/College-Dealz&quot;,
+    &quot;accountId&quot;: &quot;b8484678-2dbe-47cf-aacb-5a3cd2ca4983&quot;
   }
 }</component>
   <component name="ProjectColorInfo">{
   &quot;customColor&quot;: &quot;&quot;,
-  &quot;associatedIndex&quot;: 0
+  &quot;associatedIndex&quot;: 7
 }</component>
-  <component name="ProjectId" id="2qpRoDILp8VeDT8QBsgWtEmAk8E" />
-=========
-  <component name="ProjectId" id="2rYpxXYfNGwZYMPFngBciGg1Pwa" />
-  <component name="ProjectLevelVcsManager">
-    <ConfirmationsSetting value="1" id="Add" />
-  </component>
->>>>>>>>> Temporary merge branch 2
+  <component name="ProjectId" id="2rtdLMHIpGNnJvF6gr1jt8SGOgj" />
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
   <component name="PropertiesComponent">{
   &quot;keyToString&quot;: {
-    &quot;Application.CollegeDealzApplication.executor&quot;: &quot;Run&quot;,
-    &quot;RequestMappingsPanelOrder0&quot;: &quot;0&quot;,
-    &quot;RequestMappingsPanelOrder1&quot;: &quot;1&quot;,
-    &quot;RequestMappingsPanelWidth0&quot;: &quot;75&quot;,
-    &quot;RequestMappingsPanelWidth1&quot;: &quot;75&quot;,
     &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
-    &quot;SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
     &quot;Spring Boot.CollegeDealzApplication.executor&quot;: &quot;Run&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;backend&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;frontend&quot;,
     &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
-    &quot;last_opened_file_path&quot;: &quot;C:/Users/venup/OneDrive/Desktop/College-Dealz&quot;,
     &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
     &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
     &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
@@ -124,16 +58,6 @@
     &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
 }</component>
-  <component name="RunManager">
-    <configuration name="CollegeDealzApplication" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot" nameIsGenerated="true">
-      <option name="FRAME_DEACTIVATION_UPDATE_POLICY" value="UpdateClassesAndResources" />
-      <module name="College-Dealz" />
-      <option name="SPRING_BOOT_MAIN_CLASS" value="com.nd.CollegeDealzApplication" />
-      <method v="2">
-        <option name="Make" enabled="true" />
-      </method>
-    </configuration>
-  </component>
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
@@ -145,64 +69,17 @@
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
   <component name="TaskManager">
     <task active="true" id="Default" summary="Default task">
-      <changelist id="c6564612-8fe2-49e4-bb4c-5d4305a5e686" name="Changes" comment="" />
-      <created>1735357705502</created>
+      <changelist id="75f814e9-2a3c-4b2a-81b9-efdc48cd6e43" name="Changes" comment="" />
+      <created>1737381853328</created>
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
-      <updated>1735357705502</updated>
-      <workItem from="1736830923020" duration="908000" />
-      <workItem from="1736833100074" duration="7647000" />
-      <workItem from="1736934860708" duration="14980000" />
-      <workItem from="1737038554640" duration="5162000" />
-      <workItem from="1737176029662" duration="7679000" />
-      <workItem from="1737191762147" duration="2169000" />
-=========
-      <updated>1736746113569</updated>
-      <workItem from="1736746118184" duration="2169000" />
-      <workItem from="1736867411850" duration="2896000" />
-      <workItem from="1737005264791" duration="12531000" />
-      <workItem from="1737116612261" duration="1242000" />
-      <workItem from="1737118264171" duration="10180000" />
-      <workItem from="1737175105691" duration="3641000" />
->>>>>>>>> Temporary merge branch 2
+      <updated>1737381853328</updated>
+      <workItem from="1737381857912" duration="369000" />
+      <workItem from="1737382287230" duration="2639000" />
     </task>
-    <task id="LOCAL-00001" summary="Image API and &#10;product curd with Image">
-      <option name="closed" value="true" />
-      <created>1737189077080</created>
-      <option name="number" value="00001" />
-      <option name="presentableId" value="LOCAL-00001" />
-      <option name="project" value="LOCAL" />
-      <updated>1737189077080</updated>
-    </task>
-    <task id="LOCAL-00002" summary="Product Service with images &#10;completed.">
-      <option name="closed" value="true" />
-      <created>1737194223516</created>
-      <option name="number" value="00002" />
-      <option name="presentableId" value="LOCAL-00002" />
-      <option name="project" value="LOCAL" />
-      <updated>1737194223516</updated>
-    </task>
-    <option name="localTasksCounter" value="3" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="3" />
-  </component>
-  <component name="Vcs.Log.Tabs.Properties">
-    <option name="TAB_STATES">
-      <map>
-        <entry key="MAIN">
-          <value>
-            <State />
-          </value>
-        </entry>
-      </map>
-    </option>
-  </component>
-  <component name="VcsManagerConfiguration">
-    <MESSAGE value="Product Controller from authentication header" />
-    <MESSAGE value="Image API and &#10;product curd with Image" />
-    <MESSAGE value="Product Service with images &#10;completed." />
-    <option name="LAST_COMMIT_MESSAGE" value="Product Service with images &#10;completed." />
   </component>
 </project>

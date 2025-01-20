@@ -57,6 +57,7 @@ function App() {
               </ProtectedRoute>
             }
           />
+         
           <Route
             path="/product/:id"
             element={
