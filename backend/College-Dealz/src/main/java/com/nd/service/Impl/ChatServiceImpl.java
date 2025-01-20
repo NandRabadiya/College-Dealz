@@ -104,7 +104,7 @@ public class ChatServiceImpl implements ChatService {
                         chat.getId(),
                         message.getSender().getId(),
                         message.getContent(),
-                        message.getTimestamp()
+                        message.getCreatedAt()
                 ))
                 .collect(Collectors.toList());
 

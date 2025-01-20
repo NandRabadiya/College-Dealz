@@ -228,6 +228,20 @@ System.out.println(jwtService.getUniversityIdFromToken(authHeader));
         return product;
     }
 
+
+    @Override
+    public Chat getChatByProductId(int ProductId){
+
+
+        Product product=productRepo.getProductById(ProductId);
+
+        Chat chat=product.getChat();
+
+        return chat;
+
+    }
+
+
     private ProductDto mapToDto(Product product) {
         ProductDto productDto = new ProductDto();
         productDto.setId(product.getId());
