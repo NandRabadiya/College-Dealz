@@ -6,11 +6,21 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { API_BASE_URL } from "../Api/api";
 
 // Separate component for notification content
 const NotificationContent = ({ notifications, error }) => {
   const getNotificationIcon = (type) => {
-    switch (type) {
+    // Convert numeric type to string for icon mapping
+    const typeMap = {
+      1: 'chat',
+      2: 'update',
+      3: 'wantlist',
+      4: 'deal'
+    };
+    const mappedType = typeMap[type] || 'default';
+
+    switch (mappedType) {
       case 'chat':
         return <MessageCircle className="w-4 h-4 text-blue-500" />;
       case 'update':
@@ -25,7 +35,7 @@ const NotificationContent = ({ notifications, error }) => {
   };
 
   const formatNotification = (notification) => {
-    return `New item #${notification.itemId} added by User #${notification.addedByUserId}`;
+    return notification.message || `New notification: ${notification.title}`;
   };
 
   return (
@@ -33,7 +43,7 @@ const NotificationContent = ({ notifications, error }) => {
       <div className="flex items-center justify-between p-4 border-b">
         <h2 className="font-semibold">Notifications</h2>
         <span className="text-xs text-gray-500">
-          {notifications.length} new
+          {notifications.filter(n => !n.is_read).length} new
         </span>
       </div>
       <ScrollArea className="h-[300px]">
@@ -45,19 +55,22 @@ const NotificationContent = ({ notifications, error }) => {
           <div className="divide-y">
             {notifications.map((notification) => (
               <div
-                key={notification.id}
-                className="p-4 hover:bg-gray-50 transition-colors"
+                key={notification.notification_id}
+                className={`p-4 hover:bg-gray-50 transition-colors ${
+                  !notification.is_read ? 'bg-blue-50' : ''
+                }`}
               >
                 <div className="flex gap-3">
                   <div className="mt-1">
                     {getNotificationIcon(notification.type)}
                   </div>
                   <div className="flex-1">
+                    <p className="text-sm font-medium">{notification.title}</p>
                     <p className="text-sm">
                       {formatNotification(notification)}
                     </p>
                     <span className="text-xs text-gray-400">
-                      {new Date(notification.createdAt).toLocaleString()}
+                      {new Date(notification.created_at).toLocaleString()}
                     </span>
                   </div>
                 </div>
@@ -77,33 +90,6 @@ const NotificationBell = ({ children }) => {
   const [isOpen, setIsOpen] = useState(false);
 
   useEffect(() => {
-    // Dummy data for testing
-    const dummyNotifications = [
-      {
-        id: 1,
-        itemId: 101,
-        addedByUserId: 201,
-        type: 'chat',
-        createdAt: new Date(Date.now() - 1000 * 60 * 5).toISOString()
-      },
-      {
-        id: 2,
-        itemId: 102,
-        addedByUserId: 202,
-        type: 'update',
-        createdAt: new Date(Date.now() - 1000 * 60 * 15).toISOString()
-      },
-      {
-        id: 3,
-        itemId: 103,
-        addedByUserId: 203,
-        type: 'wantlist',
-        createdAt: new Date(Date.now() - 1000 * 60 * 30).toISOString()
-      },
-    ];
-
-    // Uncomment this when ready to connect to backend
-    /*
     const fetchNotifications = async () => {
       try {
         const token = localStorage.getItem('jwt');
@@ -111,7 +97,7 @@ const NotificationBell = ({ children }) => {
           throw new Error("No authentication token found");
         }
 
-        const response = await fetch('/api/notifications', {
+        const response = await fetch(`${API_BASE_URL}/api/notifications/`, {
           headers: {
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json'
@@ -123,6 +109,7 @@ const NotificationBell = ({ children }) => {
         }
 
         const data = await response.json();
+        console.log(data);
         setNotifications(data);
         setError(null);
       } catch (err) {
@@ -131,17 +118,51 @@ const NotificationBell = ({ children }) => {
     };
 
     fetchNotifications();
-    */
 
-    setNotifications(dummyNotifications);
+    // Optional: Set up polling for new notifications
+    const pollInterval = setInterval(fetchNotifications, 30000); // Poll every 30 seconds
+
+    return () => clearInterval(pollInterval);
   }, []);
+
+  const markAsRead = async (notificationId) => {
+    try {
+      const token = localStorage.getItem('jwt');
+      await fetch(`${API_BASE_URL}/api/notifications/mark-as-read/${notificationId}`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      // Update local state to mark notification as read
+      setNotifications(notifications.map(n => 
+        n.notification_id === notificationId 
+          ? { ...n, is_read: true }
+          : n
+      ));
+    } catch (err) {
+      console.error('Failed to mark notification as read:', err);
+    }
+  };
 
   return (
     <Popover open={isOpen} onOpenChange={setIsOpen}>
       <PopoverTrigger asChild>
-        {children}
+        <div className="relative">
+          {children}
+          {notifications.filter(n => !n.is_read).length > 0 && (
+            <div className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+              {notifications.filter(n => !n.is_read).length}
+            </div>
+          )}
+        </div>
       </PopoverTrigger>
-      <NotificationContent notifications={notifications} error={error} />
+      <NotificationContent 
+        notifications={notifications} 
+        error={error} 
+      />
     </Popover>
   );
 };
