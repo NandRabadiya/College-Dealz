@@ -1,5 +1,6 @@
 package com.nd.dto;
 
+import com.nd.entities.Chat;
 import com.nd.enums.Category;
 import com.nd.enums.Condition;
 import jakarta.validation.constraints.*;
@@ -40,6 +41,8 @@ public class ProductDto {
 
     //@NotNull(message = "University ID cannot be null")
     private Integer universityId; // Referencing university by ID
+
+    private Chat chat;
 
     private List<MultipartFile> images;
 
