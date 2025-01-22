@@ -8,6 +8,7 @@
     X,
     Sun,
     Moon,
+    Bell,
   } from "lucide-react";
   import {
     DropdownMenu,
@@ -22,6 +23,7 @@
   import logo from "../assets/photo/logo.png";
   import { Label } from "@/components/ui/label";
   import { useLocation, useNavigate } from "react-router-dom";
+  import NotificationBell from "./notification/Notification";
 
   const NavBar = () => {
     const [showMobileSearch, setShowMobileSearch] = useState(false);
@@ -38,6 +40,14 @@
         action();
       }
     };
+     // Add notification handler
+  const handleNotifications = () => {
+    handleProtectedAction("/notifications", () => {
+      console.log("Opening notifications");
+      navigate("/notifications");
+      // Add notification handling logic here
+    });
+  };
 
     // Define actions for each button
     const handlePostDeal = () => {
@@ -177,6 +187,13 @@
           <Heart className="h-5 w-5" />
           {isMobile && <span className="ml-2">Wishlist</span>}
         </Button>
+        <NotificationBell>
+        <div className="relative cursor-pointer">
+          <Bell className="w-6 h-6" />
+          {/* You can move the notification dot here if needed */}
+        </div>
+        {/* {isMobile && <span className="ml-2">Notifications</span>} */}
+      </NotificationBell>
         <ThemeToggle isMobile={isMobile} />
       </div>
     );

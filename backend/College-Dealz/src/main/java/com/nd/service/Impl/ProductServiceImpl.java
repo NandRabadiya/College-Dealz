@@ -42,7 +42,7 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public ProductDto createProduct(ProductDto productDto, String authHeader) throws ResourceNotFoundException {
 
-int seller_id= jwtService.getUserIdFromToken(authHeader);
+        int seller_id= jwtService.getUserIdFromToken(authHeader);
         productDto.setSellerId(seller_id);
 
 

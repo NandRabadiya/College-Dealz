@@ -15,7 +15,7 @@ public interface NotificationRepo extends JpaRepository<Notification, Integer> {
     Optional<Notification> findById(Integer integer);
 
     @Query("SELECT n FROM Notification n WHERE n.user.id = :userId ORDER BY n.createdAt DESC")
-    Optional<Notification> findByUserIdOrderByCreatedAtDesc(@Param("userId") Integer userId);
+    List<Notification> findByUserIdOrderByCreatedAtDesc(@Param("userId") Integer userId);
 
 
 }
