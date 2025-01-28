@@ -16,6 +16,7 @@ public class WantlistController {
 
     private final WantlistService wantlistService;
 
+
     private final JwtService jwtService;
     @PostMapping("/add")
     public ResponseEntity<WantlistDto> addProductToWantlist(

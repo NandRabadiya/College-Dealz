@@ -4,15 +4,14 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="c6564612-8fe2-49e4-bb4c-5d4305a5e686" name="Changes" comment="Notification Controller Tested">
-      <change afterPath="$PROJECT_DIR$/backend/College-Dealz/src/main/java/com/nd/controller/WantlistController.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/backend/College-Dealz/src/main/java/com/nd/dto/WantlistDto.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/backend/College-Dealz/src/main/java/com/nd/entities/Wantlist.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/backend/College-Dealz/src/main/java/com/nd/repositories/WantlistRepo.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/backend/College-Dealz/src/main/java/com/nd/service/Impl/WantlistServiceImpl.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/backend/College-Dealz/src/main/java/com/nd/service/WantlistService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/dataSources/0153c1e7-ec77-41c1-9fb1-957cb04d8170.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/dataSources/0153c1e7-ec77-41c1-9fb1-957cb04d8170.xml" afterDir="false" />
+    <list default="true" id="c6564612-8fe2-49e4-bb4c-5d4305a5e686" name="Changes" comment="Wantlist API build">
+      <change afterPath="$PROJECT_DIR$/backend/College-Dealz/src/main/java/com/nd/controller/UniversityController.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/College-Dealz/src/main/java/com/nd/dto/UniversityDto.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/College-Dealz/src/main/java/com/nd/service/Impl/UniversityServiceImpl.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/College-Dealz/src/main/java/com/nd/service/UniversityService.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/College-Dealz/src/main/java/com/nd/controller/WantlistController.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/College-Dealz/src/main/java/com/nd/controller/WantlistController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/College-Dealz/src/main/resources/application.properties" beforeDir="false" afterPath="$PROJECT_DIR$/backend/College-Dealz/src/main/resources/application.properties" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -115,6 +114,8 @@
       <workItem from="1737286010615" duration="1511000" />
       <workItem from="1737377670554" duration="3150000" />
       <workItem from="1737461937427" duration="4194000" />
+      <workItem from="1737884856811" duration="4500000" />
+      <workItem from="1738063546644" duration="2399000" />
     </task>
     <task id="LOCAL-00001" summary="Image API and &#10;product curd with Image">
       <option name="closed" value="true" />
