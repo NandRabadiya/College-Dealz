@@ -1,15 +1,9 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
 
-const GoogleLoginButton = ({ onSuccess, onError }) => {
-  const handleGoogleLogin = async () => {
-    try {
-      // Mock Google authentication call
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      onSuccess("Google authentication successful!");
-    } catch (error) {
-      onError("Google authentication failed");
-    }
+const GoogleLoginButton = () => {
+  const handleGoogleLogin = () => {
+    window.location.href = "http://localhost:8080/oauth2/authorization/google";
   };
 
   return (
