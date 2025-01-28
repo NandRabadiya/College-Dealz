@@ -48,6 +48,7 @@ function App() {
           />
 
           {/* Protected Route */}
+          <Route path="/oauth2/redirect" element={<OAuth2RedirectHandler />} /> 
 
           <Route
             path="/dashboard"
