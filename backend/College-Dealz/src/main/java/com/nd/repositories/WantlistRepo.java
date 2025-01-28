@@ -16,5 +16,5 @@ public interface WantlistRepo extends JpaRepository<Wantlist,Integer> {
     // Delete a wantlist item by ID and user ID (to ensure ownership)
     void deleteByIdAndUserId(Integer id, Integer userId);
 
-
+    Wantlist getById(Integer id);
 }

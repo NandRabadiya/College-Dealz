@@ -25,4 +25,6 @@ public interface WantlistService {
      */
     List<WantlistDto> getAllWantlistItemsByUserId(Integer userId);
 
+
+    WantlistDto getWantlistById(Integer wantlistId);
 }

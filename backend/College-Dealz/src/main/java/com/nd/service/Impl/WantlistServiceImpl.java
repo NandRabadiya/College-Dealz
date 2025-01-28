@@ -43,7 +43,7 @@ public class WantlistServiceImpl implements WantlistService {
         if (!wantlistRepository.existsById(wantlistId)) {
             throw new EntityNotFoundException("Wantlist item not found with ID: " + wantlistId);
         }
-        wantlistRepository.deleteByIdAndUserId(wantlistId, userId);
+        wantlistRepository.deleteById(wantlistId);
     }
 
     @Override
@@ -52,6 +52,14 @@ public class WantlistServiceImpl implements WantlistService {
         return wantlist.stream()
                 .map(this::toDto)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public WantlistDto getWantlistById(Integer wantlistId) {
+
+        Wantlist wantlist=wantlistRepository.getById(wantlistId);
+
+        return toDto(wantlist);
     }
 
     /**

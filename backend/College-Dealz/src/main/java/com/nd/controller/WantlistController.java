@@ -44,6 +44,14 @@ public class WantlistController {
         return ResponseEntity.ok(wantlistItems);
     }
 
+    @GetMapping("/{product_id}")
+    public ResponseEntity<WantlistDto> getProductById(@PathVariable Integer product_id) {
+
+        WantlistDto wantlistDto = wantlistService.getWantlistById(product_id);
+
+        return ResponseEntity.ok(wantlistDto);
+
+    }
     private Integer extractUserIdFromToken(String token) {
 
         return jwtService.getUserIdFromToken(token);
