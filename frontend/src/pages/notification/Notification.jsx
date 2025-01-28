@@ -120,7 +120,7 @@ const NotificationBell = ({ children }) => {
     fetchNotifications();
 
     // Optional: Set up polling for new notifications
-    const pollInterval = setInterval(fetchNotifications, 30000); // Poll every 30 seconds
+    const pollInterval = setInterval(fetchNotifications, 300000); // Poll every 300 seconds
 
     return () => clearInterval(pollInterval);
   }, []);

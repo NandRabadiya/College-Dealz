@@ -18,6 +18,7 @@ import { getUser } from "./redux/Auth/actions";
 import ChatList from "./pages/chat/ChatList";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import WishList from "./pages/wishlist/WishList";
+import Wantlist from "./pages/wantlist/Wantlist";
 
 // PrivateRoute component
 const PrivateRoute = ({ element, isLoggedIn, redirectTo }) => {
@@ -67,6 +68,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <WishList />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/wantlist"
+            element={
+              <ProtectedRoute>
+                <Wantlist />
               </ProtectedRoute>
             }
           />
