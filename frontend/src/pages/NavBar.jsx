@@ -59,8 +59,9 @@
     };
 
     const handleWishlist = () => {
-      handleProtectedAction("/",() => {
+      handleProtectedAction("/wishlist",() => {
         console.log("Navigating to wishlist");
+        navigate("/wishlist");
         // Add navigation logic here
       });
     };

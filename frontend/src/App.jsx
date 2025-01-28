@@ -15,6 +15,9 @@ import ProtectedRoute from "./Routes/ProtectedRoute";
 import { useEffect } from "react";
 import { useDispatch } from "react-redux";
 import { getUser } from "./redux/Auth/actions";
+import ChatList from "./pages/chat/ChatList";
+import AdminDashboard from "./pages/admin/AdminDashboard";
+import WishList from "./pages/wishlist/WishList";
 
 // PrivateRoute component
 const PrivateRoute = ({ element, isLoggedIn, redirectTo }) => {
@@ -41,11 +44,13 @@ function App() {
         <Routes>
           {/* Public Route */}
           <Route path="/" element={<Home />} />
+          <Route path="/chat" element={<ChatList />} />
           {/* Login/Register Route */}
           <Route
             path="/Authenticate"
             element={<Authenticate isOpen={true} />}
           />
+          <Route path="/admin" element={<AdminDashboard />} />
 
           {/* Protected Route */}
 
@@ -57,7 +62,15 @@ function App() {
               </ProtectedRoute>
             }
           />
-         
+          <Route
+            path="/wishlist"
+            element={
+              <ProtectedRoute>
+                <WishList />
+              </ProtectedRoute>
+            }
+          />
+
           <Route
             path="/product/:productId"
             element={
