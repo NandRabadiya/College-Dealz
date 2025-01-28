@@ -1,11 +1,16 @@
 package com.nd.config;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.nd.dto.AuthResponse;
 import com.nd.entities.Role;
+import com.nd.entities.Token;
 import com.nd.entities.User;
 import com.nd.exceptions.ResourceNotFoundException;
 import com.nd.repositories.RoleRepo;
+import com.nd.repositories.TokenRepository;
 import com.nd.repositories.UniversityRepo;
 import com.nd.repositories.UserRepo;
+import com.nd.service.JwtService;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -35,8 +40,18 @@ public class OAuthAuthenticationSuccessHandler implements AuthenticationSuccessH
     @Autowired
     private RoleRepo roleRepo;
 
+    private final TokenRepository tokenRepository;
+    @Autowired
+    private final JwtService jwtService;
+
     @Autowired
     private UniversityRepo universityRepo;
+
+    public OAuthAuthenticationSuccessHandler(TokenRepository tokenRepository, JwtService jwtService) {
+        this.tokenRepository = tokenRepository;
+        this.jwtService = jwtService;
+    }
+
 
     @Override
     public void onAuthenticationSuccess(
@@ -105,96 +120,37 @@ public class OAuthAuthenticationSuccessHandler implements AuthenticationSuccessH
 
                 user.getRoles().add(userRole);
 
-                userRepo.save(user);
+    User user1=userRepo.save(user);
 
+            String accessToken = jwtService.generateAccessToken(user1);
+            String refreshToken = jwtService.generateRefreshToken(user1);
+            saveUserToken(accessToken, refreshToken, user);
 
-            }
-
-//        } else if (authorizedClientRegistrationId.equalsIgnoreCase("github")) {
+//            AuthResponse authResponse = new AuthResponse(accessToken, refreshToken, "User login was successful");
 //
-//            // github
-//            // github attributes
-//            String email = oauthUser.getAttribute("email") != null ? oauthUser.getAttribute("email").toString()
-//                    : oauthUser.getAttribute("login").toString() + "@gmail.com";
-//            String picture = oauthUser.getAttribute("avatar_url").toString();
-//            String name = oauthUser.getAttribute("login").toString();
-//            String providerUserId = oauthUser.getName();
+//            // Convert the AuthResponse object to JSON
+//            ObjectMapper objectMapper = new ObjectMapper();
+//            String jsonResponse = objectMapper.writeValueAsString(authResponse);
 //
-//            user.setEmail(email);
-//            user.setProfilePic(picture);
-//            user.setName(name);
-//            user.setProviderUserId(providerUserId);
-//            user.setProvider(Providers.GITHUB);
-//
-//            user.setAbout("This account is created using github");
-//        }
-//
-//        else if (authorizedClientRegistrationId.equalsIgnoreCase("linkedin")) {
-//
-//        }
-//
-//        else {
-//            logger.info("OAuthAuthenicationSuccessHandler: Unknown provider");
-//        }
-
-            // save the user
-            // facebook
-            // facebook attributes
-            // linkedin
-
-            /*
-             *
-             *
-             *
-             * DefaultOAuth2User user = (DefaultOAuth2User) authentication.getPrincipal();
-             *
-             * logger.info(user.getName());
-             *
-             * user.getAttributes().forEach((key, value) -> {
-             * logger.info("{} => {}", key, value);
-             * });
-             *
-             * logger.info(user.getAuthorities().toString());
-             *
-             * // data database save:
-             *
-             * String email = user.getAttribute("email").toString();
-             * String name = user.getAttribute("name").toString();
-             * String picture = user.getAttribute("picture").toString();
-             *
-             * // create user and save in database
-             *
-             * User user1 = new User();
-             * user1.setEmail(email);
-             * user1.setName(name);
-             * user1.setProfilePic(picture);
-             * user1.setPassword("password");
-             * user1.setUserId(UUID.randomUUID().toString());
-             * user1.setProvider(Providers.GOOGLE);
-             * user1.setEnabled(true);
-             *
-             * user1.setEmailVerified(true);
-             * user1.setProviderUserId(user.getName());
-             * user1.setRoleList(List.of(AppConstants.ROLE_USER));
-             * user1.setAbout("This account is created using google..");
-             *
-             * User user2 = userRepo.findByEmail(email).orElse(null);
-             * if (user2 == null) {
-             *
-             * userRepo.save(user1);
-             * logger.info("User saved:" + email);
-             * }
-             *
-             */
-//
-//        User user2 = userRepo.findByEmail(user.getEmail()).orElse(null);
-//        if (user2 == null) {
-//            userRepo.save(user);
-//            System.out.println("user saved:" + user.getEmail());
-//        }
-//
-//        new DefaultRedirectStrategy().sendRedirect(request, response, "/user/profile");
+//            // Write the JSON response
+//            response.setContentType("application/json");
+//            response.setStatus(HttpServletResponse.SC_OK);
+//            response.getWriter().write(jsonResponse);
 
         }
+
+       }
     }
+
+
+    private void saveUserToken(String accessToken, String refreshToken, User user) {
+        Token token = new Token();
+        token.setAccessToken(accessToken);
+        token.setRefreshToken(refreshToken);
+        token.setLoggedOut(false);
+        token.setUser(user);
+        tokenRepository.save(token);
+    }
+
+
 }

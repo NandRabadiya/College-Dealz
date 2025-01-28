@@ -2,6 +2,7 @@ package com.nd.config;
 
 import com.nd.Filter.JwtAuthenticationFilter;
 import com.nd.service.Impl.UserDetailsServiceImpl;
+import com.nd.service.JwtService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -37,10 +38,11 @@ public class SecurityConfig {
 
     public SecurityConfig(UserDetailsServiceImpl userDetailsServiceImp,
                           JwtAuthenticationFilter jwtAuthenticationFilter,
-                          CustomLogoutHandler logoutHandler) {
+                          CustomLogoutHandler logoutHandler, JwtService jwtService) {
         this.userDetailsServiceImp = userDetailsServiceImp;
         this.jwtAuthenticationFilter = jwtAuthenticationFilter;
         this.logoutHandler = logoutHandler;
+
     }
 
     @Bean
@@ -70,13 +72,21 @@ public class SecurityConfig {
                         .logoutSuccessHandler((request, response, authentication) -> SecurityContextHolder.clearContext()
                         ));
 
+        http
 
+                .oauth2Login(oauth -> oauth
+                        // Set the custom login URL
+                        .successHandler((request, response, authentication) -> {
+//                            response.setContentType("application/json");
+//                            response.getWriter().write("{\"message\": \"Login successful!\"}");
+                            handler.onAuthenticationSuccess(request, response, authentication);
+                        })
+                        .failureHandler((request, response, exception) -> {
+                            response.setStatus(HttpStatus.UNAUTHORIZED.value());
+                            response.getWriter().write("{\"error\": \"Login failed!\"}");
+                        })
+                );
 
-
-
-        http.oauth2Login(oauth -> {
-                oauth.successHandler(handler);
-           });
         return http.build();
 
     }
