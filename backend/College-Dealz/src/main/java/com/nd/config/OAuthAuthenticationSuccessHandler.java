@@ -11,9 +11,11 @@ import com.nd.repositories.TokenRepository;
 import com.nd.repositories.UniversityRepo;
 import com.nd.repositories.UserRepo;
 import com.nd.service.JwtService;
+import jakarta.persistence.EntityManager;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.transaction.Transactional;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
@@ -36,6 +38,7 @@ public class OAuthAuthenticationSuccessHandler implements AuthenticationSuccessH
 
     @Autowired
     private UserRepo userRepo;
+
 
     @Autowired
     private RoleRepo roleRepo;
@@ -107,9 +110,6 @@ public class OAuthAuthenticationSuccessHandler implements AuthenticationSuccessH
             // google
             // google attributes
 
-
-
-
                 user.setEmail(oauthUser.getAttribute("email").toString());
                 //  user.setProfilePicture(oauthUser.getAttribute("picture").toString());
                 user.setName(oauthUser.getAttribute("name").toString());
@@ -120,22 +120,30 @@ public class OAuthAuthenticationSuccessHandler implements AuthenticationSuccessH
 
                 user.getRoles().add(userRole);
 
+
+logger.info("OAuthAuthenicationSuccessHandler: Google New user check before user save" );
+
     User user1=userRepo.save(user);
 
+            user1 = userRepo.findById(user1.getId()).orElseThrow();
+
+            logger.info("OAuth check after user save" );
             String accessToken = jwtService.generateAccessToken(user1);
             String refreshToken = jwtService.generateRefreshToken(user1);
-            saveUserToken(accessToken, refreshToken, user);
 
-//            AuthResponse authResponse = new AuthResponse(accessToken, refreshToken, "User login was successful");
-//
-//            // Convert the AuthResponse object to JSON
-//            ObjectMapper objectMapper = new ObjectMapper();
-//            String jsonResponse = objectMapper.writeValueAsString(authResponse);
-//
-//            // Write the JSON response
-//            response.setContentType("application/json");
-//            response.setStatus(HttpServletResponse.SC_OK);
-//            response.getWriter().write(jsonResponse);
+
+           jwtService. saveUserToken(accessToken, refreshToken, user1);
+
+            AuthResponse authResponse = new AuthResponse(accessToken, refreshToken, "User login was successful");
+
+            // Convert the AuthResponse object to JSON
+            ObjectMapper objectMapper = new ObjectMapper();
+            String jsonResponse = objectMapper.writeValueAsString(authResponse);
+
+            // Write the JSON response
+            response.setContentType("application/json");
+            response.setStatus(HttpServletResponse.SC_OK);
+            response.getWriter().write(jsonResponse);
 
         }
 
@@ -143,14 +151,6 @@ public class OAuthAuthenticationSuccessHandler implements AuthenticationSuccessH
     }
 
 
-    private void saveUserToken(String accessToken, String refreshToken, User user) {
-        Token token = new Token();
-        token.setAccessToken(accessToken);
-        token.setRefreshToken(refreshToken);
-        token.setLoggedOut(false);
-        token.setUser(user);
-        tokenRepository.save(token);
-    }
 
 
 }

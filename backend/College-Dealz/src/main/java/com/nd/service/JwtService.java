@@ -1,5 +1,6 @@
 package com.nd.service;
 
+import com.nd.entities.Token;
 import com.nd.entities.User;
 import com.nd.exceptions.ResourceNotFoundException;
 import com.nd.repositories.TokenRepository;
@@ -10,6 +11,8 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import jakarta.persistence.EntityManager;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -35,6 +38,9 @@ public class JwtService {
     @Autowired
     private UserRepo   userRepo;
 
+
+    @Autowired
+    private EntityManager entityManager;
 
     private final TokenRepository tokenRepository;
 
@@ -204,6 +210,24 @@ public class JwtService {
 
         // Return the university ID if everything is valid
         return user.getUniversity().getId();
+    }
+
+    @Transactional
+    public void saveUserToken(String accessToken, String refreshToken, User user) {
+        Token token = new Token();
+        token.setAccessToken(accessToken);
+        token.setRefreshToken(refreshToken);
+        token.setLoggedOut(false);
+
+      //  logger.info("OAuth check in token table before save");
+
+       // Ensure user is merged (attached to the current session)
+        User managedUser = entityManager.merge(user); // This will be done inside a transaction
+        token.setUser(user);
+
+        tokenRepository.save(token);
+
+      //  logger.info("OAuth check after token save");
     }
 
 }
