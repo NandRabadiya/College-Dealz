@@ -4,12 +4,15 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="c6564612-8fe2-49e4-bb4c-5d4305a5e686" name="Changes" comment="Wantlist API Checked">
+    <list default="true" id="c6564612-8fe2-49e4-bb4c-5d4305a5e686" name="Changes" comment="University Controller Checked">
+      <change beforePath="$PROJECT_DIR$/.idea/dataSources.local.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/dataSources.local.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/dataSources/0153c1e7-ec77-41c1-9fb1-957cb04d8170.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/dataSources/0153c1e7-ec77-41c1-9fb1-957cb04d8170.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/College-Dealz/src/main/java/com/nd/service/Impl/UniversityServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/College-Dealz/src/main/java/com/nd/service/Impl/UniversityServiceImpl.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/College-Dealz/src/main/resources/application.properties" beforeDir="false" afterPath="$PROJECT_DIR$/backend/College-Dealz/src/main/resources/application.properties" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/pages/admin/AdminDashboard.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/pages/admin/AdminDashboard.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/pages/notification/Notification.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/pages/notification/Notification.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/College-Dealz/src/main/java/com/nd/config/OAuthAuthenticationSuccessHandler.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/College-Dealz/src/main/java/com/nd/config/OAuthAuthenticationSuccessHandler.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/College-Dealz/src/main/java/com/nd/config/SecurityConfig.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/College-Dealz/src/main/java/com/nd/config/SecurityConfig.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/College-Dealz/src/main/java/com/nd/entities/Notification.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/College-Dealz/src/main/java/com/nd/entities/Notification.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/College-Dealz/src/main/java/com/nd/entities/Role.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/College-Dealz/src/main/java/com/nd/entities/Role.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/College-Dealz/src/main/java/com/nd/entities/Token.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/College-Dealz/src/main/java/com/nd/entities/Token.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -91,12 +94,69 @@
       <created>1737381853328</created>
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
-      <updated>1737381853328</updated>
-      <workItem from="1737381857912" duration="369000" />
-      <workItem from="1737382287230" duration="2639000" />
-      <workItem from="1738088429964" duration="4756000" />
+      <updated>1735357705502</updated>
+      <workItem from="1736830923020" duration="908000" />
+      <workItem from="1736833100074" duration="7647000" />
+      <workItem from="1736934860708" duration="14980000" />
+      <workItem from="1737038554640" duration="5162000" />
+      <workItem from="1737176029662" duration="7679000" />
+      <workItem from="1737191762147" duration="3147000" />
+      <workItem from="1737286010615" duration="1511000" />
+      <workItem from="1737377670554" duration="3150000" />
+      <workItem from="1737461937427" duration="4194000" />
+      <workItem from="1737884856811" duration="4500000" />
+      <workItem from="1738063546644" duration="5454000" />
+      <workItem from="1738082790570" duration="4359000" />
     </task>
-    <option name="localTasksCounter" value="6" />
+    <task id="LOCAL-00001" summary="Image API and &#10;product curd with Image">
+      <option name="closed" value="true" />
+      <created>1737189077080</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1737189077080</updated>
+    </task>
+    <task id="LOCAL-00002" summary="Product Service with images &#10;completed.">
+      <option name="closed" value="true" />
+      <created>1737194223516</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1737194223516</updated>
+    </task>
+    <task id="LOCAL-00003" summary="Notification Controller Tested">
+      <option name="closed" value="true" />
+      <created>1737386396166</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1737386396166</updated>
+    </task>
+    <task id="LOCAL-00004" summary="University Controller build.">
+      <option name="closed" value="true" />
+      <created>1738067142497</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1738067142497</updated>
+    </task>
+    <task id="LOCAL-00005" summary="Wantlist API Checked">
+      <option name="closed" value="true" />
+      <created>1738087160482</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1738087160482</updated>
+    </task>
+    <task id="LOCAL-00006" summary="University Controller Checked">
+      <option name="closed" value="true" />
+      <created>1738087553185</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1738087553185</updated>
+    </task>
+    <option name="localTasksCounter" value="7" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -120,7 +180,9 @@
     <MESSAGE value="Product Service with images &#10;completed." />
     <MESSAGE value="Notification Controller Tested" />
     <MESSAGE value="University Controller build." />
-    <option name="LAST_COMMIT_MESSAGE" value="University Controller build." />
+    <MESSAGE value="Wantlist API Checked" />
+    <MESSAGE value="University Controller Checked" />
+    <option name="LAST_COMMIT_MESSAGE" value="University Controller Checked" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

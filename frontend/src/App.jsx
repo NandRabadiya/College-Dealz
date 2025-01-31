@@ -54,6 +54,7 @@ function App() {
           <Route path="/admin" element={<AdminDashboard />} />
 
           {/* Protected Route */}
+          <Route path="/oauth2/redirect" element={<OAuth2RedirectHandler />} /> 
 
           <Route
             path="/dashboard"
