@@ -39,6 +39,7 @@ public class UniversityServiceImpl implements UniversityService {
     @Override
     public List<UniversityDto> getAllUniversities() {
         List<University> universities = universityRepository.findAll();
+        System.out.println("Universities fetched: " + universities);
         return universities.stream().map(this::mapToDto).collect(Collectors.toList());
     }
 
