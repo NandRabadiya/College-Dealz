@@ -14,7 +14,7 @@ public interface ProductService {
 
     ProductDto updateProduct(Integer productId, ProductDto productDto) throws IOException;
     ProductDto getProductById(Integer productId);
-    List<ProductDto> getAllProducts();
+    List<ProductDto> getAllProducts(String authHeader);
     List<ProductDto> getProductsByCategory(String category);
     List<ProductDto> getProductsBySellerId(String authHeader);
     List<ProductDto> getProductsByUniversityId(String authHeader);

@@ -75,6 +75,12 @@ public class ProductController {
         return ResponseEntity.ok(products);
     }
 
+    @GetMapping
+    public ResponseEntity<List<ProductDto>> getAllProducts(@RequestHeader("Authorization") String authHeader) {
+        List<ProductDto> products = productService.getAllProducts(authHeader);
+        return ResponseEntity.ok(products);
+    }
+
     @GetMapping("/seller")
     public ResponseEntity<List<ProductDto>> getProductsBySeller(@RequestHeader("Authorization") String authHeader) {
         List<ProductDto> products = productService.getProductsBySellerId(authHeader);

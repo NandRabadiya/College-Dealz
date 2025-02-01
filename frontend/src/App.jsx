@@ -19,6 +19,7 @@ import ChatList from "./pages/chat/ChatList";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import WishList from "./pages/wishlist/WishList";
 import Wantlist from "./pages/wantlist/Wantlist";
+import OAuth2RedirectHandler from "./redux/Auth/OAuth2RedirectHandler";
 
 // PrivateRoute component
 const PrivateRoute = ({ element, isLoggedIn, redirectTo }) => {

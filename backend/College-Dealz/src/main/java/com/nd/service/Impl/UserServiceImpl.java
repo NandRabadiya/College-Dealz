@@ -85,14 +85,20 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public List<UserDto> getAllUsers() {
+    public List<UserDto> getAllUsers(String authHeader) {
         System.out.println("\n \n getAllUsers \n \n");
-        List<User> users = this.userRepo.findAll();
-        users.forEach(user -> System.out.println(user.toString())); // Ensure all fields are populated
+        int u = jwtService.getUserIdFromToken(authHeader);
+        if(u!=0){
+//        List<User> users = this.userRepo.findAll();
+//        users.forEach(user -> System.out.println(user.toString())); // Ensure all fields are populated
+//
+//        List<UserDto> userDtos = users.stream().map(user -> this.userToDto(user)).collect(Collectors.toList());
+//
+//        return userDtos;
 
-        List<UserDto> userDtos = users.stream().map(user -> this.userToDto(user)).collect(Collectors.toList());
-
-        return userDtos;
+            return userRepo.findAll().stream().map(this::userToDto).collect(Collectors.toList());
+        }
+        return null;
     }
 
     @Override

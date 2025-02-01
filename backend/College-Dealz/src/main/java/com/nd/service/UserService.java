@@ -27,7 +27,7 @@ public interface UserService {
 
     UserDto getUserById(Integer userId);
 
-    List<UserDto> getAllUsers();
+    List<UserDto> getAllUsers(String jwt);
 
     void deleteUser(Integer userId);
 

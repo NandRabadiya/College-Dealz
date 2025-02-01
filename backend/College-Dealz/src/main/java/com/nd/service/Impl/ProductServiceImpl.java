@@ -165,10 +165,13 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public List<ProductDto> getAllProducts() {
-        return productRepo.findAll().stream()
+    public List<ProductDto> getAllProducts(String authHeader) {
+        int user = jwtService.getUserIdFromToken(authHeader);
+        if (user!=0) {return productRepo.findAll().stream()
                 .map(this::mapToDto)
-                .collect(Collectors.toList());
+                .collect(Collectors.toList());}
+        return null;
+
     }
 
     @Override

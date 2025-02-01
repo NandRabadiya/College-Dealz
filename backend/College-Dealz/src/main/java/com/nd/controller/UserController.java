@@ -5,6 +5,7 @@ import java.util.List;
 import com.nd.dto.ApiResponse;
 import com.nd.dto.UserDto;
 import com.nd.entities.User;
+import com.nd.service.JwtService;
 import com.nd.service.UserService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,6 +20,8 @@ public class UserController {
 
     @Autowired
     private UserService userService;
+    @Autowired
+    private JwtService jwtService;
 
     // POST-create user
     @PostMapping("/")
@@ -44,9 +47,10 @@ public class UserController {
     }
 
     // GET - user get
-    @GetMapping("/")
-    public ResponseEntity<List<UserDto>> getAllUsers() {
-        return ResponseEntity.ok(this.userService.getAllUsers());
+    @GetMapping
+    public ResponseEntity<List<UserDto>> getAllUsers(@RequestHeader("Authorization") String authHeader) {
+        List<UserDto> users = userService.getAllUsers(authHeader);
+        return ResponseEntity.ok(users);
     }
 
     // GET - user get
