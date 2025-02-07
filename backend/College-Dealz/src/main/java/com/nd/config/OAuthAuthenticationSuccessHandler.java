@@ -43,7 +43,6 @@ public class OAuthAuthenticationSuccessHandler implements AuthenticationSuccessH
     @Autowired
     private RoleRepo roleRepo;
 
-    private final TokenRepository tokenRepository;
     @Autowired
     private final JwtService jwtService;
 
@@ -51,7 +50,7 @@ public class OAuthAuthenticationSuccessHandler implements AuthenticationSuccessH
     private UniversityRepo universityRepo;
 
     public OAuthAuthenticationSuccessHandler(TokenRepository tokenRepository, JwtService jwtService) {
-        this.tokenRepository = tokenRepository;
+
         this.jwtService = jwtService;
     }
 

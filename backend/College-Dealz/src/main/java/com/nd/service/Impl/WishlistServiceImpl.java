@@ -3,13 +3,17 @@ package com.nd.service.Impl;
 import com.nd.dto.WishlistDto;
 import com.nd.entities.Wishlist;
 import com.nd.exceptions.ResourceNotFoundException;
+import com.nd.repositories.ProductRepo;
+import com.nd.repositories.UserRepo;
 import com.nd.repositories.WishlistRepository;
 import com.nd.service.JwtService;
+import com.nd.service.ProductService;
 import com.nd.service.WishlistService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import java.time.LocalDateTime;
+
+import java.time.Instant;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -18,6 +22,13 @@ public class WishlistServiceImpl implements WishlistService {
 
     @Autowired
     private WishlistRepository wishlistRepository;
+
+    @Autowired
+    private ProductRepo productRepo;
+
+    @Autowired
+    private UserRepo userRepo;
+
 
     @Autowired
     private JwtService jwtService;
@@ -32,11 +43,14 @@ public class WishlistServiceImpl implements WishlistService {
         }
 
         Wishlist wishlist = new Wishlist();
-        wishlist.setUserId(userId);
-        wishlist.setProductId(productId);
+        wishlist.setProduct(productRepo.findById(productId).get());
+        wishlist.setUser(userRepo.findById(userId).get());
+        wishlist.setCreatedAt(Instant.now());
+        wishlist.setUpdatedAt(Instant.now());
 
-        Wishlist savedWishlist = wishlistRepository.save(wishlist);
-        return mapToDto(savedWishlist);
+        Wishlist wishlistSaved = wishlistRepository.save(wishlist);
+
+        return mapToDto(wishlistSaved);
     }
 
     @Override
@@ -66,11 +80,11 @@ public class WishlistServiceImpl implements WishlistService {
 
     private WishlistDto mapToDto(Wishlist wishlist) {
         WishlistDto dto = new WishlistDto();
-        dto.setWishlistId(wishlist.getWishlistId());
-        dto.setUserId(wishlist.getUserId());
-        dto.setProductId(wishlist.getProductId());
-        dto.setCreatedAt(wishlist.getCreatedAt());
-        dto.setUpdatedAt(wishlist.getUpdatedAt());
+        dto.setWishlistId(wishlist.getId());
+        dto.setUserId(wishlist.getUser().getId());
+        dto.setProductId(wishlist.getProduct().getId());
+
         return dto;
     }
+
 }
