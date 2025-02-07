@@ -1,0 +1,94 @@
+[
+  {
+    "id": 1,
+    "name": "Vintage Leather Jacket",
+    "price": "₹16,499",
+    "seller_name": "VintageFinds",
+    "post_date": "2 days ago",
+    "image": "/jacket.jpeg",
+    "isWishlisted": false,
+    "description": "Classic brown leather jacket from the 90s. Excellent condition with authentic wear pattern. Size M."
+  },
+  {
+    "id": 2,
+    "name": "Mountain Bike - Trek 3500",
+    "price": "₹37,000",
+    "seller_name": "BikeEnthusiast",
+    "post_date": "1 week ago",
+    "image": "/bike.jpg",
+    "isWishlisted": true,
+    "description": "Well-maintained Trek mountain bike. 21 speeds, recently serviced brakes and gears. Perfect for trails."
+  },
+  {
+    "id": 3,
+    "name": "iPhone 13 Pro - 256GB",
+    "price": "₹57,999",
+    "seller_name": "TechTrader",
+    "post_date": "3 days ago",
+    "image": "/iphone.png",
+    "isWishlisted": false,
+    "description": "Like new iPhone 13 Pro. Comes with original charger and box. Battery health 94%."
+  },
+ 
+  {
+    "id": 5,
+    "name": "Gaming Laptop - ASUS ROG Strix",
+    "price": "₹98,999",
+    "seller_name": "GameZone",
+    "post_date": "3 days ago",
+    "image": "/gaming-laptop.jpg",
+    "isWishlisted": true,
+    "description": "High-performance gaming laptop with AMD Ryzen 9, 16GB RAM, and RTX 3060. Excellent condition."
+  },
+  {
+    "id": 6,
+    "name": "Acoustic Guitar - Yamaha F310",
+    "price": "₹8,499",
+    "seller_name": "MusicMania",
+    "post_date": "1 day ago",
+    "image": "/guitar.jpg",
+    "isWishlisted": false,
+    "description": "Yamaha F310 acoustic guitar in great condition. Perfect for beginners and seasoned players."
+  },
+  {
+    "id": 8,
+    "name": "Sony Noise Cancelling Headphones",
+    "price": "₹17,499",
+    "seller_name": "SoundMaster",
+    "post_date": "2 days ago",
+    "image": "/headphone.jpeg",
+    "isWishlisted": true,
+    "description": "Sony WH-1000XM4 wireless noise-cancelling headphones. Top-notch sound quality and battery life."
+  },
+  
+  {
+    "id": 10,
+    "name": "Men's Sneakers - Nike Air Max",
+    "price": "₹7,299",
+    "seller_name": "ShoeStyle",
+    "post_date": "1 week ago",
+    "image": "/sneaker.jpg",
+    "isWishlisted": true,
+    "description": "Brand new Nike Air Max sneakers. Size 9, perfect for casual wear and running."
+  },
+  {
+    "id": 11,
+    "name": "Study Table with Chair",
+    "price": "₹4,999",
+    "seller_name": "HomeDeco",
+    "post_date": "6 days ago",
+    "image": "/studytable.jpg",
+    "isWishlisted": false,
+    "description": "Compact study table with an ergonomic chair. Ideal for work-from-home setups or students."
+  },
+  {
+    "id": 12,
+    "name": "Samsung Galaxy Watch 4",
+    "price": "₹14,999",
+    "seller_name": "GadgetStore",
+    "post_date": "2 days ago",
+    "image": "/watch.jpg",
+    "isWishlisted": true,
+    "description": "Samsung Galaxy Watch 4 in excellent condition. Comes with original charger and strap."
+  }
+]

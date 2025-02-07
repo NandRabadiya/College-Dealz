@@ -1,5 +1,6 @@
 package com.nd.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.Entity;
 
 import jakarta.persistence.*;
@@ -17,7 +18,8 @@ import java.util.Set;
 @AllArgsConstructor
 public class University {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "university_id")
     private int id;
 
     @Column(nullable = false)
@@ -35,7 +37,8 @@ public class University {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
-    @OneToMany(mappedBy = "university")
+    @OneToMany(mappedBy = "university",fetch = FetchType.LAZY)
+    @JsonIgnore
     private Set<User> users = new HashSet<>();
 
     @PrePersist
@@ -48,4 +51,6 @@ public class University {
     protected void onUpdate() {
         updatedAt = LocalDateTime.now();
     }
+
+
 }

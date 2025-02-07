@@ -2,22 +2,22 @@ package com.nd.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.nd.entities.Provider;
+import com.nd.enums.Provider;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Size;
-import lombok.Data;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.util.Set;
-import java.util.UUID;
 
 @Getter
 @Setter
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+@ToString
 public class UserDto {
-    private int universityId;
+    private String universityName;
     private int id;
 
     @NotEmpty
@@ -38,6 +38,10 @@ public class UserDto {
     private Provider provider;
     private Set<String> roles;
 
+    @Override
+    public String toString() {
+        return "User{id=" + id + ", name='" + name + "', email='" + email + "', roles=" + roles + "}";
+    }
 
     @JsonIgnore
     public String getPassword() {
@@ -47,6 +51,12 @@ public class UserDto {
     public int getId() {
         return id;
     }
+
+    @JsonProperty
+    public void setId(int id) {this.id=id;}
+
+
+
     @JsonProperty
     public void setPassword(String password) {
         this.password=password;
@@ -65,6 +75,8 @@ public class UserDto {
     public String getEmail() {
         return email;
     }
-
-
+    @JsonProperty
+    public void setEmail(String email) {
+        this.email = email;
+    }
 }

@@ -1,4 +1,4 @@
-package com.nd.entities;
+package com.nd.enums;
 
 public enum Provider {
     SELF,

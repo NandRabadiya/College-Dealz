@@ -1,5 +1,6 @@
 package com.nd.service;
 import com.nd.dto.UserDto;
+import com.nd.entities.User;
 
 import java.util.List;
 import java.util.UUID;
@@ -20,18 +21,17 @@ public interface UserService {
     UserDto registerNewUser(UserDto user);
 
 
-    UserDto createUser(UserDto user);
+    //UserDto createUser(UserDto user);
 
     UserDto updateUser(UserDto user, Integer userId);
 
     UserDto getUserById(Integer userId);
 
-    List<UserDto> getAllUsers();
+    List<UserDto> getAllUsers(String jwt);
 
     void deleteUser(Integer userId);
 
 
 
-
-
+    User findUserByJwt(String jwt);
 }
