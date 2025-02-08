@@ -28,7 +28,7 @@ public interface ChatRepo extends JpaRepository<Chat, Integer> {
 //    @Query("SELECT c FROM Chat c WHERE c.product = :productId")
 //    List<Chat> findByProductProductId(@Param("productId") Integer productId);
 
-    Chat findByProductId(Integer productId);
+    List<Chat> findByProductId(Integer productId);
 
 
 

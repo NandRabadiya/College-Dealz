@@ -81,7 +81,7 @@ public class ChatServiceImpl implements ChatService {
 
     @Override
     public List<ChatDTO> getChatsByProductId(int productId) {
-        return chatRepository.findById(productId)
+        return chatRepository.findByProductId(productId)
                 .stream()
                 .map(this::mapToDTO)
                 .collect(Collectors.toList());
