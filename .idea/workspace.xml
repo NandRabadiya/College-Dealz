@@ -4,12 +4,12 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="c6564612-8fe2-49e4-bb4c-5d4305a5e686" name="Changes" comment="University Controller Checked">
+    <list default="true" id="c6564612-8fe2-49e4-bb4c-5d4305a5e686" name="Changes" comment="Image API and &#10;product curd with Image">
+      <change beforePath="$PROJECT_DIR$/.idea/dataSources.local.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/dataSources.local.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/College-Dealz/src/main/java/com/nd/controller/ChatController.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/College-Dealz/src/main/java/com/nd/controller/ChatController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/College-Dealz/src/main/java/com/nd/dto/ChatDTO.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/College-Dealz/src/main/java/com/nd/dto/ChatDTO.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/backend/College-Dealz/src/main/java/com/nd/repositories/ChatRepo.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/College-Dealz/src/main/java/com/nd/repositories/ChatRepo.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/backend/College-Dealz/src/main/java/com/nd/service/Impl/ChatServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/College-Dealz/src/main/java/com/nd/service/Impl/ChatServiceImpl.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/College-Dealz/src/main/resources/application.properties" beforeDir="false" afterPath="$PROJECT_DIR$/backend/College-Dealz/src/main/resources/application.properties" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -19,8 +19,6 @@
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
       <list>
-        <option value="AnnotationType" />
-        <option value="com.intellij.jpb.JpaEntity" />
         <option value="Interface" />
         <option value="Class" />
       </list>
@@ -29,7 +27,7 @@
   <component name="Git.Settings">
     <option name="RECENT_BRANCH_BY_REPOSITORY">
       <map>
-        <entry key="$PROJECT_DIR$" value="frontend" />
+        <entry key="$PROJECT_DIR$" value="backend" />
       </map>
     </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
@@ -43,7 +41,7 @@
   <component name="GithubPullRequestsUISettings">{
   &quot;selectedUrlAndAccountId&quot;: {
     &quot;url&quot;: &quot;https://github.com/VenuVirparia/College-Dealz&quot;,
-    &quot;accountId&quot;: &quot;b8484678-2dbe-47cf-aacb-5a3cd2ca4983&quot;
+    &quot;accountId&quot;: &quot;e1549d37-0e3e-4529-9999-512e3fe385b0&quot;
   }
 }</component>
   <component name="ProjectColorInfo">{
@@ -57,15 +55,18 @@
   </component>
   <component name="PropertiesComponent">{
   &quot;keyToString&quot;: {
+    &quot;Application.CollegeDealzApplication.executor&quot;: &quot;Run&quot;,
     &quot;RequestMappingsPanelOrder0&quot;: &quot;0&quot;,
     &quot;RequestMappingsPanelOrder1&quot;: &quot;1&quot;,
     &quot;RequestMappingsPanelWidth0&quot;: &quot;75&quot;,
     &quot;RequestMappingsPanelWidth1&quot;: &quot;75&quot;,
     &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
     &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
     &quot;Spring Boot.CollegeDealzApplication.executor&quot;: &quot;Run&quot;,
     &quot;git-widget-placeholder&quot;: &quot;frontend&quot;,
     &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;C:/Users/venup/OneDrive/Desktop/College-Dealz&quot;,
     &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
     &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
     &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
@@ -74,10 +75,15 @@
     &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
 }</component>
-  <component name="RecentsManager">
-    <key name="MoveFile.RECENT_KEYS">
-      <recent name="C:\Users\venup\OneDrive\Desktop\College-Dealz\backend\College-Dealz\src\main\resources" />
-    </key>
+  <component name="RunManager">
+    <configuration name="CollegeDealzApplication" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot" nameIsGenerated="true">
+      <option name="FRAME_DEACTIVATION_UPDATE_POLICY" value="UpdateClassesAndResources" />
+      <module name="College-Dealz" />
+      <option name="SPRING_BOOT_MAIN_CLASS" value="com.nd.CollegeDealzApplication" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
   </component>
   <component name="SharedIndexes">
     <attachedChunks>
@@ -88,13 +94,10 @@
     </attachedChunks>
   </component>
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
-  <component name="StructureViewState">
-    <option name="selectedTab" value="Logical" />
-  </component>
   <component name="TaskManager">
     <task active="true" id="Default" summary="Default task">
-      <changelist id="c6564612-8fe2-49e4-bb4c-5d4305a5e686" name="Changes" comment="Wantlist API Checked" />
-      <created>1737381853328</created>
+      <changelist id="c6564612-8fe2-49e4-bb4c-5d4305a5e686" name="Changes" comment="" />
+      <created>1735357705502</created>
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1735357705502</updated>
@@ -103,17 +106,7 @@
       <workItem from="1736934860708" duration="14980000" />
       <workItem from="1737038554640" duration="5162000" />
       <workItem from="1737176029662" duration="7679000" />
-      <workItem from="1737191762147" duration="3147000" />
-      <workItem from="1737286010615" duration="1511000" />
-      <workItem from="1737377670554" duration="3150000" />
-      <workItem from="1737461937427" duration="4194000" />
-      <workItem from="1737884856811" duration="4500000" />
-      <workItem from="1738063546644" duration="5454000" />
-      <workItem from="1738082790570" duration="4359000" />
-      <workItem from="1738434225611" duration="5110000" />
-      <workItem from="1738664436284" duration="519000" />
-      <workItem from="1738831053517" duration="1063000" />
-      <workItem from="1738905371928" duration="6102000" />
+      <workItem from="1737191762147" duration="2169000" />
     </task>
     <task id="LOCAL-00001" summary="Image API and &#10;product curd with Image">
       <option name="closed" value="true" />
@@ -123,82 +116,24 @@
       <option name="project" value="LOCAL" />
       <updated>1737189077080</updated>
     </task>
-    <task id="LOCAL-00002" summary="Product Service with images &#10;completed.">
-      <option name="closed" value="true" />
-      <created>1737194223516</created>
-      <option name="number" value="00002" />
-      <option name="presentableId" value="LOCAL-00002" />
-      <option name="project" value="LOCAL" />
-      <updated>1737194223516</updated>
-    </task>
-    <task id="LOCAL-00003" summary="Notification Controller Tested">
-      <option name="closed" value="true" />
-      <created>1737386396166</created>
-      <option name="number" value="00003" />
-      <option name="presentableId" value="LOCAL-00003" />
-      <option name="project" value="LOCAL" />
-      <updated>1737386396166</updated>
-    </task>
-    <task id="LOCAL-00004" summary="University Controller build.">
-      <option name="closed" value="true" />
-      <created>1738067142497</created>
-      <option name="number" value="00004" />
-      <option name="presentableId" value="LOCAL-00004" />
-      <option name="project" value="LOCAL" />
-      <updated>1738067142497</updated>
-    </task>
-    <task id="LOCAL-00005" summary="Wantlist API Checked">
-      <option name="closed" value="true" />
-      <created>1738087160482</created>
-      <option name="number" value="00005" />
-      <option name="presentableId" value="LOCAL-00005" />
-      <option name="project" value="LOCAL" />
-      <updated>1738087160482</updated>
-    </task>
-    <task id="LOCAL-00006" summary="University Controller Checked">
-      <option name="closed" value="true" />
-      <created>1738087553185</created>
-      <option name="number" value="00006" />
-      <option name="presentableId" value="LOCAL-00006" />
-      <option name="project" value="LOCAL" />
-      <updated>1738087553185</updated>
-    </task>
-    <option name="localTasksCounter" value="7" />
+    <option name="localTasksCounter" value="2" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="3" />
   </component>
-  <component name="Vcs.Log.Tabs.Properties">
-    <option name="TAB_STATES">
-      <map>
-        <entry key="MAIN">
-          <value>
-            <State />
-          </value>
-        </entry>
-      </map>
-    </option>
-  </component>
   <component name="VcsManagerConfiguration">
-    <option name="CHECK_CODE_SMELLS_BEFORE_PROJECT_COMMIT" value="false" />
     <MESSAGE value="Product Controller from authentication header" />
     <MESSAGE value="Image API and &#10;product curd with Image" />
-    <MESSAGE value="Product Service with images &#10;completed." />
-    <MESSAGE value="Notification Controller Tested" />
-    <MESSAGE value="University Controller build." />
-    <MESSAGE value="Wantlist API Checked" />
-    <MESSAGE value="University Controller Checked" />
-    <option name="LAST_COMMIT_MESSAGE" value="University Controller Checked" />
+    <option name="LAST_COMMIT_MESSAGE" value="Image API and &#10;product curd with Image" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
       <breakpoints>
-        <line-breakpoint enabled="true" type="java-line">
-          <url>file://$PROJECT_DIR$/backend/College-Dealz/src/main/java/com/nd/service/Impl/ProductServiceImpl.java</url>
-          <line>208</line>
+        <breakpoint enabled="true" type="java-exception">
+          <properties class="java.lang.IllegalArgumentException" package="java.lang" />
           <option name="timeStamp" value="1" />
-        </line-breakpoint>
+        </breakpoint>
       </breakpoints>
     </breakpoint-manager>
   </component>

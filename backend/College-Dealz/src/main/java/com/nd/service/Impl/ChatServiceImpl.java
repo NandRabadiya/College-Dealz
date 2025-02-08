@@ -63,7 +63,7 @@ public class ChatServiceImpl implements ChatService {
 
     @Override
     public List<ChatDTO> getChatsBySenderId(int senderId) {
-        return chatRepository.findBySenderUserId(senderId)
+        return chatRepository.findBySenderId(senderId)
                 .orElse(Collections.emptyList())
                 .stream()
                 .map(this::mapToDTO)
@@ -72,7 +72,7 @@ public class ChatServiceImpl implements ChatService {
 
     @Override
     public List<ChatDTO> getChatsByReceiverId(int receiverId) {
-        return chatRepository.findByReceiverUserId(receiverId)
+        return chatRepository.findByReceiverId(receiverId)
                 .orElse(Collections.emptyList())
                 .stream()
                 .map(this::mapToDTO)
@@ -81,7 +81,7 @@ public class ChatServiceImpl implements ChatService {
 
     @Override
     public List<ChatDTO> getChatsByProductId(int productId) {
-        return chatRepository.findByProductProductId(productId)
+        return chatRepository.findById(productId)
                 .stream()
                 .map(this::mapToDTO)
                 .collect(Collectors.toList());

@@ -15,7 +15,7 @@ public class ChatController {
     @Autowired
     private ChatService chatService;
 
-    @PostMapping
+    @PostMapping("/")
     public ResponseEntity<ChatDTO> createChat(@RequestBody ChatDTO chatDTO) {
         ChatDTO createdChat = chatService.createChat(chatDTO);
         return ResponseEntity.ok(createdChat);
