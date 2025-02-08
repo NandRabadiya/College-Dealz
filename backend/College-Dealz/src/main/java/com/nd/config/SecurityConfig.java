@@ -31,7 +31,6 @@ import java.util.Collection;
 
 @Configuration
 @EnableWebSecurity
-@EnableMethodSecurity
 public class SecurityConfig {
 
     private final UserDetailsServiceImpl userDetailsServiceImp;
@@ -61,7 +60,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(
                         req->req.requestMatchers("/login/**","/register/**", "/refresh_token/**")
                                 .permitAll()
-                             //   .requestMatchers("/api/admin_only/**")
+                                .requestMatchers("/api/admin_only/**")
 //                                .access((authentication, context) -> {
 //                                    // Explicitly call getAuthorities() here
 //                                    Collection<? extends GrantedAuthority> authorities = authentication.get().getAuthorities();
@@ -72,10 +71,10 @@ public class SecurityConfig {
 //                                            ? new AuthorizationDecision(true)
 //                                            : new AuthorizationDecision(false);
 //                                })
-                           //     .hasRole("ADMIN")
+         //                      .hasRole("ADMIN")
 
 
-                               // .hasAuthority("ADMIN")
+                               .hasAuthority("ADMIN")
                                 .anyRequest()
                                 .authenticated()
                 ).userDetailsService(userDetailsServiceImp)

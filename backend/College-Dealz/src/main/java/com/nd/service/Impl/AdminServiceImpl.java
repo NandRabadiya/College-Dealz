@@ -118,6 +118,7 @@ public class AdminServiceImpl implements AdminService {
 
             List<User> admins= userRepository.findByRolesContaining(adminRole);
 
+            System.out.println("\n\n"+admins.toString());
 
             return admins.stream()
                     .map(admin->  userService.userToDto(admin) )

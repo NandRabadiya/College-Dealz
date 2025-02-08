@@ -17,29 +17,6 @@ import java.util.List;
 @RequestMapping("/api/universities")
 public class UniversityController {
 
-
-
-
-
-        @GetMapping("/authorities")
-        public ResponseEntity<?> getUserAuthorities() {
-            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-            if (authentication == null || !authentication.isAuthenticated()) {
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User is not authenticated.");
-            }
-
-            Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
-            return ResponseEntity.ok(authorities);
-
-        }
-
-
-
-
-
-
-
-
     @Autowired
     private UniversityService universityService;
 
