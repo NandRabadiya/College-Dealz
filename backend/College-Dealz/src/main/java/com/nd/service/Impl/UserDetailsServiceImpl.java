@@ -30,7 +30,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
         return org.springframework.security.core.userdetails.User.builder()
                 .username(user.getEmail())
                 .password(user.getPassword()) // Make sure this is BCrypt hashed
-                //.roles(user.getRole()) // Assuming `role` is available in your `User` entity
+                .roles(String.valueOf(user.getRoles())) // Assuming `role` is available in your `User` entity
                 .build();
     }
 

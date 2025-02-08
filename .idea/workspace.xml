@@ -4,14 +4,12 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="c6564612-8fe2-49e4-bb4c-5d4305a5e686" name="Changes" comment="Wishlist Api changed and Admin url secured.">
+    <list default="true" id="c6564612-8fe2-49e4-bb4c-5d4305a5e686" name="Changes" comment="Chat controller bug fixed 2 .">
+      <change beforePath="$PROJECT_DIR$/.idea/dataSources.local.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/dataSources.local.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/College-Dealz/src/main/java/com/nd/CollegeDealzApplication.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/College-Dealz/src/main/java/com/nd/CollegeDealzApplication.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/backend/College-Dealz/src/main/java/com/nd/config/SecurityConfig.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/College-Dealz/src/main/java/com/nd/config/SecurityConfig.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/backend/College-Dealz/src/main/java/com/nd/entities/User.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/College-Dealz/src/main/java/com/nd/entities/User.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/College-Dealz/src/main/java/com/nd/repositories/UserRepo.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/College-Dealz/src/main/java/com/nd/repositories/UserRepo.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/College-Dealz/src/main/java/com/nd/service/UserService.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/College-Dealz/src/main/java/com/nd/service/UserService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/College-Dealz/src/main/resources/application.properties" beforeDir="false" afterPath="$PROJECT_DIR$/backend/College-Dealz/src/main/resources/application.properties" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/College-Dealz/src/main/java/com/nd/service/Impl/UserDetailsServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/College-Dealz/src/main/java/com/nd/service/Impl/UserDetailsServiceImpl.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -21,10 +19,8 @@
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
       <list>
-        <option value="AnnotationType" />
         <option value="Interface" />
         <option value="Class" />
-        <option value="com.intellij.jpb.JpaEntity" />
       </list>
     </option>
   </component>
@@ -98,9 +94,6 @@
     </attachedChunks>
   </component>
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
-  <component name="StructureViewState">
-    <option name="selectedTab" value="Logical" />
-  </component>
   <component name="TaskManager">
     <task active="true" id="Default" summary="Default task">
       <changelist id="c6564612-8fe2-49e4-bb4c-5d4305a5e686" name="Changes" comment="" />
@@ -113,17 +106,8 @@
       <workItem from="1736934860708" duration="14980000" />
       <workItem from="1737038554640" duration="5162000" />
       <workItem from="1737176029662" duration="7679000" />
-      <workItem from="1737191762147" duration="3147000" />
-      <workItem from="1737286010615" duration="1511000" />
-      <workItem from="1737377670554" duration="3150000" />
-      <workItem from="1737461937427" duration="4194000" />
-      <workItem from="1737884856811" duration="4500000" />
-      <workItem from="1738063546644" duration="5454000" />
-      <workItem from="1738082790570" duration="16015000" />
-      <workItem from="1738323502896" duration="4166000" />
-      <workItem from="1738861609614" duration="45000" />
-      <workItem from="1738869438829" duration="15440000" />
-      <workItem from="1738943131895" duration="2357000" />
+      <workItem from="1737191762147" duration="2169000" />
+      <workItem from="1739015507632" duration="5793000" />
     </task>
     <task id="LOCAL-00001" summary="Image API and &#10;product curd with Image">
       <option name="closed" value="true" />
@@ -133,71 +117,23 @@
       <option name="project" value="LOCAL" />
       <updated>1737189077080</updated>
     </task>
-    <task id="LOCAL-00002" summary="Product Service with images &#10;completed.">
+    <task id="LOCAL-00002" summary="Chat controller bug fixed.">
       <option name="closed" value="true" />
-      <created>1737194223516</created>
+      <created>1739004653256</created>
       <option name="number" value="00002" />
       <option name="presentableId" value="LOCAL-00002" />
       <option name="project" value="LOCAL" />
-      <updated>1737194223516</updated>
+      <updated>1739004653257</updated>
     </task>
-    <task id="LOCAL-00003" summary="Notification Controller Tested">
+    <task id="LOCAL-00003" summary="Chat controller bug fixed 2 .">
       <option name="closed" value="true" />
-      <created>1737386396166</created>
+      <created>1739004985177</created>
       <option name="number" value="00003" />
       <option name="presentableId" value="LOCAL-00003" />
       <option name="project" value="LOCAL" />
-      <updated>1737386396166</updated>
+      <updated>1739004985177</updated>
     </task>
-    <task id="LOCAL-00004" summary="University Controller build.">
-      <option name="closed" value="true" />
-      <created>1738067142497</created>
-      <option name="number" value="00004" />
-      <option name="presentableId" value="LOCAL-00004" />
-      <option name="project" value="LOCAL" />
-      <updated>1738067142497</updated>
-    </task>
-    <task id="LOCAL-00005" summary="Wantlist API Checked">
-      <option name="closed" value="true" />
-      <created>1738087160482</created>
-      <option name="number" value="00005" />
-      <option name="presentableId" value="LOCAL-00005" />
-      <option name="project" value="LOCAL" />
-      <updated>1738087160482</updated>
-    </task>
-    <task id="LOCAL-00006" summary="University Controller Checked">
-      <option name="closed" value="true" />
-      <created>1738087553185</created>
-      <option name="number" value="00006" />
-      <option name="presentableId" value="LOCAL-00006" />
-      <option name="project" value="LOCAL" />
-      <updated>1738087553185</updated>
-    </task>
-    <task id="LOCAL-00007" summary="Oauth 2 with small bug">
-      <option name="closed" value="true" />
-      <created>1738098154556</created>
-      <option name="number" value="00007" />
-      <option name="presentableId" value="LOCAL-00007" />
-      <option name="project" value="LOCAL" />
-      <updated>1738098154556</updated>
-    </task>
-    <task id="LOCAL-00008" summary="Oauth2 Bug fixed">
-      <option name="closed" value="true" />
-      <created>1738325669627</created>
-      <option name="number" value="00008" />
-      <option name="presentableId" value="LOCAL-00008" />
-      <option name="project" value="LOCAL" />
-      <updated>1738325669628</updated>
-    </task>
-    <task id="LOCAL-00009" summary="Wishlist Api changed and Admin url secured.">
-      <option name="closed" value="true" />
-      <created>1738909158901</created>
-      <option name="number" value="00009" />
-      <option name="presentableId" value="LOCAL-00009" />
-      <option name="project" value="LOCAL" />
-      <updated>1738909158901</updated>
-    </task>
-    <option name="localTasksCounter" value="10" />
+    <option name="localTasksCounter" value="4" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -208,25 +144,30 @@
       <map>
         <entry key="MAIN">
           <value>
-            <State />
+            <State>
+              <option name="FILTERS">
+                <map>
+                  <entry key="branch">
+                    <value>
+                      <list>
+                        <option value="origin/backend" />
+                      </list>
+                    </value>
+                  </entry>
+                </map>
+              </option>
+            </State>
           </value>
         </entry>
       </map>
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <option name="CHECK_CODE_SMELLS_BEFORE_PROJECT_COMMIT" value="false" />
     <MESSAGE value="Product Controller from authentication header" />
     <MESSAGE value="Image API and &#10;product curd with Image" />
-    <MESSAGE value="Product Service with images &#10;completed." />
-    <MESSAGE value="Notification Controller Tested" />
-    <MESSAGE value="University Controller build." />
-    <MESSAGE value="Wantlist API Checked" />
-    <MESSAGE value="University Controller Checked" />
-    <MESSAGE value="Oauth 2 with small bug" />
-    <MESSAGE value="Oauth2 Bug fixed" />
-    <MESSAGE value="Wishlist Api changed and Admin url secured." />
-    <option name="LAST_COMMIT_MESSAGE" value="Wishlist Api changed and Admin url secured." />
+    <MESSAGE value="Chat controller bug fixed." />
+    <MESSAGE value="Chat controller bug fixed 2 ." />
+    <option name="LAST_COMMIT_MESSAGE" value="Chat controller bug fixed 2 ." />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

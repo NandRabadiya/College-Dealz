@@ -39,7 +39,7 @@ public class User implements UserDetails {
     private String email;
 
 
-    @Column(nullable = true)
+    @Column
     private String password;
 
     @Column(name = "profile_picture")
@@ -100,7 +100,7 @@ public class User implements UserDetails {
 
         return roles
                 .stream()
-                .map(role -> new SimpleGrantedAuthority( "ROLE_" + role.getName()) )
+                .map(role -> new SimpleGrantedAuthority(role.getName()) )
                 .collect(Collectors.toList());
 
 

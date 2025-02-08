@@ -10,6 +10,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authorization.AuthorizationDecision;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -30,6 +31,7 @@ import java.util.Collection;
 
 @Configuration
 @EnableWebSecurity
+@EnableMethodSecurity
 public class SecurityConfig {
 
     private final UserDetailsServiceImpl userDetailsServiceImp;
@@ -59,21 +61,21 @@ public class SecurityConfig {
                 .authorizeHttpRequests(
                         req->req.requestMatchers("/login/**","/register/**", "/refresh_token/**")
                                 .permitAll()
-                                .requestMatchers("/api/admin_only/**")
-                                .access((authentication, context) -> {
-                                    // Explicitly call getAuthorities() here
-                                    Collection<? extends GrantedAuthority> authorities = authentication.get().getAuthorities();
-                                    System.out.println("User Authorities during Security Check: " + authorities);
+                             //   .requestMatchers("/api/admin_only/**")
+//                                .access((authentication, context) -> {
+//                                    // Explicitly call getAuthorities() here
+//                                    Collection<? extends GrantedAuthority> authorities = authentication.get().getAuthorities();
+//                                    System.out.println("User Authorities during Security Check: " + authorities);
+//
+//                                    // Check for "ROLE_ADMIN"
+//                                    return authorities.contains(new SimpleGrantedAuthority("ROLE_ADMIN"))
+//                                            ? new AuthorizationDecision(true)
+//                                            : new AuthorizationDecision(false);
+//                                })
+                           //     .hasRole("ADMIN")
 
-                                    // Check for "ROLE_ADMIN"
-                                    return authorities.contains(new SimpleGrantedAuthority("ROLE_ADMIN"))
-                                            ? new AuthorizationDecision(true)
-                                            : new AuthorizationDecision(false);
-                                })
 
-
-
-                                //hasAuthority("ROLE_ADMIN")
+                               // .hasAuthority("ADMIN")
                                 .anyRequest()
                                 .authenticated()
                 ).userDetailsService(userDetailsServiceImp)
