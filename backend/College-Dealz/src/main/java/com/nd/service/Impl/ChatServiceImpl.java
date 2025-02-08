@@ -20,13 +20,13 @@ import java.util.stream.Collectors;
 public class ChatServiceImpl implements ChatService {
 
     @Autowired
-    private final ChatRepo chatRepository;
+    private ChatRepo chatRepository;
 
     @Autowired
-    private final UserRepo userRepository;
+    private UserRepo userRepository;
 
     @Autowired
-    private final ProductRepo productRepository;
+    private ProductRepo productRepository;
 
     public ChatServiceImpl(ChatRepo chatRepository, UserRepo userRepository, ProductRepo productRepository) {
         this.chatRepository = chatRepository;
@@ -82,7 +82,6 @@ public class ChatServiceImpl implements ChatService {
     @Override
     public List<ChatDTO> getChatsByProductId(int productId) {
         return chatRepository.findByProductProductId(productId)
-                .orElse(Collections.emptyList())
                 .stream()
                 .map(this::mapToDTO)
                 .collect(Collectors.toList());
