@@ -25,10 +25,5 @@ public class CollegeDealzApplication {
 	}
 
 
-//    @Bean
-//    public PasswordEncoder passwordEncoder() {
-//        return new BCryptPasswordEncoder();
-//    }
-
 
 }
