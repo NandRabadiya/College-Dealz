@@ -10,7 +10,7 @@ import java.time.LocalDateTime;
 @Data
 @Entity
 @Table(name = "messages")
-@JsonIgnoreProperties({"hibernateLazyInitializer", "handler", "chat"}) // Prevents serialization loops
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler", "chat", "sender"}) // Prevents serialization loops
 public class Message {
 
     @Id
