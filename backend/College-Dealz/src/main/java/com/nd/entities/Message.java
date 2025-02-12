@@ -30,5 +30,4 @@ public class Message {
 
     @CreationTimestamp
     private LocalDateTime createdAt; // Auto-set timestamp
-
 }

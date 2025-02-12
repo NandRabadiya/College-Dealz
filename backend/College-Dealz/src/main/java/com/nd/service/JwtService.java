@@ -205,5 +205,4 @@ public class JwtService {
         // Return the university ID if everything is valid
         return user.getUniversity().getId();
     }
-
 }

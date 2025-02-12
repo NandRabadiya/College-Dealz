@@ -100,6 +100,7 @@ export const getUser = (token) => {
         },
       });
       const user = response.data;
+      // localStorage.setItem("userId",user.)
       dispatch({ type: GET_USER_SUCCESS, payload: user });
       console.log("req User ", user);
     } catch (error) {

@@ -9,11 +9,6 @@ import java.util.List;
 
 public interface MessageService {
 
-
-
     Message sendMessage(int senderId, int chatId, String content) throws UserException, ChatException, ProductException;
-
     List<Message> getMessagesByProductId(int productId) throws ProductException, ChatException;
-
-
 }

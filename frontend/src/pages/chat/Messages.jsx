@@ -1,17 +1,17 @@
-import React from 'react'
-import Chat from './Chat'
-import { useState } from 'react'
-import ChatList from './ChatList'
+import React, { useState } from "react";
+import Chat from "./Chat";
+import ChatList from "./ChatList";
 
 const Messages = () => {
   const [selectedUserId, setSelectedUserId] = useState(null);
+
   return (
     <div className="flex h-screen bg-gray-900">
       {/* Left Pane: Conversation List */}
       <div className="w-1/3 border-r border-gray-700">
         <ChatList onSelectConversation={setSelectedUserId} />
       </div>
-      
+
       {/* Right Pane: Chat */}
       <div className="w-2/3 flex flex-col">
         {selectedUserId ? (
@@ -25,4 +25,5 @@ const Messages = () => {
     </div>
   );
 };
+
 export default Messages;
