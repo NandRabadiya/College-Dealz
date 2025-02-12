@@ -16,11 +16,18 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.transaction.Transactional;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
+import java.security.SecureRandom;
 
 
 import org.slf4j.Logger;
@@ -36,22 +43,26 @@ public class OAuthAuthenticationSuccessHandler implements AuthenticationSuccessH
 
     Logger logger = LoggerFactory.getLogger(OAuthAuthenticationSuccessHandler.class);
 
+    private static final String CHARACTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()_+-=[]{}|;:,.<>?";
+    private static final SecureRandom RANDOM = new SecureRandom();
+
     @Autowired
     private UserRepo userRepo;
-
 
     @Autowired
     private RoleRepo roleRepo;
 
-    private final TokenRepository tokenRepository;
+    private final PasswordEncoder passwordEncoder;
+
     @Autowired
     private final JwtService jwtService;
 
     @Autowired
     private UniversityRepo universityRepo;
 
-    public OAuthAuthenticationSuccessHandler(TokenRepository tokenRepository, JwtService jwtService) {
-        this.tokenRepository = tokenRepository;
+    public OAuthAuthenticationSuccessHandler(TokenRepository tokenRepository, PasswordEncoder passwordEncoder, JwtService jwtService) {
+        this.passwordEncoder = passwordEncoder;
+
         this.jwtService = jwtService;
     }
 
@@ -115,6 +126,17 @@ public class OAuthAuthenticationSuccessHandler implements AuthenticationSuccessH
                 user.setName(oauthUser.getAttribute("name").toString());
                 user.setProviderUserId(oauthUser.getName());
                 user.setProvider(GOOGLE);
+                user.setPassword(passwordEncoder.encode(generateRandomPassword()));
+
+                String imageUrl=oauthUser.getAttribute("picture").toString();
+            try {
+                byte[] imageBytes = downloadImage(imageUrl);
+                user.setProfilePicture(imageBytes);  // Assuming 'profilePicture' is a byte[] field
+            } catch (IOException e) {
+                // Log the error; you may choose to continue without the image
+                System.err.println("Error downloading profile image: " + e.getMessage());
+            }
+
                 Role userRole = this.roleRepo.findById(1).orElseThrow(() ->
                         new ResourceNotFoundException("Role", "ID", 1));
 
@@ -150,7 +172,43 @@ logger.info("OAuthAuthenicationSuccessHandler: Google New user check before user
        }
     }
 
+    public static String generateRandomPassword() {
+        int length = 7;
+        StringBuilder password = new StringBuilder(length);
+        for (int i = 0; i < length; i++) {
+            int index = RANDOM.nextInt(CHARACTERS.length());
+            password.append(CHARACTERS.charAt(index));
+        }
+        return password.toString();
+    }
 
+    public static byte[] downloadImage(String imageUrl) throws IOException {
+        URL url = new URL(imageUrl);
+        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+
+        // Optional: set timeouts and request method
+        connection.setRequestMethod("GET");
+        connection.setConnectTimeout(5000);
+        connection.setReadTimeout(5000);
+
+        // Check for a successful response
+        int responseCode = connection.getResponseCode();
+        if (responseCode != HttpURLConnection.HTTP_OK) {
+            throw new IOException("Failed to fetch image. HTTP response code: " + responseCode);
+        }
+
+        // Optionally, you can check the content type to ensure it's an image
+        String contentType = connection.getContentType();
+        if (contentType == null || !contentType.startsWith("image/")) {
+            throw new IOException("The URL does not point to an image: " + contentType);
+        }
+
+        // Read the image data into a byte array
+        try (InputStream in = connection.getInputStream()) {
+            // Java 9+ provides readAllBytes(), for earlier versions you might use Apache Commons IO
+            return in.readAllBytes();
+        }
+    }
 
 
 }

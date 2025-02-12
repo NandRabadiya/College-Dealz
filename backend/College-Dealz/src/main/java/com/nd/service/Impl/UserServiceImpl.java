@@ -148,12 +148,11 @@ public class UserServiceImpl implements UserService {
         userDtoResponse.setId(user.getId());
         userDtoResponse.setName(user.getName());
         userDtoResponse.setEmail(user.getEmail());
-        userDtoResponse.setPassword(user.getPassword()); // Optional, based on whether exposing the password is required
-        //   userDtoResponse.setRoles(user.getRoles());
+       // userDtoResponse.setPassword(user.getPassword()); // Optional, based on whether exposing the password is required
+        // userDtoResponse.setRoles(user.getRoles());
 
 
-        System.out.println("UserTODTO \n\n");
-
+        System.out.println("UserTODTO\n");
         System.out.println(userDtoResponse.toString()); // Verify DTO fields
 
         return userDtoResponse;
