@@ -4,31 +4,18 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="c6564612-8fe2-49e4-bb4c-5d4305a5e686" name="Changes" comment="Oauth2 password and Profile Picture &#10;handled">
-      <change afterPath="$PROJECT_DIR$/backend/College-Dealz/src/main/java/com/nd/controller/FeedbackController.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/backend/College-Dealz/src/main/java/com/nd/entities/Feedback.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/backend/College-Dealz/src/main/java/com/nd/repositories/FeedbackRepo.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/backend/College-Dealz/src/main/java/com/nd/service/FeedbackService.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/backend/College-Dealz/src/main/java/com/nd/service/Impl/FeedbackServiceImpl.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/dataSources/0153c1e7-ec77-41c1-9fb1-957cb04d8170.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/dataSources/0153c1e7-ec77-41c1-9fb1-957cb04d8170.xml" afterDir="false" />
+    <list default="true" id="c6564612-8fe2-49e4-bb4c-5d4305a5e686" name="Changes" comment="Feedback API added and update product fixed">
+      <change afterPath="$PROJECT_DIR$/backend/College-Dealz/src/main/java/com/nd/controller/ReportController.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/College-Dealz/src/main/java/com/nd/dto/ReportEmailRequest.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/College-Dealz/src/main/java/com/nd/service/EmailService.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/College-Dealz/src/main/java/com/nd/service/Impl/EmailServiceImpl.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/College-Dealz/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/backend/College-Dealz/pom.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/College-Dealz/src/main/java/com/nd/dto/ProductDto.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/College-Dealz/src/main/java/com/nd/dto/ProductDto.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/College-Dealz/src/main/java/com/nd/entities/Product.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/College-Dealz/src/main/java/com/nd/entities/Product.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/College-Dealz/src/main/java/com/nd/repositories/ImageRepo.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/College-Dealz/src/main/java/com/nd/repositories/ImageRepo.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/College-Dealz/src/main/java/com/nd/service/Impl/ProductServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/College-Dealz/src/main/java/com/nd/service/Impl/ProductServiceImpl.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/College-Dealz/src/main/resources/application.properties" beforeDir="false" afterPath="$PROJECT_DIR$/backend/College-Dealz/src/main/resources/application.properties" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/College-Dealz/src/main/java/com/nd/controller/ProductController.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/College-Dealz/src/main/java/com/nd/controller/ProductController.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
-  </component>
-  <component name="ChangesViewManager">
-    <option name="groupingKeys">
-      <option value="directory" />
-      <option value="module" />
-    </option>
   </component>
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
@@ -126,7 +113,7 @@
       <workItem from="1739289890322" duration="49000" />
       <workItem from="1739351427978" duration="1860000" />
       <workItem from="1739355862662" duration="1959000" />
-      <workItem from="1739357957256" duration="12795000" />
+      <workItem from="1739357957256" duration="15238000" />
     </task>
     <task id="LOCAL-00001" summary="Image API and &#10;product curd with Image">
       <option name="closed" value="true" />
@@ -168,7 +155,15 @@
       <option name="project" value="LOCAL" />
       <updated>1739358204503</updated>
     </task>
-    <option name="localTasksCounter" value="6" />
+    <task id="LOCAL-00006" summary="Feedback API added and update product fixed">
+      <option name="closed" value="true" />
+      <created>1739389966380</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1739389966380</updated>
+    </task>
+    <option name="localTasksCounter" value="7" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -205,7 +200,8 @@
     <MESSAGE value="Chat controller bug fixed 2 ." />
     <MESSAGE value="gitignore file update" />
     <MESSAGE value="Oauth2 password and Profile Picture &#10;handled" />
-    <option name="LAST_COMMIT_MESSAGE" value="Oauth2 password and Profile Picture &#10;handled" />
+    <MESSAGE value="Feedback API added and update product fixed" />
+    <option name="LAST_COMMIT_MESSAGE" value="Feedback API added and update product fixed" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
