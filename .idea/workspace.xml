@@ -4,24 +4,14 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="c6564612-8fe2-49e4-bb4c-5d4305a5e686" name="Changes" comment="Chat controller bug fixed.">
+    <list default="true" id="c6564612-8fe2-49e4-bb4c-5d4305a5e686" name="Changes" comment="Oauth 2 with small bug">
       <change beforePath="$PROJECT_DIR$/.idea/dataSources.local.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/dataSources.local.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/College-Dealz/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/backend/College-Dealz/pom.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/College-Dealz/src/main/java/com/nd/Filter/JwtAuthenticationFilter.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/College-Dealz/src/main/java/com/nd/Filter/JwtAuthenticationFilter.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/College-Dealz/src/main/java/com/nd/config/OAuthAuthenticationSuccessHandler.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/College-Dealz/src/main/java/com/nd/config/OAuthAuthenticationSuccessHandler.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/backend/College-Dealz/src/main/java/com/nd/config/SecurityConfig.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/College-Dealz/src/main/java/com/nd/config/SecurityConfig.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/College-Dealz/src/main/java/com/nd/config/WebsocketConfig.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/College-Dealz/src/main/java/com/nd/config/WebsocketConfig.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/College-Dealz/src/main/java/com/nd/entities/Message.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/College-Dealz/src/main/java/com/nd/entities/Message.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/College-Dealz/src/main/java/com/nd/repositories/ChatRepo.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/College-Dealz/src/main/java/com/nd/repositories/ChatRepo.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/College-Dealz/src/main/java/com/nd/repositories/MessageRepo.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/College-Dealz/src/main/java/com/nd/repositories/MessageRepo.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/College-Dealz/src/main/java/com/nd/service/Impl/MessageServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/College-Dealz/src/main/java/com/nd/service/Impl/MessageServiceImpl.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/College-Dealz/src/main/java/com/nd/service/JwtService.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/College-Dealz/src/main/java/com/nd/service/JwtService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/College-Dealz/src/main/java/com/nd/service/MessageService.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/College-Dealz/src/main/java/com/nd/service/MessageService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/College-Dealz/src/main/resources/application.properties" beforeDir="false" afterPath="$PROJECT_DIR$/backend/College-Dealz/src/main/resources/application.properties" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/pages/chat/Chat.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/pages/chat/Chat.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/pages/chat/ChatList.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/pages/chat/ChatList.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/pages/chat/Messages.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/pages/chat/Messages.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/redux/Auth/actions.js" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/redux/Auth/actions.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/College-Dealz/src/main/java/com/nd/entities/Notification.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/College-Dealz/src/main/java/com/nd/entities/Notification.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/College-Dealz/src/main/java/com/nd/entities/Role.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/College-Dealz/src/main/java/com/nd/entities/Role.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/College-Dealz/src/main/java/com/nd/entities/Token.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/College-Dealz/src/main/java/com/nd/entities/Token.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -147,7 +137,39 @@
       <option name="project" value="LOCAL" />
       <updated>1739004653257</updated>
     </task>
-    <option name="localTasksCounter" value="3" />
+    <task id="LOCAL-00003" summary="Notification Controller Tested">
+      <option name="closed" value="true" />
+      <created>1737386396166</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1737386396166</updated>
+    </task>
+    <task id="LOCAL-00004" summary="University Controller build.">
+      <option name="closed" value="true" />
+      <created>1738067142497</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1738067142497</updated>
+    </task>
+    <task id="LOCAL-00005" summary="Wantlist API Checked">
+      <option name="closed" value="true" />
+      <created>1738087160482</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1738087160482</updated>
+    </task>
+    <task id="LOCAL-00006" summary="University Controller Checked">
+      <option name="closed" value="true" />
+      <created>1738087553185</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1738087553185</updated>
+    </task>
+    <option name="localTasksCounter" value="7" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -156,8 +178,12 @@
   <component name="VcsManagerConfiguration">
     <MESSAGE value="Product Controller from authentication header" />
     <MESSAGE value="Image API and &#10;product curd with Image" />
-    <MESSAGE value="Chat controller bug fixed." />
-    <option name="LAST_COMMIT_MESSAGE" value="Chat controller bug fixed." />
+    <MESSAGE value="Product Service with images &#10;completed." />
+    <MESSAGE value="Notification Controller Tested" />
+    <MESSAGE value="University Controller build." />
+    <MESSAGE value="Wantlist API Checked" />
+    <MESSAGE value="University Controller Checked" />
+    <option name="LAST_COMMIT_MESSAGE" value="University Controller Checked" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
