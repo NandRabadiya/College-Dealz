@@ -6,38 +6,98 @@ import { useNavigate } from "react-router-dom";
 import { API_BASE_URL } from "../Api/api";
 import { useEffect, useState } from "react";
 
-
 const ProductCard = () => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  
-    const [isAuthenticated, setIsAuthenticated] = useState(Boolean(localStorage.getItem("jwt")));
+
+  const [isAuthenticated, setIsAuthenticated] = useState(
+    Boolean(localStorage.getItem("jwt"))
+  );
   const navigate = useNavigate();
 
   useEffect(() => {
     const fetchUniversityProducts = async () => {
       try {
-        const token = localStorage.getItem('jwt'); // Assuming you store JWT in localStorage
+        const token = localStorage.getItem("jwt"); // Assuming you store JWT in localStorage
         if (!token) {
-          throw new Error('No authentication token found');
+          throw new Error("No authentication token found");
         }
 
-        const response = await fetch(`${API_BASE_URL}/api/products/university`, {
-          headers: {
-            'Authorization': `Bearer ${token}`,
+        const response = await fetch(
+          `${API_BASE_URL}/api/products/university`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
           }
-        });
+        );
 
         if (!response.ok) {
-          throw new Error('Failed to fetch products');
+          throw new Error("Failed to fetch products");
         }
 
         const data = await response.json();
-        setProducts(data);
+
+        // Process each product to include images
+        const productsWithImages = await Promise.all(
+          data.map(async (product) => {
+            // If product already has imageUrls, process them
+            if (product.imageUrls && product.imageUrls.length > 0) {
+              return {
+                ...product,
+                images: product.imageUrls.map((url, index) => ({
+                  id: `${product.id}-${index}`,
+                  url: url,
+                  fileName: `image-${index}`,
+                })),
+              };
+            }
+
+            // Otherwise fetch images from the API
+            try {
+              const imagesResponse = await fetch(
+                `${API_BASE_URL}/api/images/product/${product.id}`,
+                {
+                  headers: {
+                    Authorization: `Bearer ${token}`,
+                  },
+                }
+              );
+
+              if (imagesResponse.ok) {
+                const images = await imagesResponse.json();
+                return {
+                  ...product,
+                  images: images
+                    .map((img) => {
+                      if (img.s3_url) {
+                        return {
+                          id: img.image_id,
+                          url: img.s3_url,
+                          fileName: img.file_name,
+                        };
+                      }
+                      return null;
+                    })
+                    .filter(Boolean),
+                };
+              }
+            } catch (error) {
+              console.error(
+                `Error fetching images for product ${product.id}:`,
+                error
+              );
+            }
+
+            return { ...product, images: [] };
+          })
+        );
+
+        setProducts(productsWithImages);
       } catch (err) {
         setError(err.message);
-        console.error('Error fetching products:', err);
+        console.error("Error fetching products:", err);
       } finally {
         setLoading(false);
       }
@@ -87,7 +147,6 @@ const ProductCard = () => {
     return <div className="m-4 text-center text-red-500">Error: {error}</div>;
   }
 
-
   return (
     <div className="m-4">
       <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
@@ -100,9 +159,13 @@ const ProductCard = () => {
             {/* Image Section */}
             <div className="relative h-64 overflow-hidden">
               <img
-                src={product.images?.[0]?.url || '/api/placeholder/400/320'}
+                src={product.images?.[0]?.url || "/api/placeholder/400/320"}
                 alt={product.name}
                 className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                onError={(e) => {
+                  e.target.onerror = null;
+                  e.target.src = "/api/placeholder/400/320";
+                }}
               />
               <Button
                 variant="ghost"
@@ -132,7 +195,7 @@ const ProductCard = () => {
               <div className="mb-3 text-sm text-muted-foreground">
                 <div className="flex items-center gap-2">
                   <Badge variant="secondary" className="font-normal">
-                    {product.seller?.name || 'Unknown Seller'}
+                    {product.seller?.name || "Unknown Seller"}
                   </Badge>
                   <span className="text-xs">•</span>
                   <span className="text-xs">

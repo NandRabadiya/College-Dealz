@@ -112,4 +112,28 @@ export const getUser = (token) => {
 };
 
 // Logout Action
-export const logout = () => ({ type: LOGOUT });
+// export const logout = () => ({ type: LOGOUT });
+
+export const logout = () => async (dispatch) => {
+  const token = localStorage.getItem("jwt");
+
+  if (!token) {
+    dispatch({ type: LOGOUT });
+    return;
+  }
+
+  try {
+    await axios.post(`${API_BASE_URL}/logout`, {}, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    // Clear token from local storage
+    localStorage.removeItem("jwt");
+  } catch (error) {
+    console.error("Logout failed:", error);
+  }
+
+  dispatch({ type: LOGOUT });
+};

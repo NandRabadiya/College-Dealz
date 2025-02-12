@@ -1,11 +1,11 @@
-import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
-import { Heart, Share2, MessageCircle } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import ProductGallery from './ProductGallery';
-import { API_BASE_URL } from '../Api/api';
-import { fetchProductWithImages } from './fetch';
+import React, { useState, useEffect } from "react";
+import { useParams } from "react-router-dom";
+import { Heart, Share2, MessageCircle } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import ProductGallery from "./ProductGallery";
+import { API_BASE_URL } from "../Api/api";
+import { fetchProductWithImages } from "./fetch";
 // ProductDetails Component
 const ProductDetails = () => {
   const { productId } = useParams();
@@ -13,12 +13,84 @@ const ProductDetails = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchProductData = async () => {
       try {
+        console.log("Fetching product data...");
         setLoading(true);
-        const productData = await fetchProductWithImages(productId);
+        const token = localStorage.getItem("jwt");
+        if (!token) {
+          throw new Error("No authentication token found");
+        }
+
+        const response = await fetch(
+          `${API_BASE_URL}/api/products/${productId}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+
+        if (!response.ok) {
+          throw new Error("Failed to fetch product");
+        }
+
+        let productData = await response.json();
+        console.log("Initial product data:", productData); // Log initial data
+
+        // Handle direct imageUrls if they exist
+        if (productData.imageUrls && productData.imageUrls.length > 0) {
+          console.log("Using direct imageUrls:", productData.imageUrls);
+          productData = {
+            ...productData,
+            images: productData.imageUrls.map((url, index) => ({
+              id: `${productId}-${index}`,
+              url: url,
+              fileName: `image-${index}`,
+            })),
+          };
+        } else {
+          // Fetch images from API
+          try {
+            console.log("Fetching images from API...");
+            const imagesResponse = await fetch(
+              `${API_BASE_URL}/api/images/product/${productId}`,
+              {
+                headers: {
+                  Authorization: `Bearer ${token}`,
+                },
+              }
+            );
+            if (imagesResponse.ok) {
+              const imagesData = await imagesResponse.json();
+              console.log("Fetched images data:", imagesData);
+              productData = {
+                ...productData,
+                images: imagesData
+                  .map((img) => {
+                    if (img.s3_url) {
+                      return {
+                        id: img.image_id,
+                        url: img.s3_url,
+                        fileName: img.file_name,
+                      };
+                    }
+                    console.log("Skipped image due to missing s3_url:", img);
+                    return null;
+                  })
+                  .filter(Boolean),
+              };
+            }
+          } catch (error) {
+            console.error(
+              `Error fetching images for product ${productId}:`,
+              error
+            );
+            productData = { ...productData, images: [] };
+          }
+        }
+        console.log('Final product data with images:', productData); // Log final processed data
         setProduct(productData);
       } catch (err) {
         setError(err.message);
@@ -29,17 +101,20 @@ const ProductDetails = () => {
     };
 
     if (productId) {
-      fetchData();
+      fetchProductData();
     }
+    console.log("Product ID:", productId);
+    console.log("Product:", product);
   }, [productId]);
+
   const handleChat = async () => {
     // Implement chat functionality
-    console.log('Starting chat with seller');
+    console.log("Starting chat with seller");
   };
 
   const handleShare = () => {
     // Implement share functionality
-    console.log('Sharing product');
+    console.log("Sharing product");
   };
 
   if (loading) {
@@ -55,20 +130,22 @@ const ProductDetails = () => {
       <div className="grid gap-8 md:grid-cols-2 w-full max-w-5xl">
         {/* Image Gallery Section */}
         <div className="flex justify-center">
-          <ProductGallery productId={product.id} />
+          <ProductGallery images={product?.images || []} />
         </div>
 
         {/* Product Info Section */}
         <div className="space-y-6">
           <div>
             <h1 className="text-3xl font-bold mb-2">{product.name}</h1>
-            <div className="text-2xl font-bold text-primary">₹{product.price}</div>
+            <div className="text-2xl font-bold text-primary">
+              ₹{product.price}
+            </div>
           </div>
 
           <div className="space-y-2">
             <div className="flex items-center gap-2">
               <Badge variant="secondary" className="font-normal">
-                {product.seller?.name || 'Unknown Seller'}
+                {product.seller?.name || "Unknown Seller"}
               </Badge>
               <span className="text-xs">•</span>
               <span className="text-sm text-muted-foreground">
@@ -82,7 +159,7 @@ const ProductDetails = () => {
               <h3 className="text-lg font-semibold mb-2">Condition</h3>
               <Badge variant="outline">{product.condition}</Badge>
             </div>
-            
+
             <div>
               <h3 className="text-lg font-semibold mb-2">Category</h3>
               <Badge variant="outline">{product.category}</Badge>
@@ -91,7 +168,9 @@ const ProductDetails = () => {
             {product.monthsOld && (
               <div>
                 <h3 className="text-lg font-semibold mb-2">Age</h3>
-                <p className="text-muted-foreground">{product.monthsOld} months old</p>
+                <p className="text-muted-foreground">
+                  {product.monthsOld} months old
+                </p>
               </div>
             )}
 
