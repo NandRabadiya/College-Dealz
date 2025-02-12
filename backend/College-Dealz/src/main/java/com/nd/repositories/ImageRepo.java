@@ -10,4 +10,5 @@ import java.util.List;
 public interface ImageRepo extends JpaRepository<Image, Integer> {
     List<Image> findByProductId(Integer productId); // Fetch all images for a product
 
+
 }
