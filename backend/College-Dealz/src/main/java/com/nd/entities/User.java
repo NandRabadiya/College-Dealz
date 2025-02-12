@@ -42,7 +42,7 @@ public class User implements UserDetails {
     @Column
     private String password;
 
-    @Column(name = "profile_picture")
+    @Column(name = "profile_picture", columnDefinition = "LONGBLOB")
     private byte[] profilePicture;
 
     @Column(name = "created_at")

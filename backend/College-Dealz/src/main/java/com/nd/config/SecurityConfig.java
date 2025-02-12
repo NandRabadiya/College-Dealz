@@ -6,6 +6,7 @@ import com.nd.service.JwtService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authorization.AuthorizationDecision;
@@ -40,6 +41,7 @@ public class SecurityConfig {
     private final CustomLogoutHandler logoutHandler;
 
         @Autowired
+        @Lazy
     private OAuthAuthenticationSuccessHandler handler;
 
     public SecurityConfig(UserDetailsServiceImpl userDetailsServiceImp,

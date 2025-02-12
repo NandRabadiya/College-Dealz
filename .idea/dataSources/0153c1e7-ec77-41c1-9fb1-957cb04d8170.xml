@@ -1671,7 +1671,7 @@ role_id</ColNames>
       <UnderlyingIndexName>PRIMARY</UnderlyingIndexName>
     </key>
     <column id="434" parent="313" name="user_id">
-      <AutoIncrement>19</AutoIncrement>
+      <AutoIncrement>36</AutoIncrement>
       <NotNull>1</NotNull>
       <Position>1</Position>
       <StoredType>int|0s</StoredType>
@@ -1696,7 +1696,7 @@ role_id</ColNames>
     </column>
     <column id="439" parent="313" name="profile_picture">
       <Position>6</Position>
-      <StoredType>varbinary(255)|0s</StoredType>
+      <StoredType>longblob|0s</StoredType>
     </column>
     <column id="440" parent="313" name="created_at">
       <DefaultExpression>CURRENT_TIMESTAMP</DefaultExpression>
