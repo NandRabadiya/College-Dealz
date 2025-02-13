@@ -1,6 +1,8 @@
 package com.nd.service.Impl;
 
+import com.nd.dto.ProductDto;
 import com.nd.dto.WishlistDto;
+import com.nd.entities.Product;
 import com.nd.entities.Wishlist;
 import com.nd.exceptions.ResourceNotFoundException;
 import com.nd.repositories.ProductRepo;
@@ -29,6 +31,8 @@ public class WishlistServiceImpl implements WishlistService {
     @Autowired
     private UserRepo userRepo;
 
+    @Autowired
+    private ProductService productService;
 
     @Autowired
     private JwtService jwtService;
@@ -54,12 +58,14 @@ public class WishlistServiceImpl implements WishlistService {
     }
 
     @Override
-    public List<WishlistDto> getWishlistByUser(String authHeader) {
+    public List<ProductDto> getWishlistByUser(String authHeader) {
         int userId = jwtService.getUserIdFromToken(authHeader);
-        return wishlistRepository.findByUserId(userId).stream()
-                .map(this::mapToDto)
+        List<Product> wishlistProducts = wishlistRepository.findAllProductsByUserId(userId);
+
+        return wishlistProducts.stream()
+                .map(product -> productService.mapToDto(product))
                 .collect(Collectors.toList());
-    }
+        }
 
     @Override
     @Transactional
@@ -82,6 +88,7 @@ public class WishlistServiceImpl implements WishlistService {
         WishlistDto dto = new WishlistDto();
         dto.setWishlistId(wishlist.getId());
         dto.setUserId(wishlist.getUser().getId());
+
         dto.setProductId(wishlist.getProduct().getId());
 
         return dto;

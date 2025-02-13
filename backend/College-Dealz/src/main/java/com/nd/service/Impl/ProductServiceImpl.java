@@ -267,8 +267,8 @@ System.out.println(jwtService.getUniversityIdFromToken(authHeader));
 
     }
 
-
-    private ProductDto mapToDto(Product product) {
+    @Override
+    public ProductDto mapToDto(Product product) {
         ProductDto productDto = new ProductDto();
         productDto.setId(product.getId());
         productDto.setName(product.getName());

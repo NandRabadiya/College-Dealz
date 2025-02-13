@@ -2,6 +2,7 @@
 // WishlistController
 package com.nd.controller;
 
+import com.nd.dto.ProductDto;
 import com.nd.dto.WishlistDto;
 import com.nd.service.WishlistService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,10 +31,10 @@ public class WishlistController {
         }
     }
 
-    @GetMapping
-    public ResponseEntity<List<WishlistDto>> getWishlist(
+    @GetMapping("/")
+    public ResponseEntity<List<ProductDto>> getWishlist(
             @RequestHeader("Authorization") String authHeader) {
-        List<WishlistDto> wishlist = wishlistService.getWishlistByUser(authHeader);
+        List<ProductDto> wishlist = wishlistService.getWishlistByUser(authHeader);
         return ResponseEntity.ok(wishlist);
     }
 
