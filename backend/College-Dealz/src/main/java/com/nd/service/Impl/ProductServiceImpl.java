@@ -10,6 +10,7 @@ import com.nd.repositories.UserRepo;
 import com.nd.service.ImageService;
 import com.nd.service.JwtService;
 import com.nd.service.ProductService;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -112,50 +113,75 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public ProductDto updateProduct(Integer productId, ProductDto productDto) throws  IOException {
+    @Transactional
+    public ProductDto updateProduct(Integer productId, ProductDto productDto) throws IOException {
+        // 1. Fetch the existing product
         Product existingProduct = productRepo.findById(productId)
                 .orElseThrow(() -> new RuntimeException("Product with ID " + productId + " not found."));
 
-        existingProduct.setName(productDto.getName());
-        existingProduct.setDescription(productDto.getDescription());
-        existingProduct.setPrice(productDto.getPrice());
-        existingProduct.setCondition(productDto.getCondition());
-        existingProduct.setCategory(productDto.getCategory());
-        existingProduct.setMonthsOld(productDto.getMonthsOld());
+        // 2. Update basic product details ONLY if new values are provided
+        if (productDto.getName() != null) {
+            existingProduct.setName(productDto.getName());
+        }
+        if (productDto.getDescription() != null) {
+            existingProduct.setDescription(productDto.getDescription());
+        }
+        if (productDto.getPrice() != null) {
+            existingProduct.setPrice(productDto.getPrice());
+        }
+        if (productDto.getCondition() != null) {
+            existingProduct.setCondition(productDto.getCondition());
+        }
+        if (productDto.getCategory() != null) {
+            existingProduct.setCategory(productDto.getCategory());
+        }
+        if (productDto.getMonthsOld() != null) {
+            existingProduct.setMonthsOld(productDto.getMonthsOld());
+        }
+        // Update the modification timestamp regardless
         existingProduct.setUpdatedAt(Instant.now());
 
-        Product updatedProduct = productRepo.save(existingProduct);
+        // 3. Remove images marked for deletion (if provided)
+        List<Integer> removedImageIds = productDto.getRemoveImageIds();
+        if (removedImageIds != null && !removedImageIds.isEmpty()) {
+            List<Image> imagesToRemove = existingProduct.getImages().stream()
+                    .filter(image -> removedImageIds.contains(image.getId()))
+                    .collect(Collectors.toList());
+            if (!imagesToRemove.isEmpty()) {
+                System.out.println("Removing images: " + imagesToRemove);
+                // Remove associations from the product's collection.
+                existingProduct.getImages().removeAll(imagesToRemove);
+                // Optionally, if orphanRemoval isn't enabled, delete them explicitly:
+                // imageRepo.deleteAll(imagesToRemove);
+            }
+        }
 
-
-        List<Image> images = new ArrayList<>();
-        if (productDto.getImages() != null) {
-            for (MultipartFile file : productDto.getImages()) {
+        // 4. Add new images (if provided)
+        List<MultipartFile> newFiles = productDto.getImages();
+        if (newFiles != null && !newFiles.isEmpty()) {
+            List<Image> newImages = new ArrayList<>();
+            for (MultipartFile file : newFiles) {
                 Image image = new Image();
                 image.setProduct(existingProduct);
                 image.setFileName(file.getOriginalFilename());
                 image.setContentType(file.getContentType());
                 image.setImageData(file.getBytes());
                 image.setCreatedAt(Instant.now());
-                image.setUpdatedAt(Instant.now());// Save image as byte array
-
-                System.out.println(image.getImageData() + image.getFileName());
-                images.add(image);
-
+                image.setUpdatedAt(Instant.now());
+                newImages.add(image);
+                System.out.println("Adding new image: " + image.getFileName());
             }
-            imageRepo.saveAll(images);
-        }else {
-            throw new ResourceNotFoundException("Images are not submited with product");
+            // Save new images first (if your mapping requires it)
+            imageRepo.saveAll(newImages);
+            // Append new images to the existing collection
+            existingProduct.getImages().addAll(newImages);
         }
 
-        existingProduct.setImages(images);
-
-        // Step 5: Save the updated product to ensure images are linked
-        Product savedProductwithImage =  productRepo.save(existingProduct);
-
-        ProductDto savedProductDtoWithImage = mapToDto(savedProductwithImage);
-
-        return savedProductDtoWithImage;
+        // 5. Save the updated product
+        Product savedProduct = productRepo.save(existingProduct);
+        return mapToDto(savedProduct);
     }
+
 
     @Override
     public ProductDto getProductById(Integer productId) {

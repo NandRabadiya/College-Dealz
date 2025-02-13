@@ -46,6 +46,8 @@ public class ProductDto {
 
     private List<MultipartFile> images;
 
+    private List<Integer> removeImageIds;
+
     private List<String> imageUrls;
 
 

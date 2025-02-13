@@ -4,14 +4,30 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="c1b5cfae-95f7-480a-95bc-2f2ad8538901" name="Changes" comment="">
+    <list default="true" id="c6564612-8fe2-49e4-bb4c-5d4305a5e686" name="Changes" comment="gitignore file update">
+      <change beforePath="$PROJECT_DIR$/.idea/dataSources.local.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/dataSources.local.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/dataSources/0153c1e7-ec77-41c1-9fb1-957cb04d8170.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/dataSources/0153c1e7-ec77-41c1-9fb1-957cb04d8170.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/pages/product/ProductCard.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/pages/product/ProductCard.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/College-Dealz/src/main/java/com/nd/controller/ProductController.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/College-Dealz/src/main/java/com/nd/controller/ProductController.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="ChangesViewManager">
+    <option name="groupingKeys">
+      <option value="directory" />
+      <option value="module" />
+    </option>
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Interface" />
+        <option value="Class" />
+      </list>
+    </option>
   </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
@@ -72,13 +88,97 @@
       <created>1739384999838</created>
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
-      <updated>1739384999838</updated>
-      <workItem from="1739385001711" duration="4146000" />
-      <workItem from="1739443596298" duration="616000" />
+      <updated>1735357705502</updated>
+      <workItem from="1736830923020" duration="908000" />
+      <workItem from="1736833100074" duration="7647000" />
+      <workItem from="1736934860708" duration="14980000" />
+      <workItem from="1737038554640" duration="5162000" />
+      <workItem from="1737176029662" duration="7679000" />
+      <workItem from="1737191762147" duration="2169000" />
+      <workItem from="1739015507632" duration="6014000" />
+      <workItem from="1739023789985" duration="3464000" />
+      <workItem from="1739289890322" duration="49000" />
+      <workItem from="1739351427978" duration="1860000" />
+      <workItem from="1739355862662" duration="1959000" />
     </task>
+    <task id="LOCAL-00001" summary="Image API and &#10;product curd with Image">
+      <option name="closed" value="true" />
+      <created>1737189077080</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1737189077080</updated>
+    </task>
+    <task id="LOCAL-00002" summary="Chat controller bug fixed.">
+      <option name="closed" value="true" />
+      <created>1739004653256</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1739004653257</updated>
+    </task>
+    <task id="LOCAL-00003" summary="Chat controller bug fixed 2 .">
+      <option name="closed" value="true" />
+      <created>1739004985177</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1739004985177</updated>
+    </task>
+    <task id="LOCAL-00004" summary="gitignore file update">
+      <option name="closed" value="true" />
+      <created>1739353226195</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1739353226195</updated>
+    </task>
+    <option name="localTasksCounter" value="5" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="3" />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State>
+              <option name="FILTERS">
+                <map>
+                  <entry key="branch">
+                    <value>
+                      <list>
+                        <option value="origin/backend" />
+                      </list>
+                    </value>
+                  </entry>
+                </map>
+              </option>
+            </State>
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="Product Controller from authentication header" />
+    <MESSAGE value="Image API and &#10;product curd with Image" />
+    <MESSAGE value="Chat controller bug fixed." />
+    <MESSAGE value="Chat controller bug fixed 2 ." />
+    <MESSAGE value="gitignore file update" />
+    <option name="LAST_COMMIT_MESSAGE" value="gitignore file update" />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/backend/College-Dealz/src/main/java/com/nd/service/Impl/ProductServiceImpl.java</url>
+          <line>205</line>
+          <option name="timeStamp" value="1" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
   </component>
 </project>
