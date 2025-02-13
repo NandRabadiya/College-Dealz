@@ -231,6 +231,12 @@ System.out.println(jwtService.getUniversityIdFromToken(authHeader));
     }
 
     @Override
+    public List<ProductDto> getProductsByUniversityId(Integer universityId) {
+        return productRepo.findByUniversityId(universityId).stream()
+                .map(this::mapToDto)
+                .collect(Collectors.toList());    }
+
+    @Override
     public void deleteProduct(Integer productId) {
         if (productRepo.existsById(productId)) {
             productRepo.deleteById(productId);
@@ -259,15 +265,9 @@ System.out.println(jwtService.getUniversityIdFromToken(authHeader));
 
 
     @Override
-    public Chat getChatByProductId(int ProductId){
-
-
-        Product product=productRepo.getProductById(ProductId);
-
-        Chat chat=product.getChat();
-
-        return chat;
-
+    public List<Chat> getChatByProductId(int ProductId){
+        Product product = productRepo.getProductById(ProductId);
+        return product.getChats();
     }
 
 

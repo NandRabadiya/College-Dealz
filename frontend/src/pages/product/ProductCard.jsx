@@ -5,81 +5,108 @@ import { Badge } from "@/components/ui/badge";
 import { useNavigate } from "react-router-dom";
 import { API_BASE_URL } from "../Api/api";
 import { useEffect, useState } from "react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 const ProductCard = () => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [universities, setUniversities] = useState([]);
+  const [selectedUniversity, setSelectedUniversity] = useState(null);
+  const [showUniversityDialog, setShowUniversityDialog] = useState(false);
+  const [dialogInitialized, setDialogInitialized] = useState(false);
+  const [open, setOpen] = useState(false);
+
 
   const [isAuthenticated, setIsAuthenticated] = useState(
     Boolean(localStorage.getItem("jwt"))
   );
   const navigate = useNavigate();
 
+  // Fetch universities on component mount
   useEffect(() => {
-    const fetchUniversityProducts = async () => {
+    const fetchUniversities = async () => {
       try {
-        const token = localStorage.getItem("jwt"); // Assuming you store JWT in localStorage
-        if (!token) {
-          throw new Error("No authentication token found");
-        }
-
-        const response = await fetch(
-          `${API_BASE_URL}/api/products/university`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
-
-        if (!response.ok) {
-          throw new Error("Failed to fetch products");
-        }
-
+        const response = await fetch(`${API_BASE_URL}/api/universities`);
+        if (!response.ok) throw new Error("Failed to fetch universities");
         const data = await response.json();
+        setUniversities(data);
+        setDialogInitialized(true);
+      } catch (err) {
+        console.error("Error fetching universities:", err);
+        setError("Failed to fetch universities");
+      }
+    };
+    fetchUniversities();
+  }, []);
 
-        // Process each product to include images
-        const productsWithImages = await Promise.all(
-          data.map(async (product) => {
-            // If product already has imageUrls, process them
-            if (product.imageUrls && product.imageUrls.length > 0) {
-              return {
-                ...product,
-                images: product.imageUrls.map((url, index) => ({
-                  id: `${product.id}-${index}`,
-                  url: url,
-                  fileName: `image-${index}`,
-                })),
-              };
-            }
+ // Show university selection dialog for non-logged-in users
+ useEffect(() => {
+  if (dialogInitialized && !isAuthenticated && !selectedUniversity) {
+    console.log("Showing university dialog");
+    setShowUniversityDialog(true);
+  }
+}, [isAuthenticated, selectedUniversity, dialogInitialized]);
 
-            // Otherwise fetch images from the API
+  // Modified product fetch function to handle both authenticated and non-authenticated cases
+  const fetchProducts = async (universityId = null) => {
+    try {
+      setLoading(true);
+      const token = localStorage.getItem("jwt");
+      const headers = token ? { Authorization: `Bearer ${token}` } : {};
+
+        // Don't fetch if we need a university ID but don't have one
+        if (!token && !universityId) {
+          setProducts([]);
+          return;
+        }
+  
+      // Use different endpoints based on authentication status
+      const endpoint = token
+        ? `${API_BASE_URL}/api/products/university`
+        : `${API_BASE_URL}/api/products/public/university/${universityId}`;
+
+      const response = await fetch(endpoint, { headers });
+      if (!response.ok) throw new Error("Failed to fetch products");
+
+      const data = await response.json();
+
+      // Process products with images
+      const productsWithImages = await Promise.all(
+        data.map(async (product) => {
+          if (product.imageUrls?.length > 0) {
+            return {
+              ...product,
+              images: product.imageUrls.map((url, index) => ({
+                id: `${product.id}-${index}`,
+                url: url,
+                fileName: `image-${index}`,
+              })),
+            };
+          }
+
+          // Fetch images if needed
+          if (token) {
             try {
               const imagesResponse = await fetch(
                 `${API_BASE_URL}/api/images/product/${product.id}`,
-                {
-                  headers: {
-                    Authorization: `Bearer ${token}`,
-                  },
-                }
+                { headers }
               );
-
               if (imagesResponse.ok) {
                 const images = await imagesResponse.json();
                 return {
                   ...product,
                   images: images
-                    .map((img) => {
-                      if (img.s3_url) {
-                        return {
-                          id: img.image_id,
-                          url: img.s3_url,
-                          fileName: img.file_name,
-                        };
-                      }
-                      return null;
-                    })
+                    .map((img) =>
+                      img.s3_url
+                        ? {
+                            id: img.image_id,
+                            url: img.s3_url,
+                            fileName: img.file_name,
+                          }
+                        : null
+                    )
                     .filter(Boolean),
                 };
               }
@@ -89,23 +116,32 @@ const ProductCard = () => {
                 error
               );
             }
+          }
+          return { ...product, images: [] };
+        })
+      );
 
-            return { ...product, images: [] };
-          })
-        );
+      setProducts(productsWithImages);
+    } catch (err) {
+      setError(err.message);
+      console.error("Error fetching products:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-        setProducts(productsWithImages);
-      } catch (err) {
-        setError(err.message);
-        console.error("Error fetching products:", err);
-      } finally {
-        setLoading(false);
-      }
-    };
+  // Handle university selection
+  const handleUniversitySelect = (universityId) => {
+    setSelectedUniversity(universityId);
+    setShowUniversityDialog(false);
+    fetchProducts(universityId);
+  };
 
-    fetchUniversityProducts();
-  }, []);
-  // Function to handle protected actions like Wishlist and Chat
+  useEffect(() => {
+    if (isAuthenticated) {
+      fetchProducts();
+    }
+  }, [isAuthenticated]);
   const handleProtectedAction = (action, e) => {
     if (e) e.stopPropagation();
     if (!isAuthenticated) {
@@ -124,18 +160,21 @@ const ProductCard = () => {
   const handleWishlist = async (product, e) => {
     handleProtectedAction(async (productId) => {
       try {
-        const response = await fetch(`${API_BASE_URL}/api/wishlist/${productId}`, {
-          method: "POST", // Use POST to add to wishlist
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-        });
-  
+        const response = await fetch(
+          `${API_BASE_URL}/api/wishlist/${productId}`,
+          {
+            method: "POST", // Use POST to add to wishlist
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+
         if (!response.ok) {
           throw new Error("Failed to add to wishlist");
         }
-  
+
         console.log("Added to wishlist:", product);
       } catch (error) {
         console.error("Error adding to wishlist:", error);
@@ -164,7 +203,53 @@ const ProductCard = () => {
   }
 
   return (
+    <>
+    <Dialog 
+        open={open}
+        onOpenChange={setOpen}
+      >
+        {console.log("Dialog")}
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Select Your University</DialogTitle>
+          </DialogHeader>
+          <div className="p-4">
+            <Select onValueChange={(value) => {
+              handleUniversitySelect(value);
+              setOpen(false);
+            }}>
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Choose a university" />
+              </SelectTrigger>
+              <SelectContent>
+                {universities.map((university) => (
+                  <SelectItem key={university.id} value={university.id}>
+                    {university.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        </DialogContent>
+      </Dialog>
     <div className="m-4">
+       {/* University selection for manual change */}
+       {!isAuthenticated && selectedUniversity && (
+          <div className="mb-4">
+            <Select value={selectedUniversity} onValueChange={handleUniversitySelect}>
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {universities.map((university) => (
+                  <SelectItem key={university.id} value={university.id}>
+                    {university.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        )}
       <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
         {products.map((product) => (
           <div
@@ -246,6 +331,8 @@ const ProductCard = () => {
         ))}
       </div>
     </div>
+    </>
+
   );
 };
 

@@ -27,9 +27,13 @@ public class Chat {
     @JoinColumn(name = "receiver_id", referencedColumnName = "user_id", nullable = false)
     private User receiver;
 
-    @OneToOne(fetch = FetchType.LAZY)
+//    @OneToOne(fetch = FetchType.LAZY)
+//    @JoinColumn(name = "product_id", referencedColumnName = "product_id", nullable = false)
+//    private Product product; // Chat is linked to a product context
+
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "product_id", referencedColumnName = "product_id", nullable = false)
-    private Product product; // Chat is linked to a product context
+    private Product product;
 
     @OneToMany(mappedBy = "chat", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Message> messages = new ArrayList<>();

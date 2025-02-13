@@ -11,6 +11,7 @@ import org.hibernate.annotations.ColumnDefault;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.List;
 
 @Getter
@@ -51,9 +52,10 @@ public class Product {
     private List<Image> images;
 
 
-    @OneToOne(mappedBy = "product", cascade = CascadeType.ALL)
-    private Chat chat;
-
+//    @OneToOne(mappedBy = "product", cascade = CascadeType.ALL)
+//    private Chat chat;
+    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Chat> chats = new ArrayList<>();
 
     @Column(name = "months_old")
     private Integer monthsOld;

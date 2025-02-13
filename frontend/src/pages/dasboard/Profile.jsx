@@ -15,6 +15,8 @@ import UserDeals from "./UserDeals";
 import { logout } from ".././../redux/Auth/actions";
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
+import { Switch } from "@/components/ui/switch";
+import AdminDashboard from "../admin/AdminDashboard";
 
 const Dashboard = () => {
   const { user, isAuthenticated } = useSelector((state) => state.auth);
@@ -31,6 +33,7 @@ const Dashboard = () => {
   const [isEditingProfile, setIsEditingProfile] = useState(false);
   const [editedName, setEditedName] = useState(localUser.name);
   const [editedImage, setEditedImage] = useState(null);
+  const [isAdminView, setIsAdminView] = useState(false);
 
   const [deals, setDeals] = useState([]); // Replace with fetched data if applicable
   const [isEditingDeal, setIsEditingDeal] = useState(false);
@@ -124,10 +127,15 @@ const Dashboard = () => {
                       ? localUser.university.name
                       : localUser.university}
                   </Badge>
-                  <Button
-                    className="w-full mt-4"
-                    onClick={handleLogout}
-                  >
+                  <div className="flex items-center justify-center space-x-2 mt-4">
+                    <span className="text-sm">User</span>
+                    <Switch
+                      checked={isAdminView}
+                      onCheckedChange={setIsAdminView}
+                    />
+                    <span className="text-sm">Admin</span>
+                  </div>
+                  <Button className="w-full mt-4" onClick={handleLogout}>
                     Logout
                   </Button>
                 </div>
@@ -135,7 +143,10 @@ const Dashboard = () => {
             </Card>
           </div>
           <div className="md:col-span-2">
-            <UserDeals />
+            {/* <UserDeals /> */}
+            <div className="md:col-span-2">
+              {isAdminView ? <AdminDashboard /> : <UserDeals />}
+            </div>
           </div>
         </div>
       </div>

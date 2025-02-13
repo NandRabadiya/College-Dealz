@@ -70,11 +70,14 @@ public class ProductController {
 
         System.out.println("\nin getProductsByUniversity controller\n");
         List<ProductDto> products = productService.getProductsByUniversityId(authHeader);
-
-
         return ResponseEntity.ok(products);
     }
 
+    @GetMapping("/public/university/{universityId}")
+    public ResponseEntity<List<ProductDto>> getProductsByUniversityId(@PathVariable Integer universityId) {
+        System.out.println("\nin getProductsByUniversityId controller\n");
+        List<ProductDto> products = productService.getProductsByUniversityId(universityId);
+        return ResponseEntity.ok(products);    }
 
     @GetMapping
     public ResponseEntity<List<ProductDto>> getAllProducts(@RequestHeader("Authorization") String authHeader) {
