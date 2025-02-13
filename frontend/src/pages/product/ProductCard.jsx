@@ -121,10 +121,26 @@ const ProductCard = () => {
   };
 
   // Add product to Wishlist
-  const handleWishlist = (product, e) => {
-    handleProtectedAction(() => {
-      console.log("Adding to wishlist:", product);
-    }, e);
+  const handleWishlist = async (product, e) => {
+    handleProtectedAction(async (productId) => {
+      try {
+        const response = await fetch(`${API_BASE_URL}/api/wishlist/${productId}`, {
+          method: "POST", // Use POST to add to wishlist
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        });
+  
+        if (!response.ok) {
+          throw new Error("Failed to add to wishlist");
+        }
+  
+        console.log("Added to wishlist:", product);
+      } catch (error) {
+        console.error("Error adding to wishlist:", error);
+      }
+    }, product.id || product._id); // Pass product ID properly
   };
 
   // Start chat with seller
