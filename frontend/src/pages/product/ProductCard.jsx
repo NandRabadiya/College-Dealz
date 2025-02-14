@@ -5,8 +5,19 @@ import { Badge } from "@/components/ui/badge";
 import { useNavigate } from "react-router-dom";
 import { API_BASE_URL } from "../Api/api";
 import { useEffect, useState } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 const ProductCard = () => {
   const [products, setProducts] = useState([]);
@@ -17,7 +28,7 @@ const ProductCard = () => {
   const [showUniversityDialog, setShowUniversityDialog] = useState(false);
   const [dialogInitialized, setDialogInitialized] = useState(false);
   const [open, setOpen] = useState(false);
-
+  const [wishlistedItems, setWishlistedItems] = useState(new Set());
 
   const [isAuthenticated, setIsAuthenticated] = useState(
     Boolean(localStorage.getItem("jwt"))
@@ -41,13 +52,13 @@ const ProductCard = () => {
     fetchUniversities();
   }, []);
 
- // Show university selection dialog for non-logged-in users
- useEffect(() => {
-  if (dialogInitialized && !isAuthenticated && !selectedUniversity) {
-    console.log("Showing university dialog");
-    setShowUniversityDialog(true);
-  }
-}, [isAuthenticated, selectedUniversity, dialogInitialized]);
+  // Show university selection dialog for non-logged-in users
+  useEffect(() => {
+    if (dialogInitialized && !isAuthenticated && !selectedUniversity) {
+      console.log("Showing university dialog");
+      setShowUniversityDialog(true);
+    }
+  }, [isAuthenticated, selectedUniversity, dialogInitialized]);
 
   // Modified product fetch function to handle both authenticated and non-authenticated cases
   const fetchProducts = async (universityId = null) => {
@@ -56,12 +67,12 @@ const ProductCard = () => {
       const token = localStorage.getItem("jwt");
       const headers = token ? { Authorization: `Bearer ${token}` } : {};
 
-        // Don't fetch if we need a university ID but don't have one
-        if (!token && !universityId) {
-          setProducts([]);
-          return;
-        }
-  
+      // Don't fetch if we need a university ID but don't have one
+      if (!token && !universityId) {
+        setProducts([]);
+        return;
+      }
+
       // Use different endpoints based on authentication status
       const endpoint = token
         ? `${API_BASE_URL}/api/products/university`
@@ -157,30 +168,84 @@ const ProductCard = () => {
   };
 
   // Add product to Wishlist
-  const handleWishlist = async (product, e) => {
-    handleProtectedAction(async (productId) => {
-      try {
-        const response = await fetch(
-          `${API_BASE_URL}/api/wishlist/${productId}`,
-          {
-            method: "POST", // Use POST to add to wishlist
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
+  const handleWishlist = async (productId, e) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
 
-        if (!response.ok) {
-          throw new Error("Failed to add to wishlist");
+    if (!isAuthenticated) {
+      setOpen(true); // Show login/university dialog
+      return;
+    }
+    const token = localStorage.getItem("jwt");
+    console.log("Adding to wishlist:", productId);
+
+    try {
+      const response = await fetch(
+        `${API_BASE_URL}/api/wishlist/${productId}`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
         }
+      );
 
-        console.log("Added to wishlist:", product);
-      } catch (error) {
-        console.error("Error adding to wishlist:", error);
+      if (!response.ok) {
+        throw new Error("Failed to add to wishlist");
       }
-    }, product.id || product._id); // Pass product ID properly
+
+      // Update local state to reflect wishlist change
+      setWishlistedItems((prev) => {
+        const newSet = new Set(prev);
+        if (newSet.has(productId)) {
+          newSet.delete(productId);
+        } else {
+          newSet.add(productId);
+        }
+        return newSet;
+      });
+
+      // Optionally update the products state to reflect the change
+      setProducts((prevProducts) =>
+        prevProducts.map((product) =>
+          product.id === productId
+            ? { ...product, isWishlisted: !product.isWishlisted }
+            : product
+        )
+      );
+    } catch (error) {
+      console.error("Error updating wishlist:", error);
+      // Add error handling UI feedback here
+    }
   };
+  // Add this effect to fetch initial wishlist status
+  useEffect(() => {
+    const fetchWishlistStatus = async () => {
+      if (!isAuthenticated) return;
+
+      try {
+        const token = localStorage.getItem("jwt");
+        const response = await fetch(`${API_BASE_URL}/api/wishlist/`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        if (!response.ok) throw new Error("Failed to fetch wishlist");
+
+        const wishlistItems = await response.json();
+        setWishlistedItems(
+          new Set(wishlistItems.map((item) => item.productId))
+        );
+      } catch (error) {
+        console.error("Error fetching wishlist status:", error);
+      }
+    };
+
+    fetchWishlistStatus();
+  }, [isAuthenticated]);
 
   // Start chat with seller
   const handleChat = (product, e) => {
@@ -204,20 +269,19 @@ const ProductCard = () => {
 
   return (
     <>
-    <Dialog 
-        open={open}
-        onOpenChange={setOpen}
-      >
+      {/* <Dialog open={open} onOpenChange={setOpen} className="z-9999">
         {console.log("Dialog")}
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Select Your University</DialogTitle>
           </DialogHeader>
           <div className="p-4">
-            <Select onValueChange={(value) => {
-              handleUniversitySelect(value);
-              setOpen(false);
-            }}>
+            <Select
+              onValueChange={(value) => {
+                handleUniversitySelect(value);
+                setOpen(false);
+              }}
+            >
               <SelectTrigger className="w-full">
                 <SelectValue placeholder="Choose a university" />
               </SelectTrigger>
@@ -231,12 +295,15 @@ const ProductCard = () => {
             </Select>
           </div>
         </DialogContent>
-      </Dialog>
-    <div className="m-4">
-       {/* University selection for manual change */}
-       {!isAuthenticated && selectedUniversity && (
+      </Dialog> */}
+      <div className="m-4">
+        {/* University selection for manual change */}
+        {!isAuthenticated && selectedUniversity && (
           <div className="mb-4">
-            <Select value={selectedUniversity} onValueChange={handleUniversitySelect}>
+            <Select
+              value={selectedUniversity}
+              onValueChange={handleUniversitySelect}
+            >
               <SelectTrigger>
                 <SelectValue />
               </SelectTrigger>
@@ -250,89 +317,90 @@ const ProductCard = () => {
             </Select>
           </div>
         )}
-      <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
-        {products.map((product) => (
-          <div
-            key={product.id}
-            className="group relative overflow-hidden rounded-lg border bg-card transition-all hover:shadow-md cursor-pointer"
-            onClick={() => handleProductClick(product.id)}
-          >
-            {/* Image Section */}
-            <div className="relative h-64 overflow-hidden">
-              <img
-                src={product.images?.[0]?.url || "/api/placeholder/400/320"}
-                alt={product.name}
-                className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
-                onError={(e) => {
-                  e.target.onerror = null;
-                  e.target.src = "/api/placeholder/400/320";
-                }}
-              />
-              <Button
-                variant="ghost"
-                size="icon"
-                className="absolute right-2 top-2 bg-background/80 backdrop-blur-sm hover:bg-background/90"
-                onClick={(e) => handleWishlist(product, e)}
-              >
-                <Heart
-                  className={`h-6 w-6 text-primary transition ${
-                    product.isWishlisted ? "fill-primary" : "hover:fill-primary"
-                  }`}
+        <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
+          {products.map((product) => (
+            <div
+              key={product.id}
+              className="group relative overflow-hidden rounded-lg border bg-card transition-all hover:shadow-md cursor-pointer"
+              onClick={() => handleProductClick(product.id)}
+            >
+              {/* Image Section */}
+              <div className="relative h-64 overflow-hidden">
+                <img
+                  src={product.images?.[0]?.url || "/api/placeholder/400/320"}
+                  alt={product.name}
+                  className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                  onError={(e) => {
+                    e.target.onerror = null;
+                    e.target.src = "/api/placeholder/400/320";
+                  }}
                 />
-              </Button>
-            </div>
-
-            {/* Product Info Section */}
-            <div className="p-4">
-              <div className="mb-2 flex items-start justify-between gap-2">
-                <h3 className="font-semibold leading-tight text-foreground text-xl line-clamp-2">
-                  {product.name}
-                </h3>
-                <div className="text-xl font-bold text-primary whitespace-nowrap">
-                  ₹{product.price}
-                </div>
-              </div>
-
-              <div className="mb-3 text-sm text-muted-foreground">
-                <div className="flex items-center gap-2">
-                  <Badge variant="secondary" className="font-normal">
-                    {product.seller?.name || "Unknown Seller"}
-                  </Badge>
-                  <span className="text-xs">•</span>
-                  <span className="text-xs">
-                    {new Date(product.postDate).toLocaleDateString()}
-                  </span>
-                </div>
-              </div>
-
-              {/* Action Buttons */}
-              <div className="flex items-center justify-between gap-2 pt-2 border-t">
                 <Button
                   variant="ghost"
-                  size="sm"
-                  className="flex-1 text-foreground hover:bg-muted"
-                  onClick={(e) => handleChat(product, e)}
+                  size="icon"
+                  className="absolute right-2 top-2 bg-background/80 backdrop-blur-sm hover:bg-background/90 z-10"
+                  onClick={(e) => handleWishlist(product.id, e)}
                 >
-                  <MessageCircle className="mr-2 h-4 w-4 text-inherit" />
-                  Chat
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="flex-1 text-foreground hover:bg-muted"
-                  onClick={(e) => handleShare(product, e)}
-                >
-                  <Share2 className="mr-2 h-4 w-4 text-inherit" />
-                  Share
+                  <Heart
+                    className={`h-6 w-6 transition-colors duration-200 ${
+                      wishlistedItems.has(product.id)
+                        ? "fill-primary text-primary"
+                        : "text-primary hover:fill-primary/20"
+                    }`}
+                  />
                 </Button>
               </div>
+
+              {/* Product Info Section */}
+              <div className="p-4">
+                <div className="mb-2 flex items-start justify-between gap-2">
+                  <h3 className="font-semibold leading-tight text-foreground text-xl line-clamp-2">
+                    {product.name}
+                  </h3>
+                  <div className="text-xl font-bold text-primary whitespace-nowrap">
+                    ₹{product.price}
+                  </div>
+                </div>
+
+                <div className="mb-3 text-sm text-muted-foreground">
+                  <div className="flex items-center gap-2">
+                    <Badge variant="secondary" className="font-normal">
+                      {product.seller?.name || "Unknown Seller"}
+                    </Badge>
+                    <span className="text-xs">•</span>
+                    <span className="text-xs">
+                      {new Date(product.postDate).toLocaleDateString()}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Action Buttons */}
+                <div className="flex items-center justify-between gap-2 pt-2 border-t">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="flex-1 text-foreground hover:bg-muted"
+                    onClick={(e) => handleChat(product, e)}
+                  >
+                    <MessageCircle className="mr-2 h-4 w-4 text-inherit" />
+                    Chat
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="flex-1 text-foreground hover:bg-muted"
+                    onClick={(e) => handleShare(product, e)}
+                  >
+                    <Share2 className="mr-2 h-4 w-4 text-inherit" />
+                    Share
+                  </Button>
+                </div>
+              </div>
             </div>
-          </div>
-        ))}
+          ))}
+        </div>
       </div>
-    </div>
     </>
-
   );
 };
 
