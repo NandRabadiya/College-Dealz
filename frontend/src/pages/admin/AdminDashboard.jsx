@@ -46,61 +46,58 @@ function AdminDashboard() {
   }, []);
 
   // Fetch functions
-  const fetchUniversities = async () => {
-    try {
-      const response = await fetch(`${API_BASE_URL}/api/universities`, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("jwt")}`,
-        },
-      });
-      const data = await response.json();
-      setUniversities(data);
-    } catch (error) {
-      console.error("Error fetching universities:", error);
-    }
-  };
+ // Fetch functions with proper error handling
+ const fetchUniversities = async () => {
+  try {
+    const response = await axios.get(`${API_BASE_URL}/api/universities`, {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("jwt")}`,
+      },
+    });
+    setUniversities(response.data);
+  } catch (error) {
+    console.error("Error fetching universities:", error);
+  }
+};
+const fetchProducts = async () => {
+  try {
+    const response = await axios.get(`${API_BASE_URL}/api/products`, {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("jwt")}`,
+      },
+    });
+    setProducts(response.data);
+  } catch (error) {
+    console.error("Error fetching products:", error);
+  }
+};
 
-  const fetchProducts = async () => {
-    try {
-      const response = await fetch(`${API_BASE_URL}/api/products`, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("jwt")}`,
-        },
-      });
-      const data = await response.json();
-      setProducts(data);
-    } catch (error) {
-      console.error("Error fetching products:", error);
-    }
-  };
+ 
+const fetchUsers = async () => {
+  try {
+    const response = await axios.get(`${API_BASE_URL}/api/users`, {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("jwt")}`,
+      },
+    });
+    setUsers(response.data);
+  } catch (error) {
+    console.error("Error fetching users:", error);
+  }
+};
 
-  const fetchUsers = async () => {
-    try {
-      const response = await fetch(`${API_BASE_URL}/api/users`, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("jwt")}`,
-        },
-      });
-      const data = await response.json();
-      setUsers(data);
-    } catch (error) {
-      console.error("Error fetching users:", error);
-    }
-  };
-
-  const fetchAdmins = async () => {
-    try {
-      const response = await fetch(`${API_BASE_URL}/api/admins`, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("jwt")}`,
-        },
-      });
-      const data = await response.json();
-      setAdmins(data);
-    } catch (error) {
-      console.error("Error fetching admins:", error);
-    }
-  };
+const fetchAdmins = async () => {
+  try {
+    const response = await axios.get(`${API_BASE_URL}/api/admin_only/all`, {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("jwt")}`,
+      },
+    });
+    setAdmins(response.data);
+  } catch (error) {
+    console.error("Error fetching admins:", error);
+  }
+};
 
   // University handlers
   const handleSubmit = async (e) => {
@@ -156,32 +153,40 @@ function AdminDashboard() {
   };
 
   // Admin management handlers
+  // Fixed handleToggleAdmin function
   const handleToggleAdmin = async (userId, isAdmin) => {
-    if (
-      window.confirm(
-        `Are you sure you want to ${isAdmin ? "remove" : "make"} this user ${
-          isAdmin ? "from" : "an"
-        } admin?`
-      )
-    ) {
+    if (window.confirm(
+      `Are you sure you want to ${isAdmin ? "remove" : "make"} this user ${
+        isAdmin ? "from" : "an"
+      } admin?`
+    )) {
       try {
-        await axios.post(
-          `${API_BASE_URL}/api/users/${userId}/toggle-admin`,
-          {},
-          {
-            headers: {
-              Authorization: `Bearer ${localStorage.getItem("jwt")}`,
-            },
-          }
-        );
-        fetchUsers();
-        fetchAdmins();
+        if (!isAdmin) {
+          await axios.post(
+            `${API_BASE_URL}/api/admin_only/add/${userId}`,
+            {},  // Empty body object
+            {
+              headers: {
+                Authorization: `Bearer ${localStorage.getItem("jwt")}`,
+              },
+            }
+          );
+        } else {
+          await axios.delete(
+            `${API_BASE_URL}/api/admin_only/remove/${userId}`,
+            {
+              headers: {
+                Authorization: `Bearer ${localStorage.getItem("jwt")}`,
+              },
+            }
+          );
+        }
+        await Promise.all([fetchUsers(), fetchAdmins()]);
       } catch (error) {
         console.error("Error toggling admin status:", error);
       }
     }
   };
-
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
@@ -596,7 +601,7 @@ function AdminDashboard() {
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                         <button
-                          onClick={() => handleToggleAdmin(user.user_id, false)}
+                          onClick={() => handleToggleAdmin(user.id, false)}
                           className="text-blue-600 hover:text-blue-900"
                         >
                           Make Admin
@@ -672,7 +677,7 @@ function AdminDashboard() {
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                         <button
-                          onClick={() => handleToggleAdmin(admin.user_id, true)}
+                          onClick={() => handleToggleAdmin(admin.id, true)}
                           className="text-red-600 hover:text-red-900"
                         >
                           Remove Admin
