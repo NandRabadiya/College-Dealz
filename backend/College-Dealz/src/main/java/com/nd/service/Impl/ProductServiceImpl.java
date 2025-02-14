@@ -2,6 +2,7 @@ package com.nd.service.Impl;
 
 import com.nd.entities.*;
 import com.nd.dto.ProductDto;
+import com.nd.enums.Category;
 import com.nd.exceptions.ResourceNotFoundException;
 import com.nd.repositories.ImageRepo;
 import com.nd.repositories.ProductRepo;
@@ -12,10 +13,26 @@ import com.nd.service.JwtService;
 import com.nd.service.ProductService;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import jakarta.persistence.criteria.Predicate;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.*;
+import org.springframework.data.jpa.domain.Specification;
+import org.springframework.stereotype.Service;
+
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Base64;
@@ -216,16 +233,61 @@ public class ProductServiceImpl implements ProductService {
                 .collect(Collectors.toList());
     }
 
-    @Override
-    public List<ProductDto> getProductsByUniversityId(String authHeader) {
-System.out.println(authHeader);
-System.out.println(jwtService.getUniversityIdFromToken(authHeader));
 
-        int universityId = jwtService.getUniversityIdFromToken(authHeader);
-        return productRepo.findByUniversityId(universityId).stream()
-                .map(this::mapToDto)
-                .collect(Collectors.toList());
+
+//    @Override
+//    public List<ProductDto> getProductsByUniversityId(String authHeader) {
+//System.out.println(authHeader);
+//System.out.println(jwtService.getUniversityIdFromToken(authHeader));
+//
+//        int universityId = jwtService.getUniversityIdFromToken(authHeader);
+//        return productRepo.findByUniversityId(universityId).stream()
+//                .map(this::mapToDto)
+//                .collect(Collectors.toList());
+//    }
+
+    @Override
+    public Page<ProductDto> getProductsByUniversityId(
+            int universityId,
+            String sortField,
+            String sortDir,
+            Integer page,
+            Integer size,
+            String category,
+            BigDecimal minPrice,
+            BigDecimal maxPrice) {
+         int pageNumber = (page != null && page >= 0) ? page : 0;
+        int pageSize = (size != null && size > 0) ? size : 10;
+        String sortBy = (sortField != null && !sortField.isEmpty()) ? sortField : "price";
+        Sort.Direction direction = (sortDir != null && sortDir.equalsIgnoreCase("desc")) ? Sort.Direction.DESC : Sort.Direction.ASC;
+        Pageable sortedPageable = PageRequest.of(pageNumber, pageSize, Sort.by(direction, sortBy));
+
+
+        // If a filter is provided, add your filtering logic here. This example assumes filtering by a product name substring.
+        Page<Product> productPage;
+
+        if (category != null && !category.isEmpty()) {
+      //      productPage = productRepo.findByUniversityIdAndNameContainingIgnoreCase(universityId, filter, sortedPageable);
+            Category category_enum= Category.valueOf(category.toUpperCase());
+            productPage= productRepo.findByUniversityIdAndCategory(universityId,category_enum , sortedPageable);
+        } else if(maxPrice != null &&  !maxPrice.equals(BigDecimal.ZERO) && minPrice != null)
+
+        {
+            productPage = productRepo.findByUniversityIdAndPriceLessThanEqualAndPriceGreaterThanEqual(universityId,maxPrice,minPrice,sortedPageable);
+        }
+        else
+        {
+            productPage = productRepo.findByUniversityId(universityId, sortedPageable);
+        }
+
+        // Map your Product entities to ProductDto
+        return productPage.map(this::mapToDto);
     }
+
+
+
+
+
 
     @Override
     public void deleteProduct(Integer productId) {

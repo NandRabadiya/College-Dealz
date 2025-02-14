@@ -3,8 +3,11 @@ package com.nd.service;
 import com.nd.dto.ProductDto;
 import com.nd.entities.Chat;
 import com.nd.entities.Product;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.util.List;
 
 public interface ProductService {
@@ -17,7 +20,21 @@ public interface ProductService {
     List<ProductDto> getAllProducts();
     List<ProductDto> getProductsByCategory(String category);
     List<ProductDto> getProductsBySellerId(String authHeader);
-    List<ProductDto> getProductsByUniversityId(String authHeader);
+
+
+    public Page<ProductDto> getProductsByUniversityId(
+            int universityId,
+            String sortField,
+            String sortDir,
+            Integer page,
+            Integer size,
+            String category,
+            BigDecimal minPrice,
+            BigDecimal maxPrice);
+    //List<ProductDto> getProductsByUniversityId(String authHeader);
+
+   // public Page<ProductDto> getProductsByUniversityId(int universityId, String filter, String sortField, String sortDir, Pageable pageable);
+
     void deleteProduct(Integer productId);
     ProductDto createProductWithImages(ProductDto productDto, String authHeader) throws IOException;
 }

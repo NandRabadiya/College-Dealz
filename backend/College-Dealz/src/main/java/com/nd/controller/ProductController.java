@@ -1,15 +1,20 @@
 package com.nd.controller;
 
 import com.nd.dto.ProductDto;
+import com.nd.dto.ProductSearchRequest;
+import com.nd.service.JwtService;
 import com.nd.service.ProductService;
-import org.apache.catalina.filters.AddDefaultCharsetFilter;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.util.List;
 
 @RestController
@@ -18,6 +23,9 @@ public class ProductController {
 
     @Autowired
     private ProductService productService;
+
+    @Autowired
+    private JwtService  jwtService;
 
     @GetMapping("/{productId}")
     public ResponseEntity<ProductDto> getProductById(@PathVariable Integer productId) {
@@ -65,15 +73,48 @@ public class ProductController {
         }
     }
 
-    @GetMapping("/university")
-    public ResponseEntity<List<ProductDto>> getProductsByUniversity( @RequestHeader("Authorization") String authHeader) {
+//    @GetMapping("/university")
+//    public ResponseEntity<List<ProductDto>> getProductsByUniversity( @RequestHeader("Authorization") String authHeader) {
+//
+//        System.out.println("\nin getProductsByUniversity controller\n");
+//        List<ProductDto> products = productService.getProductsByUniversityId(authHeader);
+//
+//
+//        return ResponseEntity.ok(products);
+//    }
 
-        System.out.println("\nin getProductsByUniversity controller\n");
-        List<ProductDto> products = productService.getProductsByUniversityId(authHeader);
+    @PostMapping("/university/{universityId}")
+    public ResponseEntity<Page<ProductDto>> getProductsByUniversity(
+            @PathVariable int universityId,
+            @RequestBody(required = false) ProductSearchRequest request) {
 
+        // If no body is provided, create a default request.
+        if (request == null) {
+            request = new ProductSearchRequest();
+        }
+
+        // Log parameters for debugging
+        System.out.println("\n\nSortField: " + request.getSortField() + ", SortDir: " + request.getSortDir() +
+                ", Page: " + request.getPage() + ", Size: " + request.getSize() +
+                ", Category: " + request.getCategory() + ", MinPrice: " + request.getMinPrice() +
+                ", MaxPrice: " + request.getMaxPrice());
+
+        Page<ProductDto> products = productService.getProductsByUniversityId(
+                universityId,
+                request.getSortField(),
+                request.getSortDir(),
+                request.getPage(),
+                request.getSize(),
+                request.getCategory(),
+                request.getMinPrice(),
+                request.getMaxPrice()
+        );
 
         return ResponseEntity.ok(products);
     }
+
+
+
 
 
     @GetMapping("/seller")

@@ -42,6 +42,12 @@ public class Product {
     @Column(name = "conditions", nullable = false)
     private Condition condition;
 
+    @Column(name = "months_old")
+    private Integer monthsOld;
+
+    @ColumnDefault("CURRENT_TIMESTAMP")
+    @Column(name = "post_date")
+    private Instant postDate;
 
     @NotNull
     @Enumerated(EnumType.STRING)
@@ -60,13 +66,6 @@ public class Product {
     @OneToOne(mappedBy = "product", cascade = CascadeType.ALL)
     private Chat chat;
 
-
-    @Column(name = "months_old")
-    private Integer monthsOld;
-
-    @ColumnDefault("CURRENT_TIMESTAMP")
-    @Column(name = "post_date")
-    private Instant postDate;
 
     @Size(max = 255)
     @Column(name = "location")
