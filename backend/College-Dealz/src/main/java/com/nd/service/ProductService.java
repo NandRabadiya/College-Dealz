@@ -11,7 +11,7 @@ public interface ProductService {
 
      List<Chat> getChatByProductId(int productId) ;
     ProductDto createProduct(ProductDto productDto, String authHeader);
-
+    ProductDto mapToDto(Product product);
     ProductDto updateProduct(Integer productId, ProductDto productDto) throws IOException;
     ProductDto getProductById(Integer productId);
     List<ProductDto> getAllProducts(String authHeader);

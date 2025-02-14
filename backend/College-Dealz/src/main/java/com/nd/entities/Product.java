@@ -1,5 +1,6 @@
 package com.nd.entities;
 
+import com.nd.dto.WishlistDto;
 import com.nd.enums.Category;
 import com.nd.enums.Condition;
 import jakarta.persistence.*;
@@ -50,6 +51,9 @@ public class Product {
 
     @OneToMany(mappedBy = "product", fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Image> images;
+
+    @OneToMany(mappedBy = "product" , fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Wishlist> wishlists;
 
 
 //    @OneToOne(mappedBy = "product", cascade = CascadeType.ALL)
