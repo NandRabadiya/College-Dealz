@@ -235,16 +235,6 @@ public class ProductServiceImpl implements ProductService {
 
 
 
-//    @Override
-//    public List<ProductDto> getProductsByUniversityId(String authHeader) {
-//System.out.println(authHeader);
-//System.out.println(jwtService.getUniversityIdFromToken(authHeader));
-//
-//        int universityId = jwtService.getUniversityIdFromToken(authHeader);
-//        return productRepo.findByUniversityId(universityId).stream()
-//                .map(this::mapToDto)
-//                .collect(Collectors.toList());
-//    }
 
     @Override
     public Page<ProductDto> getProductsByUniversityId(
@@ -286,7 +276,14 @@ public class ProductServiceImpl implements ProductService {
 
 
 
+    @Override
+    public Page<ProductDto> searchProductsByUniversity(int universityId, String searchTerm, Pageable pageable) {
+        Page<Product> productPage = productRepo
+                .findByUniversityIdAndNameContainingOrDescriptionContaining(
+                        universityId, searchTerm, searchTerm, pageable);
 
+        return productPage.map(this::mapToDto);
+    }
 
 
     @Override

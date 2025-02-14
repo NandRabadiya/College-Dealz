@@ -22,7 +22,7 @@ public interface ProductService {
     List<ProductDto> getProductsBySellerId(String authHeader);
 
 
-    public Page<ProductDto> getProductsByUniversityId(
+   Page<ProductDto> getProductsByUniversityId(
             int universityId,
             String sortField,
             String sortDir,
@@ -31,9 +31,7 @@ public interface ProductService {
             String category,
             BigDecimal minPrice,
             BigDecimal maxPrice);
-    //List<ProductDto> getProductsByUniversityId(String authHeader);
-
-   // public Page<ProductDto> getProductsByUniversityId(int universityId, String filter, String sortField, String sortDir, Pageable pageable);
+    Page<ProductDto> searchProductsByUniversity(int universityId, String searchTerm, Pageable pageable);
 
     void deleteProduct(Integer productId);
     ProductDto createProductWithImages(ProductDto productDto, String authHeader) throws IOException;

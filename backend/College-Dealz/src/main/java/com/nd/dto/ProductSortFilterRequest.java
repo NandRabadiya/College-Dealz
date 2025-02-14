@@ -5,7 +5,7 @@ import lombok.Data;
 import java.math.BigDecimal;
 
 @Data
-public class ProductSearchRequest {
+public class ProductSortFilterRequest {
     // Optional parameters with defaults handled in the service if needed.
     private String sortField;  // e.g., "name", "price", etc.
     private String sortDir;    // "asc" or "desc"

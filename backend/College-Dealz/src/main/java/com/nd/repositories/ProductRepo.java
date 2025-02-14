@@ -37,6 +37,8 @@ public interface ProductRepo extends JpaRepository<Product, Integer>, JpaSpecifi
 
     Page<Product> findByUniversityIdAndPriceLessThanEqualAndPriceGreaterThanEqual(int universityId,@NotNull BigDecimal priceIsLessThan, @NotNull BigDecimal priceIsGreaterThan,Pageable pageable);
 
+    Page<Product> findByUniversityIdAndNameContainingOrDescriptionContaining(int universityId, String name, String description, Pageable pageable);
+
     @Query("SELECT p FROM Product p WHERE p.seller.id = :sellerId")
     List<Product> findBySellerId(Integer sellerId);
 

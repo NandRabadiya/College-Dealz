@@ -1,7 +1,7 @@
 package com.nd.controller;
 
 import com.nd.dto.ProductDto;
-import com.nd.dto.ProductSearchRequest;
+import com.nd.dto.ProductSortFilterRequest;
 import com.nd.service.JwtService;
 import com.nd.service.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,9 +13,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import java.io.IOException;
-import java.math.BigDecimal;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/products")
@@ -73,24 +72,15 @@ public class ProductController {
         }
     }
 
-//    @GetMapping("/university")
-//    public ResponseEntity<List<ProductDto>> getProductsByUniversity( @RequestHeader("Authorization") String authHeader) {
-//
-//        System.out.println("\nin getProductsByUniversity controller\n");
-//        List<ProductDto> products = productService.getProductsByUniversityId(authHeader);
-//
-//
-//        return ResponseEntity.ok(products);
-//    }
 
     @PostMapping("/university/{universityId}")
     public ResponseEntity<Page<ProductDto>> getProductsByUniversity(
             @PathVariable int universityId,
-            @RequestBody(required = false) ProductSearchRequest request) {
+            @RequestBody(required = false) ProductSortFilterRequest request) {
 
         // If no body is provided, create a default request.
         if (request == null) {
-            request = new ProductSearchRequest();
+            request = new ProductSortFilterRequest();
         }
 
         // Log parameters for debugging
@@ -113,6 +103,24 @@ public class ProductController {
         return ResponseEntity.ok(products);
     }
 
+
+    @GetMapping("/search/{searchTerm}")
+    public ResponseEntity<?> searchProducts(
+            @RequestHeader("Authorization") String authHeader,
+            @PathVariable String searchTerm,
+            @PageableDefault(page = 0, size = 10) Pageable pageable) {
+
+        int universityId = jwtService.getUniversityIdFromToken(authHeader);
+        Page<ProductDto> products = productService.searchProductsByUniversity(universityId, searchTerm, pageable);
+
+        if (products.isEmpty()) {
+            // Return a custom message when no products are found
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(Map.of("message", "No such product found. Please check the spelling or try a different search term."));
+        }
+
+        return ResponseEntity.ok(products);
+    }
 
 
 
