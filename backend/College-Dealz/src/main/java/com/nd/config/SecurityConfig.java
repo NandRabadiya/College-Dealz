@@ -64,19 +64,6 @@ public class SecurityConfig {
                                         "/api/products/public/university/**" )
                                 .permitAll()
                                 .requestMatchers("/api/admin_only/**")
-//                                .access((authentication, context) -> {
-//                                    // Explicitly call getAuthorities() here
-//                                    Collection<? extends GrantedAuthority> authorities = authentication.get().getAuthorities();
-//                                    System.out.println("User Authorities during Security Check: " + authorities);
-//
-//                                    // Check for "ROLE_ADMIN"
-//                                    return authorities.contains(new SimpleGrantedAuthority("ROLE_ADMIN"))
-//                                            ? new AuthorizationDecision(true)
-//                                            : new AuthorizationDecision(false);
-//                                })
-         //                      .hasRole("ADMIN")
-
-
                                .hasAuthority("ADMIN")
                                 .anyRequest()
                                 .authenticated()

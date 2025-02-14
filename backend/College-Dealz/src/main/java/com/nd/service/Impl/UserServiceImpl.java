@@ -117,6 +117,9 @@ public class UserServiceImpl implements UserService {
     }
 
     private User findUserByEmail(String email) {
+
+
+
         User user = userRepo.findUByEmail(email);
 
        if(user!= null) {

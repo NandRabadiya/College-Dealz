@@ -43,6 +43,12 @@ public class Product {
     @Column(name = "conditions", nullable = false)
     private Condition condition;
 
+    @Column(name = "months_old")
+    private Integer monthsOld;
+
+    @ColumnDefault("CURRENT_TIMESTAMP")
+    @Column(name = "post_date")
+    private Instant postDate;
 
     @NotNull
     @Enumerated(EnumType.STRING)
@@ -60,13 +66,6 @@ public class Product {
 //    private Chat chat;
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Chat> chats = new ArrayList<>();
-
-    @Column(name = "months_old")
-    private Integer monthsOld;
-
-    @ColumnDefault("CURRENT_TIMESTAMP")
-    @Column(name = "post_date")
-    private Instant postDate;
 
     @Size(max = 255)
     @Column(name = "location")

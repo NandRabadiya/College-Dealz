@@ -20,7 +20,7 @@ public interface UserRepo extends JpaRepository<User, Integer> {
     User findUByEmail(@Param("email") String email);
 
     @Query("SELECT u.id FROM User u WHERE u.university.id = :universityId")
-List<Integer> findUserIdsByUniversityId(@Param("universityId") Integer universityId);
+    List<Integer> findUserIdsByUniversityId(@Param("universityId") Integer universityId);
 
 int countByRolesContaining(Role role);
 
