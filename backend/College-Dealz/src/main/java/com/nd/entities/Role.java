@@ -23,6 +23,7 @@ public class Role {
     private int id;
     @Column(nullable = false, unique = true)
     private String name;
+
     @JsonIgnore
     @ManyToMany(mappedBy = "roles", fetch = FetchType.EAGER)
     private Set<User> users = new HashSet<>();

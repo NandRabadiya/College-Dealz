@@ -12,6 +12,7 @@ import org.hibernate.annotations.ColumnDefault;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.List;
 
 @Getter
@@ -57,15 +58,14 @@ public class Product {
     @OneToMany(mappedBy = "product", fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Image> images;
 
-
-
     @OneToMany(mappedBy = "product" , fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Wishlist> wishlists;
 
 
-    @OneToOne(mappedBy = "product", cascade = CascadeType.ALL)
-    private Chat chat;
-
+//    @OneToOne(mappedBy = "product", cascade = CascadeType.ALL)
+//    private Chat chat;
+    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Chat> chats = new ArrayList<>();
 
     @Size(max = 255)
     @Column(name = "location")

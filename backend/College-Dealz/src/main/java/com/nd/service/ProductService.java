@@ -12,12 +12,12 @@ import java.util.List;
 
 public interface ProductService {
 
-     Chat getChatByProductId(int productId) ;
+     List<Chat> getChatByProductId(int productId) ;
     ProductDto createProduct(ProductDto productDto, String authHeader);
     ProductDto mapToDto(Product product);
     ProductDto updateProduct(Integer productId, ProductDto productDto) throws IOException;
     ProductDto getProductById(Integer productId);
-    List<ProductDto> getAllProducts();
+    List<ProductDto> getAllProducts(String authHeader);
     List<ProductDto> getProductsByCategory(String category);
     List<ProductDto> getProductsBySellerId(String authHeader);
 
@@ -33,6 +33,8 @@ public interface ProductService {
             BigDecimal maxPrice);
     Page<ProductDto> searchProductsByUniversity(int universityId, String searchTerm, Pageable pageable);
 
+    List<ProductDto> getProductsByUniversityId(String authHeader);
+    List<ProductDto> getProductsByUniversityId(Integer universityId);
     void deleteProduct(Integer productId);
     ProductDto createProductWithImages(ProductDto productDto, String authHeader) throws IOException;
 }

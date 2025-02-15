@@ -208,10 +208,13 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public List<ProductDto> getAllProducts() {
-        return productRepo.findAll().stream()
+    public List<ProductDto> getAllProducts(String authHeader) {
+        int user = jwtService.getUserIdFromToken(authHeader);
+        if (user!=0) {return productRepo.findAll().stream()
                 .map(this::mapToDto)
-                .collect(Collectors.toList());
+                .collect(Collectors.toList());}
+        return null;
+
     }
 
     @Override
@@ -287,6 +290,12 @@ public class ProductServiceImpl implements ProductService {
 
 
     @Override
+    public List<ProductDto> getProductsByUniversityId(Integer universityId) {
+        return productRepo.findByUniversityId(universityId).stream()
+                .map(this::mapToDto)
+                .collect(Collectors.toList());    }
+
+    @Override
     public void deleteProduct(Integer productId) {
         if (productRepo.existsById(productId)) {
             productRepo.deleteById(productId);
@@ -315,15 +324,9 @@ public class ProductServiceImpl implements ProductService {
 
 
     @Override
-    public Chat getChatByProductId(int ProductId){
-
-
-        Product product=productRepo.getProductById(ProductId);
-
-        Chat chat=product.getChat();
-
-        return chat;
-
+    public List<Chat> getChatByProductId(int ProductId){
+        Product product = productRepo.getProductById(ProductId);
+        return product.getChats();
     }
 
     @Override

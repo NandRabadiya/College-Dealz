@@ -15,6 +15,7 @@ public class ChatDTO {
     private int productId;
     private List<MessageDTO> messages;
 
+    public ChatDTO() {}
 
     public ChatDTO(int chatId, int senderId, int receiverId, int productId, List<MessageDTO> messages) {
         this.chatId = chatId;

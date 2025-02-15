@@ -1,5 +1,6 @@
 package com.nd.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.nd.enums.Provider;
 import jakarta.persistence.*;
 import lombok.*;
@@ -15,6 +16,8 @@ import java.util.Set;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
+
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 @Entity
 @Table(name = "users")
 @Getter

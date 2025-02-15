@@ -12,7 +12,9 @@ import com.nd.repositories.ProductRepo;
 import com.nd.repositories.UserRepo;
 import com.nd.service.MessageService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 
 @Service
@@ -33,16 +35,16 @@ public class MessageServiceImpl implements MessageService {
         User sender = userRepository.findById(senderId)
                 .orElseThrow(() -> new UserException("User not found with id: " + senderId));
 
-        Chat chat = productRepo.getProductById(ProductId).getChat();
+       // List<Chat> chat = productRepo.getProductById(ProductId).getChat();
 
         Message message = new Message();
         message.setContent(content);
         message.setSender(sender);
         message.setCreatedAt(LocalDateTime.now());
-        message.setChat(chat);
+       // message.setChat(chat);
         Message savedMessage=messageRepository.save(message);
 
-        chat.getMessages().add(savedMessage);
+        //chat.getMessages().add(savedMessage);
         return savedMessage;
     }
 

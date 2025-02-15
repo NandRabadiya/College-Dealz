@@ -20,13 +20,13 @@ import java.util.stream.Collectors;
 public class ChatServiceImpl implements ChatService {
 
     @Autowired
-    private final ChatRepo chatRepository;
+    private ChatRepo chatRepository;
 
     @Autowired
-    private final UserRepo userRepository;
+    private UserRepo userRepository;
 
     @Autowired
-    private final ProductRepo productRepository;
+    private ProductRepo productRepository;
 
     public ChatServiceImpl(ChatRepo chatRepository, UserRepo userRepository, ProductRepo productRepository) {
         this.chatRepository = chatRepository;
@@ -63,7 +63,7 @@ public class ChatServiceImpl implements ChatService {
 
     @Override
     public List<ChatDTO> getChatsBySenderId(int senderId) {
-        return chatRepository.findBySenderUserId(senderId)
+        return chatRepository.findBySenderId(senderId)
                 .orElse(Collections.emptyList())
                 .stream()
                 .map(this::mapToDTO)
@@ -72,7 +72,7 @@ public class ChatServiceImpl implements ChatService {
 
     @Override
     public List<ChatDTO> getChatsByReceiverId(int receiverId) {
-        return chatRepository.findByReceiverUserId(receiverId)
+        return chatRepository.findByReceiverId(receiverId)
                 .orElse(Collections.emptyList())
                 .stream()
                 .map(this::mapToDTO)
@@ -81,8 +81,7 @@ public class ChatServiceImpl implements ChatService {
 
     @Override
     public List<ChatDTO> getChatsByProductId(int productId) {
-        return chatRepository.findByProductProductId(productId)
-                .orElse(Collections.emptyList())
+        return chatRepository.findByProductId(productId)
                 .stream()
                 .map(this::mapToDTO)
                 .collect(Collectors.toList());
