@@ -6,6 +6,8 @@ import com.nd.service.JwtService;
 import com.nd.service.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -107,6 +109,25 @@ public class ProductController {
         List<ProductDto> products = productService.getAllProducts(authHeader);
         return ResponseEntity.ok(products);
     }
+
+    @GetMapping("/search/{searchTerm}")
+    public ResponseEntity<?> searchProducts(
+            @RequestHeader("Authorization") String authHeader,
+            @PathVariable String searchTerm,
+            @PageableDefault(page = 0, size = 10) Pageable pageable) {
+
+        int universityId = jwtService.getUniversityIdFromToken(authHeader);
+        Page<ProductDto> products = productService.searchProductsByUniversity(universityId, searchTerm, pageable);
+
+        if (products.isEmpty()) {
+            // Return a custom message when no products are found
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(Map.of("message", "No such product found. Please check the spelling or try a different search term."));
+        }
+
+        return ResponseEntity.ok(products);
+    }
+
 
 
     @GetMapping("/seller")
