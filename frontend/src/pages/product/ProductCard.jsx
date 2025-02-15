@@ -1,5 +1,11 @@
 import React from "react";
-import { Heart, Share2, MessageCircle } from "lucide-react";
+import {
+  Heart,
+  Share2,
+  MessageCircle,
+  ChevronLeft,
+  ChevronRight,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useNavigate } from "react-router-dom";
@@ -29,6 +35,12 @@ const ProductCard = () => {
   const [dialogInitialized, setDialogInitialized] = useState(false);
   const [open, setOpen] = useState(false);
   const [wishlistedItems, setWishlistedItems] = useState(new Set());
+
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(0);
+  const [totalPages, setTotalPages] = useState(0);
+  const [pageSize, setPageSize] = useState(2);
+  const [totalElements, setTotalElements] = useState(0);
 
   const [isAuthenticated, setIsAuthenticated] = useState(
     Boolean(localStorage.getItem("jwt"))
@@ -61,7 +73,7 @@ const ProductCard = () => {
   }, [isAuthenticated, selectedUniversity, dialogInitialized]);
 
   // Modified product fetch function to handle both authenticated and non-authenticated cases
-  const fetchProducts = async (universityId = null) => {
+  const fetchProducts = async (universityId = null, page = 0) => {
     try {
       setLoading(true);
       const token = localStorage.getItem("jwt");
@@ -78,10 +90,28 @@ const ProductCard = () => {
         ? `${API_BASE_URL}/api/products/university`
         : `${API_BASE_URL}/api/products/public/university/${universityId}`;
 
-      const response = await fetch(endpoint, { headers });
+      const response = await fetch(endpoint, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          ...headers, // Include additional headers if needed
+        },
+        body: JSON.stringify({
+          page: page,
+          size: pageSize,
+        }),
+      });
+
       if (!response.ok) throw new Error("Failed to fetch products");
 
-      const data = await response.json();
+      const responseData = await response.json();
+      // Extract products array from the content property
+      const data = responseData.content || [];
+      console.log("Fetched products:", data);
+      // Update pagination state
+      setTotalPages(responseData.totalPages);
+      setTotalElements(responseData.totalElements);
+      setCurrentPage(responseData.number);
 
       // Process products with images
       const productsWithImages = await Promise.all(
@@ -187,10 +217,12 @@ const ProductCard = () => {
         {
           method: "POST",
           headers: {
+            "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
           },
         }
       );
+      // Handle page change
 
       if (!response.ok) {
         throw new Error("Failed to add to wishlist");
@@ -227,7 +259,7 @@ const ProductCard = () => {
 
       try {
         const token = localStorage.getItem("jwt");
-        const response = await fetch(`${API_BASE_URL}/api/wishlist/`, {
+        const response = await fetch(`${API_BASE_URL}/api/wishlist`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -258,6 +290,12 @@ const ProductCard = () => {
   const handleShare = (product, e) => {
     e.stopPropagation();
     console.log("Sharing product:", product);
+  };
+  const handlePageChange = (newPage) => {
+    if (newPage >= 0 && newPage < totalPages) {
+      const universityId = isAuthenticated ? null : selectedUniversity;
+      fetchProducts(universityId, newPage);
+    }
   };
   if (loading) {
     return <div className="m-4 text-center">Loading products...</div>;
@@ -398,6 +436,41 @@ const ProductCard = () => {
               </div>
             </div>
           ))}
+        </div>
+
+        {/* Pagination UI */}
+        <div className="mt-8 flex items-center justify-between px-2">
+          <div className="text-sm text-muted-foreground">
+            Showing {products.length} of {totalElements} items
+          </div>
+
+          <div className="flex items-center space-x-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => handlePageChange(currentPage - 1)}
+              disabled={currentPage === 0}
+              className="w-24"
+            >
+              <ChevronLeft className="mr-2 h-4 w-4" />
+              Previous
+            </Button>
+
+            <div className="text-sm text-muted-foreground">
+              Page {currentPage + 1} of {totalPages}
+            </div>
+
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => handlePageChange(currentPage + 1)}
+              disabled={currentPage === totalPages - 1}
+              className="w-24"
+            >
+              Next
+              <ChevronRight className="ml-2 h-4 w-4" />
+            </Button>
+          </div>
         </div>
       </div>
     </>
