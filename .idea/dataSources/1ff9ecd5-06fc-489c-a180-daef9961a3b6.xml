@@ -1,0 +1,869 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<dataSource name="college_dealz@gateway01.us-west-2.prod.aws.tidbcloud.com">
+  <database-model serializer="dbm" dbms="TIDB" family-id="TIDB" format-version="4.53">
+    <root id="1">
+      <Dbms>TIDB</Dbms>
+      <DefaultCasing>mixed/mixed</DefaultCasing>
+      <DefaultEngine>InnoDB</DefaultEngine>
+      <DefaultTmpEngine>InnoDB</DefaultTmpEngine>
+      <ServerVersion>7.1.3</ServerVersion>
+    </root>
+    <schema id="2" parent="1" name="INFORMATION_SCHEMA">
+      <CollationName>utf8mb4_bin</CollationName>
+    </schema>
+    <schema id="3" parent="1" name="PERFORMANCE_SCHEMA">
+      <CollationName>utf8mb4_bin</CollationName>
+    </schema>
+    <schema id="4" parent="1" name="college_dealz">
+      <Current>1</Current>
+      <CollationName>utf8mb4_general_ci</CollationName>
+    </schema>
+    <schema id="5" parent="1" name="mysql">
+      <CollationName>utf8mb4_bin</CollationName>
+    </schema>
+    <table id="6" parent="4" name="admins">
+      <Engine>InnoDB</Engine>
+      <CollationName>utf8mb4_general_ci</CollationName>
+    </table>
+    <table id="7" parent="4" name="chats">
+      <Engine>InnoDB</Engine>
+      <CollationName>utf8mb4_general_ci</CollationName>
+    </table>
+    <table id="8" parent="4" name="feedback">
+      <Engine>InnoDB</Engine>
+      <CollationName>utf8mb4_general_ci</CollationName>
+    </table>
+    <table id="9" parent="4" name="image">
+      <Engine>InnoDB</Engine>
+      <CollationName>utf8mb4_general_ci</CollationName>
+    </table>
+    <table id="10" parent="4" name="messages">
+      <Engine>InnoDB</Engine>
+      <CollationName>utf8mb4_general_ci</CollationName>
+    </table>
+    <table id="11" parent="4" name="notifications">
+      <Engine>InnoDB</Engine>
+      <CollationName>utf8mb4_general_ci</CollationName>
+    </table>
+    <table id="12" parent="4" name="products">
+      <Engine>InnoDB</Engine>
+      <CollationName>utf8mb4_general_ci</CollationName>
+    </table>
+    <table id="13" parent="4" name="roles">
+      <Engine>InnoDB</Engine>
+      <CollationName>utf8mb4_general_ci</CollationName>
+    </table>
+    <table id="14" parent="4" name="token">
+      <Engine>InnoDB</Engine>
+      <CollationName>utf8mb4_general_ci</CollationName>
+    </table>
+    <table id="15" parent="4" name="universities">
+      <Engine>InnoDB</Engine>
+      <CollationName>utf8mb4_general_ci</CollationName>
+    </table>
+    <table id="16" parent="4" name="user_roles">
+      <Engine>InnoDB</Engine>
+      <CollationName>utf8mb4_general_ci</CollationName>
+    </table>
+    <table id="17" parent="4" name="users">
+      <Engine>InnoDB</Engine>
+      <CollationName>utf8mb4_general_ci</CollationName>
+    </table>
+    <table id="18" parent="4" name="wantlist">
+      <Engine>InnoDB</Engine>
+      <CollationName>utf8mb4_general_ci</CollationName>
+    </table>
+    <table id="19" parent="4" name="wishlists">
+      <Engine>InnoDB</Engine>
+      <CollationName>utf8mb4_general_ci</CollationName>
+    </table>
+    <column id="20" parent="6" name="admin_id">
+      <AutoIncrement>1</AutoIncrement>
+      <NotNull>1</NotNull>
+      <Position>1</Position>
+      <StoredType>int(11)|0s</StoredType>
+    </column>
+    <column id="21" parent="6" name="created_at">
+      <Position>2</Position>
+      <StoredType>datetime(6)|0s</StoredType>
+    </column>
+    <column id="22" parent="6" name="email">
+      <NotNull>1</NotNull>
+      <Position>3</Position>
+      <StoredType>varchar(255)|0s</StoredType>
+    </column>
+    <column id="23" parent="6" name="name">
+      <NotNull>1</NotNull>
+      <Position>4</Position>
+      <StoredType>varchar(255)|0s</StoredType>
+    </column>
+    <column id="24" parent="6" name="password">
+      <NotNull>1</NotNull>
+      <Position>5</Position>
+      <StoredType>varchar(255)|0s</StoredType>
+    </column>
+    <column id="25" parent="6" name="role">
+      <NotNull>1</NotNull>
+      <Position>6</Position>
+      <StoredType>varchar(255)|0s</StoredType>
+    </column>
+    <column id="26" parent="6" name="updated_at">
+      <Position>7</Position>
+      <StoredType>datetime(6)|0s</StoredType>
+    </column>
+    <index id="27" parent="6" name="PRIMARY">
+      <ColNames>admin_id</ColNames>
+      <Type>btree</Type>
+      <Unique>1</Unique>
+    </index>
+    <index id="28" parent="6" name="UK47bvqemyk6vlm0w7crc3opdd4">
+      <ColNames>email</ColNames>
+      <Type>btree</Type>
+      <Unique>1</Unique>
+    </index>
+    <key id="29" parent="6" name="PRIMARY">
+      <NameSurrogate>1</NameSurrogate>
+      <Primary>1</Primary>
+      <UnderlyingIndexName>PRIMARY</UnderlyingIndexName>
+    </key>
+    <key id="30" parent="6" name="UK47bvqemyk6vlm0w7crc3opdd4">
+      <UnderlyingIndexName>UK47bvqemyk6vlm0w7crc3opdd4</UnderlyingIndexName>
+    </key>
+    <column id="31" parent="7" name="id">
+      <AutoIncrement>1</AutoIncrement>
+      <NotNull>1</NotNull>
+      <Position>1</Position>
+      <StoredType>int(11)|0s</StoredType>
+    </column>
+    <column id="32" parent="7" name="product_id">
+      <Position>2</Position>
+      <StoredType>int(11)|0s</StoredType>
+    </column>
+    <column id="33" parent="7" name="receiver_id">
+      <Position>3</Position>
+      <StoredType>int(11)|0s</StoredType>
+    </column>
+    <column id="34" parent="7" name="sender_id">
+      <Position>4</Position>
+      <StoredType>int(11)|0s</StoredType>
+    </column>
+    <foreign-key id="35" parent="7" name="FK1q842q8yv3wj7vlwwc2py4xed">
+      <ColNames>product_id</ColNames>
+      <RefColNames>product_id</RefColNames>
+      <RefTableName>products</RefTableName>
+    </foreign-key>
+    <foreign-key id="36" parent="7" name="FK6dbye15iemw6gjqt0q4q06nf1">
+      <ColNames>receiver_id</ColNames>
+      <RefColNames>user_id</RefColNames>
+      <RefTableName>users</RefTableName>
+    </foreign-key>
+    <foreign-key id="37" parent="7" name="FKla7peq6fislsxok7a4wxv5p36">
+      <ColNames>sender_id</ColNames>
+      <RefColNames>user_id</RefColNames>
+      <RefTableName>users</RefTableName>
+    </foreign-key>
+    <index id="38" parent="7" name="PRIMARY">
+      <ColNames>id</ColNames>
+      <Type>btree</Type>
+      <Unique>1</Unique>
+    </index>
+    <index id="39" parent="7" name="FK1q842q8yv3wj7vlwwc2py4xed">
+      <ColNames>product_id</ColNames>
+      <Type>btree</Type>
+    </index>
+    <index id="40" parent="7" name="FK6dbye15iemw6gjqt0q4q06nf1">
+      <ColNames>receiver_id</ColNames>
+      <Type>btree</Type>
+    </index>
+    <index id="41" parent="7" name="FKla7peq6fislsxok7a4wxv5p36">
+      <ColNames>sender_id</ColNames>
+      <Type>btree</Type>
+    </index>
+    <key id="42" parent="7" name="PRIMARY">
+      <NameSurrogate>1</NameSurrogate>
+      <Primary>1</Primary>
+      <UnderlyingIndexName>PRIMARY</UnderlyingIndexName>
+    </key>
+    <column id="43" parent="8" name="id">
+      <AutoIncrement>1</AutoIncrement>
+      <NotNull>1</NotNull>
+      <Position>1</Position>
+      <StoredType>int(11)|0s</StoredType>
+    </column>
+    <column id="44" parent="8" name="email">
+      <Position>2</Position>
+      <StoredType>varchar(255)|0s</StoredType>
+    </column>
+    <column id="45" parent="8" name="message">
+      <Position>3</Position>
+      <StoredType>varchar(255)|0s</StoredType>
+    </column>
+    <column id="46" parent="8" name="name">
+      <Position>4</Position>
+      <StoredType>varchar(255)|0s</StoredType>
+    </column>
+    <index id="47" parent="8" name="PRIMARY">
+      <ColNames>id</ColNames>
+      <Type>btree</Type>
+      <Unique>1</Unique>
+    </index>
+    <key id="48" parent="8" name="PRIMARY">
+      <NameSurrogate>1</NameSurrogate>
+      <Primary>1</Primary>
+      <UnderlyingIndexName>PRIMARY</UnderlyingIndexName>
+    </key>
+    <column id="49" parent="9" name="image_id">
+      <AutoIncrement>1</AutoIncrement>
+      <NotNull>1</NotNull>
+      <Position>1</Position>
+      <StoredType>int(11)|0s</StoredType>
+    </column>
+    <column id="50" parent="9" name="product_id">
+      <NotNull>1</NotNull>
+      <Position>2</Position>
+      <StoredType>int(11)|0s</StoredType>
+    </column>
+    <column id="51" parent="9" name="file_name">
+      <NotNull>1</NotNull>
+      <Position>3</Position>
+      <StoredType>varchar(255)|0s</StoredType>
+    </column>
+    <column id="52" parent="9" name="content_type">
+      <NotNull>1</NotNull>
+      <Position>4</Position>
+      <StoredType>varchar(100)|0s</StoredType>
+    </column>
+    <column id="53" parent="9" name="image_data">
+      <Position>5</Position>
+      <StoredType>longblob|0s</StoredType>
+    </column>
+    <column id="54" parent="9" name="s3_url">
+      <Position>6</Position>
+      <StoredType>varchar(500)|0s</StoredType>
+    </column>
+    <column id="55" parent="9" name="created_at">
+      <DefaultExpression>CURRENT_TIMESTAMP</DefaultExpression>
+      <Position>7</Position>
+      <StoredType>timestamp|0s</StoredType>
+    </column>
+    <column id="56" parent="9" name="updated_at">
+      <DefaultExpression>CURRENT_TIMESTAMP</DefaultExpression>
+      <OnUpdate>CURRENT_TIMESTAMP</OnUpdate>
+      <Position>8</Position>
+      <StoredType>timestamp|0s</StoredType>
+    </column>
+    <foreign-key id="57" parent="9" name="fk_product">
+      <ColNames>product_id</ColNames>
+      <OnDelete>cascade</OnDelete>
+      <RefColNames>product_id</RefColNames>
+      <RefTableName>products</RefTableName>
+    </foreign-key>
+    <index id="58" parent="9" name="PRIMARY">
+      <ColNames>image_id</ColNames>
+      <Type>btree</Type>
+      <Unique>1</Unique>
+    </index>
+    <index id="59" parent="9" name="fk_product">
+      <ColNames>product_id</ColNames>
+      <Type>btree</Type>
+    </index>
+    <key id="60" parent="9" name="PRIMARY">
+      <NameSurrogate>1</NameSurrogate>
+      <Primary>1</Primary>
+      <UnderlyingIndexName>PRIMARY</UnderlyingIndexName>
+    </key>
+    <column id="61" parent="10" name="id">
+      <AutoIncrement>1</AutoIncrement>
+      <NotNull>1</NotNull>
+      <Position>1</Position>
+      <StoredType>int(11)|0s</StoredType>
+    </column>
+    <column id="62" parent="10" name="content">
+      <Position>2</Position>
+      <StoredType>varchar(255)|0s</StoredType>
+    </column>
+    <column id="63" parent="10" name="timestamp">
+      <Position>3</Position>
+      <StoredType>datetime(6)|0s</StoredType>
+    </column>
+    <column id="64" parent="10" name="chat_id">
+      <Position>4</Position>
+      <StoredType>int(11)|0s</StoredType>
+    </column>
+    <column id="65" parent="10" name="sender_id">
+      <Position>5</Position>
+      <StoredType>int(11)|0s</StoredType>
+    </column>
+    <column id="66" parent="10" name="created_at">
+      <Position>6</Position>
+      <StoredType>datetime(6)|0s</StoredType>
+    </column>
+    <foreign-key id="67" parent="10" name="FK64w44ngcpqp99ptcb9werdfmb">
+      <ColNames>chat_id</ColNames>
+      <RefColNames>id</RefColNames>
+      <RefTableName>chats</RefTableName>
+    </foreign-key>
+    <foreign-key id="68" parent="10" name="FK4ui4nnwntodh6wjvck53dbk9m">
+      <ColNames>sender_id</ColNames>
+      <RefColNames>user_id</RefColNames>
+      <RefTableName>users</RefTableName>
+    </foreign-key>
+    <index id="69" parent="10" name="PRIMARY">
+      <ColNames>id</ColNames>
+      <Type>btree</Type>
+      <Unique>1</Unique>
+    </index>
+    <index id="70" parent="10" name="FK64w44ngcpqp99ptcb9werdfmb">
+      <ColNames>chat_id</ColNames>
+      <Type>btree</Type>
+    </index>
+    <index id="71" parent="10" name="FK4ui4nnwntodh6wjvck53dbk9m">
+      <ColNames>sender_id</ColNames>
+      <Type>btree</Type>
+    </index>
+    <key id="72" parent="10" name="PRIMARY">
+      <NameSurrogate>1</NameSurrogate>
+      <Primary>1</Primary>
+      <UnderlyingIndexName>PRIMARY</UnderlyingIndexName>
+    </key>
+    <column id="73" parent="11" name="notification_id">
+      <AutoIncrement>1</AutoIncrement>
+      <NotNull>1</NotNull>
+      <Position>1</Position>
+      <StoredType>int(11)|0s</StoredType>
+    </column>
+    <column id="74" parent="11" name="user_id">
+      <NotNull>1</NotNull>
+      <Position>2</Position>
+      <StoredType>int(11)|0s</StoredType>
+    </column>
+    <column id="75" parent="11" name="type">
+      <Position>3</Position>
+      <StoredType>tinyint(4)|0s</StoredType>
+    </column>
+    <column id="76" parent="11" name="title">
+      <NotNull>1</NotNull>
+      <Position>4</Position>
+      <StoredType>varchar(255)|0s</StoredType>
+    </column>
+    <column id="77" parent="11" name="message">
+      <NotNull>1</NotNull>
+      <Position>5</Position>
+      <StoredType>tinytext|0s</StoredType>
+    </column>
+    <column id="78" parent="11" name="is_read">
+      <DefaultExpression>0</DefaultExpression>
+      <Position>6</Position>
+      <StoredType>tinyint(1)|0s</StoredType>
+    </column>
+    <column id="79" parent="11" name="reference_id">
+      <Position>7</Position>
+      <StoredType>int(11)|0s</StoredType>
+    </column>
+    <column id="80" parent="11" name="reference_type">
+      <Position>8</Position>
+      <StoredType>varchar(50)|0s</StoredType>
+    </column>
+    <column id="81" parent="11" name="created_at">
+      <DefaultExpression>CURRENT_TIMESTAMP</DefaultExpression>
+      <Position>9</Position>
+      <StoredType>timestamp|0s</StoredType>
+    </column>
+    <column id="82" parent="11" name="updated_at">
+      <DefaultExpression>CURRENT_TIMESTAMP</DefaultExpression>
+      <OnUpdate>CURRENT_TIMESTAMP</OnUpdate>
+      <Position>10</Position>
+      <StoredType>timestamp|0s</StoredType>
+    </column>
+    <foreign-key id="83" parent="11" name="notifications_ibfk_1">
+      <ColNames>user_id</ColNames>
+      <RefColNames>user_id</RefColNames>
+      <RefTableName>users</RefTableName>
+    </foreign-key>
+    <index id="84" parent="11" name="PRIMARY">
+      <ColNames>notification_id</ColNames>
+      <Type>btree</Type>
+      <Unique>1</Unique>
+    </index>
+    <index id="85" parent="11" name="idx_user_id">
+      <ColNames>user_id</ColNames>
+      <Type>btree</Type>
+    </index>
+    <index id="86" parent="11" name="idx_reference_id">
+      <ColNames>reference_id</ColNames>
+      <Type>btree</Type>
+    </index>
+    <key id="87" parent="11" name="PRIMARY">
+      <NameSurrogate>1</NameSurrogate>
+      <Primary>1</Primary>
+      <UnderlyingIndexName>PRIMARY</UnderlyingIndexName>
+    </key>
+    <column id="88" parent="12" name="product_id">
+      <AutoIncrement>1</AutoIncrement>
+      <NotNull>1</NotNull>
+      <Position>1</Position>
+      <StoredType>int(11)|0s</StoredType>
+    </column>
+    <column id="89" parent="12" name="name">
+      <NotNull>1</NotNull>
+      <Position>2</Position>
+      <StoredType>varchar(255)|0s</StoredType>
+    </column>
+    <column id="90" parent="12" name="description">
+      <Position>3</Position>
+      <StoredType>tinytext|0s</StoredType>
+    </column>
+    <column id="91" parent="12" name="price">
+      <NotNull>1</NotNull>
+      <Position>4</Position>
+      <StoredType>decimal(10,2 digit)|0s</StoredType>
+    </column>
+    <column id="92" parent="12" name="conditions">
+      <NotNull>1</NotNull>
+      <Position>5</Position>
+      <StoredType>varchar(50)|0s</StoredType>
+    </column>
+    <column id="93" parent="12" name="category">
+      <NotNull>1</NotNull>
+      <Position>6</Position>
+      <StoredType>varchar(50)|0s</StoredType>
+    </column>
+    <column id="94" parent="12" name="months_old">
+      <Position>7</Position>
+      <StoredType>int(11)|0s</StoredType>
+    </column>
+    <column id="95" parent="12" name="post_date">
+      <DefaultExpression>CURRENT_TIMESTAMP</DefaultExpression>
+      <Position>8</Position>
+      <StoredType>timestamp|0s</StoredType>
+    </column>
+    <column id="96" parent="12" name="location">
+      <Position>9</Position>
+      <StoredType>varchar(255)|0s</StoredType>
+    </column>
+    <column id="97" parent="12" name="seller_id">
+      <NotNull>1</NotNull>
+      <Position>10</Position>
+      <StoredType>int(11)|0s</StoredType>
+    </column>
+    <column id="98" parent="12" name="university_id">
+      <NotNull>1</NotNull>
+      <Position>11</Position>
+      <StoredType>int(11)|0s</StoredType>
+    </column>
+    <column id="99" parent="12" name="created_at">
+      <DefaultExpression>CURRENT_TIMESTAMP</DefaultExpression>
+      <Position>12</Position>
+      <StoredType>timestamp|0s</StoredType>
+    </column>
+    <column id="100" parent="12" name="updated_at">
+      <DefaultExpression>CURRENT_TIMESTAMP</DefaultExpression>
+      <OnUpdate>CURRENT_TIMESTAMP</OnUpdate>
+      <Position>13</Position>
+      <StoredType>timestamp|0s</StoredType>
+    </column>
+    <foreign-key id="101" parent="12" name="products_ibfk_1">
+      <ColNames>seller_id</ColNames>
+      <RefColNames>user_id</RefColNames>
+      <RefTableName>users</RefTableName>
+    </foreign-key>
+    <foreign-key id="102" parent="12" name="products_ibfk_2">
+      <ColNames>university_id</ColNames>
+      <RefColNames>university_id</RefColNames>
+      <RefTableName>universities</RefTableName>
+    </foreign-key>
+    <index id="103" parent="12" name="PRIMARY">
+      <ColNames>product_id</ColNames>
+      <Type>btree</Type>
+      <Unique>1</Unique>
+    </index>
+    <index id="104" parent="12" name="idx_seller_id">
+      <ColNames>seller_id</ColNames>
+      <Type>btree</Type>
+    </index>
+    <index id="105" parent="12" name="idx_university_id">
+      <ColNames>university_id</ColNames>
+      <Type>btree</Type>
+    </index>
+    <key id="106" parent="12" name="PRIMARY">
+      <NameSurrogate>1</NameSurrogate>
+      <Primary>1</Primary>
+      <UnderlyingIndexName>PRIMARY</UnderlyingIndexName>
+    </key>
+    <column id="107" parent="13" name="role_id">
+      <AutoIncrement>1</AutoIncrement>
+      <NotNull>1</NotNull>
+      <Position>1</Position>
+      <StoredType>int(11)|0s</StoredType>
+    </column>
+    <column id="108" parent="13" name="name">
+      <NotNull>1</NotNull>
+      <Position>2</Position>
+      <StoredType>varchar(255)|0s</StoredType>
+    </column>
+    <index id="109" parent="13" name="PRIMARY">
+      <ColNames>role_id</ColNames>
+      <Type>btree</Type>
+      <Unique>1</Unique>
+    </index>
+    <index id="110" parent="13" name="name">
+      <ColNames>name</ColNames>
+      <Type>btree</Type>
+      <Unique>1</Unique>
+    </index>
+    <key id="111" parent="13" name="PRIMARY">
+      <NameSurrogate>1</NameSurrogate>
+      <Primary>1</Primary>
+      <UnderlyingIndexName>PRIMARY</UnderlyingIndexName>
+    </key>
+    <key id="112" parent="13" name="name">
+      <UnderlyingIndexName>name</UnderlyingIndexName>
+    </key>
+    <column id="113" parent="14" name="id">
+      <AutoIncrement>1</AutoIncrement>
+      <NotNull>1</NotNull>
+      <Position>1</Position>
+      <StoredType>int(11)|0s</StoredType>
+    </column>
+    <column id="114" parent="14" name="access_token">
+      <Position>2</Position>
+      <StoredType>varchar(255)|0s</StoredType>
+    </column>
+    <column id="115" parent="14" name="is_logged_out">
+      <Position>3</Position>
+      <StoredType>bit(1)|0s</StoredType>
+    </column>
+    <column id="116" parent="14" name="refresh_token">
+      <Position>4</Position>
+      <StoredType>varchar(255)|0s</StoredType>
+    </column>
+    <column id="117" parent="14" name="user_id">
+      <Position>5</Position>
+      <StoredType>int(11)|0s</StoredType>
+    </column>
+    <foreign-key id="118" parent="14" name="FKj8rfw4x0wjjyibfqq566j4qng">
+      <ColNames>user_id</ColNames>
+      <RefColNames>user_id</RefColNames>
+      <RefTableName>users</RefTableName>
+    </foreign-key>
+    <index id="119" parent="14" name="PRIMARY">
+      <ColNames>id</ColNames>
+      <Type>btree</Type>
+      <Unique>1</Unique>
+    </index>
+    <index id="120" parent="14" name="FKj8rfw4x0wjjyibfqq566j4qng">
+      <ColNames>user_id</ColNames>
+      <Type>btree</Type>
+    </index>
+    <key id="121" parent="14" name="PRIMARY">
+      <NameSurrogate>1</NameSurrogate>
+      <Primary>1</Primary>
+      <UnderlyingIndexName>PRIMARY</UnderlyingIndexName>
+    </key>
+    <column id="122" parent="15" name="university_id">
+      <AutoIncrement>1</AutoIncrement>
+      <NotNull>1</NotNull>
+      <Position>1</Position>
+      <StoredType>int(11)|0s</StoredType>
+    </column>
+    <column id="123" parent="15" name="name">
+      <NotNull>1</NotNull>
+      <Position>2</Position>
+      <StoredType>varchar(255)|0s</StoredType>
+    </column>
+    <column id="124" parent="15" name="domain">
+      <NotNull>1</NotNull>
+      <Position>3</Position>
+      <StoredType>varchar(255)|0s</StoredType>
+    </column>
+    <column id="125" parent="15" name="location">
+      <NotNull>1</NotNull>
+      <Position>4</Position>
+      <StoredType>varchar(255)|0s</StoredType>
+    </column>
+    <column id="126" parent="15" name="created_at">
+      <DefaultExpression>CURRENT_TIMESTAMP</DefaultExpression>
+      <Position>5</Position>
+      <StoredType>timestamp|0s</StoredType>
+    </column>
+    <column id="127" parent="15" name="updated_at">
+      <DefaultExpression>CURRENT_TIMESTAMP</DefaultExpression>
+      <OnUpdate>CURRENT_TIMESTAMP</OnUpdate>
+      <Position>6</Position>
+      <StoredType>timestamp|0s</StoredType>
+    </column>
+    <index id="128" parent="15" name="PRIMARY">
+      <ColNames>university_id</ColNames>
+      <Type>btree</Type>
+      <Unique>1</Unique>
+    </index>
+    <index id="129" parent="15" name="domain">
+      <ColNames>domain</ColNames>
+      <Type>btree</Type>
+      <Unique>1</Unique>
+    </index>
+    <key id="130" parent="15" name="PRIMARY">
+      <NameSurrogate>1</NameSurrogate>
+      <Primary>1</Primary>
+      <UnderlyingIndexName>PRIMARY</UnderlyingIndexName>
+    </key>
+    <key id="131" parent="15" name="domain">
+      <UnderlyingIndexName>domain</UnderlyingIndexName>
+    </key>
+    <column id="132" parent="16" name="user_id">
+      <NotNull>1</NotNull>
+      <Position>1</Position>
+      <StoredType>int(11)|0s</StoredType>
+    </column>
+    <column id="133" parent="16" name="role_id">
+      <NotNull>1</NotNull>
+      <Position>2</Position>
+      <StoredType>int(11)|0s</StoredType>
+    </column>
+    <foreign-key id="134" parent="16" name="user_roles_ibfk_1">
+      <ColNames>user_id</ColNames>
+      <OnDelete>cascade</OnDelete>
+      <RefColNames>user_id</RefColNames>
+      <RefTableName>users</RefTableName>
+    </foreign-key>
+    <foreign-key id="135" parent="16" name="user_roles_ibfk_2">
+      <ColNames>role_id</ColNames>
+      <OnDelete>cascade</OnDelete>
+      <RefColNames>role_id</RefColNames>
+      <RefTableName>roles</RefTableName>
+    </foreign-key>
+    <index id="136" parent="16" name="PRIMARY">
+      <ColNames>user_id
+role_id</ColNames>
+      <Type>btree</Type>
+      <Unique>1</Unique>
+    </index>
+    <index id="137" parent="16" name="role_id">
+      <ColNames>role_id</ColNames>
+      <Type>btree</Type>
+    </index>
+    <key id="138" parent="16" name="PRIMARY">
+      <NameSurrogate>1</NameSurrogate>
+      <Primary>1</Primary>
+      <UnderlyingIndexName>PRIMARY</UnderlyingIndexName>
+    </key>
+    <column id="139" parent="17" name="user_id">
+      <AutoIncrement>1</AutoIncrement>
+      <NotNull>1</NotNull>
+      <Position>1</Position>
+      <StoredType>int(11)|0s</StoredType>
+    </column>
+    <column id="140" parent="17" name="university_id">
+      <Position>2</Position>
+      <StoredType>int(11)|0s</StoredType>
+    </column>
+    <column id="141" parent="17" name="name">
+      <NotNull>1</NotNull>
+      <Position>3</Position>
+      <StoredType>varchar(255)|0s</StoredType>
+    </column>
+    <column id="142" parent="17" name="email">
+      <NotNull>1</NotNull>
+      <Position>4</Position>
+      <StoredType>varchar(255)|0s</StoredType>
+    </column>
+    <column id="143" parent="17" name="password">
+      <Position>5</Position>
+      <StoredType>varchar(255)|0s</StoredType>
+    </column>
+    <column id="144" parent="17" name="profile_picture">
+      <Position>6</Position>
+      <StoredType>longblob|0s</StoredType>
+    </column>
+    <column id="145" parent="17" name="created_at">
+      <DefaultExpression>CURRENT_TIMESTAMP</DefaultExpression>
+      <Position>7</Position>
+      <StoredType>timestamp|0s</StoredType>
+    </column>
+    <column id="146" parent="17" name="updated_at">
+      <DefaultExpression>CURRENT_TIMESTAMP</DefaultExpression>
+      <OnUpdate>CURRENT_TIMESTAMP</OnUpdate>
+      <Position>8</Position>
+      <StoredType>timestamp|0s</StoredType>
+    </column>
+    <column id="147" parent="17" name="enabled">
+      <DefaultExpression>1</DefaultExpression>
+      <Position>9</Position>
+      <StoredType>tinyint(1)|0s</StoredType>
+    </column>
+    <column id="148" parent="17" name="email_verified">
+      <DefaultExpression>0</DefaultExpression>
+      <Position>10</Position>
+      <StoredType>tinyint(1)|0s</StoredType>
+    </column>
+    <column id="149" parent="17" name="provider">
+      <DefaultExpression>&apos;SELF&apos;</DefaultExpression>
+      <NotNull>1</NotNull>
+      <Position>11</Position>
+      <StoredType>varchar(20)|0s</StoredType>
+    </column>
+    <column id="150" parent="17" name="provider_user_id">
+      <Position>12</Position>
+      <StoredType>varchar(255)|0s</StoredType>
+    </column>
+    <column id="151" parent="17" name="email_token">
+      <Position>13</Position>
+      <StoredType>varchar(255)|0s</StoredType>
+    </column>
+    <foreign-key id="152" parent="17" name="users_ibfk_1">
+      <ColNames>university_id</ColNames>
+      <RefColNames>university_id</RefColNames>
+      <RefTableName>universities</RefTableName>
+    </foreign-key>
+    <index id="153" parent="17" name="PRIMARY">
+      <ColNames>user_id</ColNames>
+      <Type>btree</Type>
+      <Unique>1</Unique>
+    </index>
+    <index id="154" parent="17" name="email_UNIQUE">
+      <ColNames>email</ColNames>
+      <Type>btree</Type>
+      <Unique>1</Unique>
+    </index>
+    <index id="155" parent="17" name="idx_university_id">
+      <ColNames>university_id</ColNames>
+      <Type>btree</Type>
+    </index>
+    <key id="156" parent="17" name="PRIMARY">
+      <NameSurrogate>1</NameSurrogate>
+      <Primary>1</Primary>
+      <UnderlyingIndexName>PRIMARY</UnderlyingIndexName>
+    </key>
+    <key id="157" parent="17" name="email_UNIQUE">
+      <UnderlyingIndexName>email_UNIQUE</UnderlyingIndexName>
+    </key>
+    <column id="158" parent="18" name="wantlist_id">
+      <AutoIncrement>1</AutoIncrement>
+      <NotNull>1</NotNull>
+      <Position>1</Position>
+      <StoredType>int(11)|0s</StoredType>
+    </column>
+    <column id="159" parent="18" name="category">
+      <Position>2</Position>
+      <StoredType>enum(&apos;BOOKS&apos;, &apos;CLOTHING&apos;, &apos;ELECTRONICS&apos;, &apos;FURNITURE&apos;, &apos;HOSTEL_SUPPLIES&apos;, &apos;LAB_EQUIPMENT&apos;, &apos;MUSICAL_INSTRUMENTS&apos;, &apos;OTHER&apos;, &apos;SPORTS&apos;, &apos;STATIONERY&apos;, &apos;VEHICLES&apos;)|0e</StoredType>
+    </column>
+    <column id="160" parent="18" name="created_at">
+      <Position>3</Position>
+      <StoredType>datetime(6)|0s</StoredType>
+    </column>
+    <column id="161" parent="18" name="description">
+      <Position>4</Position>
+      <StoredType>varchar(255)|0s</StoredType>
+    </column>
+    <column id="162" parent="18" name="months_old_max">
+      <Position>5</Position>
+      <StoredType>int(11)|0s</StoredType>
+    </column>
+    <column id="163" parent="18" name="price_max">
+      <Position>6</Position>
+      <StoredType>int(11)|0s</StoredType>
+    </column>
+    <column id="164" parent="18" name="price_min">
+      <Position>7</Position>
+      <StoredType>int(11)|0s</StoredType>
+    </column>
+    <column id="165" parent="18" name="product_name">
+      <Position>8</Position>
+      <StoredType>varchar(255)|0s</StoredType>
+    </column>
+    <column id="166" parent="18" name="updated_at">
+      <Position>9</Position>
+      <StoredType>datetime(6)|0s</StoredType>
+    </column>
+    <column id="167" parent="18" name="user_id">
+      <NotNull>1</NotNull>
+      <Position>10</Position>
+      <StoredType>int(11)|0s</StoredType>
+    </column>
+    <foreign-key id="168" parent="18" name="ABC">
+      <ColNames>user_id</ColNames>
+      <RefColNames>user_id</RefColNames>
+      <RefTableName>users</RefTableName>
+    </foreign-key>
+    <index id="169" parent="18" name="PRIMARY">
+      <ColNames>wantlist_id</ColNames>
+      <Type>btree</Type>
+      <Unique>1</Unique>
+    </index>
+    <index id="170" parent="18" name="ABC">
+      <ColNames>user_id</ColNames>
+      <Type>btree</Type>
+    </index>
+    <key id="171" parent="18" name="PRIMARY">
+      <NameSurrogate>1</NameSurrogate>
+      <Primary>1</Primary>
+      <UnderlyingIndexName>PRIMARY</UnderlyingIndexName>
+    </key>
+    <column id="172" parent="19" name="wishlist_id">
+      <AutoIncrement>1</AutoIncrement>
+      <NotNull>1</NotNull>
+      <Position>1</Position>
+      <StoredType>int(11)|0s</StoredType>
+    </column>
+    <column id="173" parent="19" name="user_id">
+      <NotNull>1</NotNull>
+      <Position>2</Position>
+      <StoredType>int(11)|0s</StoredType>
+    </column>
+    <column id="174" parent="19" name="product_id">
+      <NotNull>1</NotNull>
+      <Position>3</Position>
+      <StoredType>int(11)|0s</StoredType>
+    </column>
+    <column id="175" parent="19" name="created_at">
+      <DefaultExpression>CURRENT_TIMESTAMP</DefaultExpression>
+      <Position>4</Position>
+      <StoredType>timestamp|0s</StoredType>
+    </column>
+    <column id="176" parent="19" name="updated_at">
+      <DefaultExpression>CURRENT_TIMESTAMP</DefaultExpression>
+      <OnUpdate>CURRENT_TIMESTAMP</OnUpdate>
+      <Position>5</Position>
+      <StoredType>timestamp|0s</StoredType>
+    </column>
+    <foreign-key id="177" parent="19" name="wishlists_ibfk_1">
+      <ColNames>user_id</ColNames>
+      <OnDelete>cascade</OnDelete>
+      <RefColNames>user_id</RefColNames>
+      <RefTableName>users</RefTableName>
+    </foreign-key>
+    <foreign-key id="178" parent="19" name="wishlists_ibfk_2">
+      <ColNames>product_id</ColNames>
+      <OnDelete>cascade</OnDelete>
+      <RefColNames>product_id</RefColNames>
+      <RefTableName>products</RefTableName>
+    </foreign-key>
+    <index id="179" parent="19" name="PRIMARY">
+      <ColNames>wishlist_id</ColNames>
+      <Type>btree</Type>
+      <Unique>1</Unique>
+    </index>
+    <index id="180" parent="19" name="unique_user_product">
+      <ColNames>user_id
+product_id</ColNames>
+      <Type>btree</Type>
+      <Unique>1</Unique>
+    </index>
+    <index id="181" parent="19" name="idx_user_id">
+      <ColNames>user_id</ColNames>
+      <Type>btree</Type>
+    </index>
+    <index id="182" parent="19" name="idx_product_id">
+      <ColNames>product_id</ColNames>
+      <Type>btree</Type>
+    </index>
+    <key id="183" parent="19" name="PRIMARY">
+      <NameSurrogate>1</NameSurrogate>
+      <Primary>1</Primary>
+      <UnderlyingIndexName>PRIMARY</UnderlyingIndexName>
+    </key>
+    <key id="184" parent="19" name="unique_user_product">
+      <UnderlyingIndexName>unique_user_product</UnderlyingIndexName>
+    </key>
+  </database-model>
+</dataSource>

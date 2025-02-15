@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useNavigate } from "react-router-dom";
 import { API_BASE_URL } from "../Api/api";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import {
   Dialog,
   DialogContent,
@@ -24,8 +24,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import debounce from "lodash/debounce";
 
-const ProductCard = () => {
+const ProductCard = ({
+  initialSearchQuery,
+  initialsortField,
+  initialsortDir,
+}) => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -35,17 +40,30 @@ const ProductCard = () => {
   const [dialogInitialized, setDialogInitialized] = useState(false);
   const [open, setOpen] = useState(false);
   const [wishlistedItems, setWishlistedItems] = useState(new Set());
+  const [fetchTrigger, setFetchTrigger] = useState(0); // New state variable
 
   // Pagination state
   const [currentPage, setCurrentPage] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
   const [pageSize, setPageSize] = useState(2);
   const [totalElements, setTotalElements] = useState(0);
+  const [sortField, setSortField] = useState(initialsortField || "postDate");
+  const [sortDir, setSortDir] = useState(initialsortDir || "desc");
+  const [searchQuery, setSearchQuery] = useState(initialSearchQuery || ""); // Rename state variable
+  const placeholderImage = "/api/placeholder/400/320";
 
   const [isAuthenticated, setIsAuthenticated] = useState(
     Boolean(localStorage.getItem("jwt"))
   );
   const navigate = useNavigate();
+  useEffect(() => {
+    fetchProducts();
+  }, [searchQuery, sortField, sortDir, currentPage]);
+
+  useEffect(() => {
+    const universityId = isAuthenticated ? null : selectedUniversity;
+    fetchProducts(universityId, currentPage, searchQuery, sortField, sortDir);
+  }, [searchQuery, sortField, sortDir, currentPage]);
 
   // Fetch universities on component mount
   useEffect(() => {
@@ -72,104 +90,144 @@ const ProductCard = () => {
     }
   }, [isAuthenticated, selectedUniversity, dialogInitialized]);
 
+  // Debounced search function (correct dependencies)
+  const debouncedSearch = useCallback(
+    debounce((query, sortField, sortDir) => {
+      // Add sort parameters
+      const universityId = isAuthenticated ? null : selectedUniversity;
+      fetchProducts(universityId, currentPage, query, sortField, sortDir); // Pass sort parameters
+    }, 500),
+    [isAuthenticated, selectedUniversity, currentPage, sortField, sortDir] // Include sort dependencies
+  );
+
+  useEffect(() => {
+    const universityId = isAuthenticated ? null : selectedUniversity;
+    fetchProducts(universityId, currentPage, searchQuery, sortField, sortDir); // Pass all parameters
+  }, [
+    searchQuery,
+    sortField,
+    sortDir,
+    currentPage,
+    isAuthenticated,
+    selectedUniversity,
+  ]); // Add isAuthenticated & selectedUniversity
+
   // Modified product fetch function to handle both authenticated and non-authenticated cases
-  const fetchProducts = async (universityId = null, page = 0) => {
-    try {
-      setLoading(true);
-      const token = localStorage.getItem("jwt");
-      const headers = token ? { Authorization: `Bearer ${token}` } : {};
+  const fetchProducts = useCallback(
+    async (universityId = null, page = currentPage) => {
+      try {
+        setLoading(true);
+        const token = localStorage.getItem("jwt");
+        const headers = token ? { Authorization: `Bearer ${token}` } : {};
 
-      // Don't fetch if we need a university ID but don't have one
-      if (!token && !universityId) {
-        setProducts([]);
-        return;
+        // Don't fetch if we need a university ID but don't have one
+        if (!token && !universityId) {
+          setProducts([]);
+          return;
+        }
+
+        // Use different endpoints based on authentication status
+        const endpoint = token
+          ? `${API_BASE_URL}/api/products/university`
+          : `${API_BASE_URL}/api/products/public/university/${universityId}`;
+
+        console.log("searchQuery ", searchQuery);
+        console.log("sortField ", sortField);
+        console.log("sortDir ", sortDir);
+        console.log("currentPage ", currentPage);
+          const response = await fetch(endpoint, {
+
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            ...headers,
+          },
+          body: JSON.stringify({
+            page: page,
+            size: pageSize,
+            sortField: sortField, // Use parameters here
+            sortDir: sortDir, // Use parameters here
+            searchQuery: searchQuery, // Use the provided query
+          }),
+        });
+
+        if (!response.ok) throw new Error("Failed to fetch products");
+
+        const responseData = await response.json();
+        // Extract products array from the content property
+        const data = responseData.content || [];
+        console.log("Fetched products:", data);
+        // Update pagination state
+        setTotalPages(responseData.totalPages);
+        setTotalElements(responseData.totalElements);
+        setCurrentPage(responseData.number);
+
+        // Process products with images
+        const productsWithImages = data.map((product) => {
+          const hasImages = product.imageUrls?.length > 0;
+          return {
+            ...product,
+            images: hasImages
+              ? product.imageUrls.map((url, index) => ({
+                  id: `${product.id}-${index}`,
+                  url: url,
+                  fileName: `image-${index}`,
+                }))
+              : [
+                  {
+                    id: product.id,
+                    url: placeholderImage,
+                    fileName: "placeholder",
+                  },
+                ],
+            hasImages: hasImages, // Add a flag to track if real images exist
+          };
+        });
+        //     // Fetch images if needed
+        //     if (token) {
+        //       try {
+        //         const imagesResponse = await fetch(
+        //           `${API_BASE_URL}/api/images/product/${product.id}`,
+        //           { headers }
+        //         );
+        //         if (imagesResponse.ok) {
+        //           const images = await imagesResponse.json();
+        //           return {
+        //             ...product,
+        //             images: images
+        //               .map((img) =>
+        //                 img.s3_url
+        //                   ? {
+        //                       id: img.image_id,
+        //                       url: img.s3_url,
+        //                       fileName: img.file_name,
+        //                     }
+        //                   : null
+        //               )
+        //               .filter(Boolean),
+        //           };
+        //         }
+        //       } catch (error) {
+        //         console.error(
+        //           `Error fetching images for product ${product.id}:`,
+        //           error
+        //         );
+        //       }
+        //     }
+        //     return { ...product, images: [] };
+        //   })
+        // );
+
+        setProducts(productsWithImages);
+      } catch (err) {
+        setError(err.message);
+        console.error("Error fetching products:", err);
+      } finally {
+        setLoading(false);
       }
-
-      // Use different endpoints based on authentication status
-      const endpoint = token
-        ? `${API_BASE_URL}/api/products/university`
-        : `${API_BASE_URL}/api/products/public/university/${universityId}`;
-
-      const response = await fetch(endpoint, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          ...headers, // Include additional headers if needed
-        },
-        body: JSON.stringify({
-          page: page,
-          size: pageSize,
-        }),
-      });
-
-      if (!response.ok) throw new Error("Failed to fetch products");
-
-      const responseData = await response.json();
-      // Extract products array from the content property
-      const data = responseData.content || [];
-      console.log("Fetched products:", data);
-      // Update pagination state
-      setTotalPages(responseData.totalPages);
-      setTotalElements(responseData.totalElements);
-      setCurrentPage(responseData.number);
-
-      // Process products with images
-      const productsWithImages = await Promise.all(
-        data.map(async (product) => {
-          if (product.imageUrls?.length > 0) {
-            return {
-              ...product,
-              images: product.imageUrls.map((url, index) => ({
-                id: `${product.id}-${index}`,
-                url: url,
-                fileName: `image-${index}`,
-              })),
-            };
-          }
-
-          // Fetch images if needed
-          if (token) {
-            try {
-              const imagesResponse = await fetch(
-                `${API_BASE_URL}/api/images/product/${product.id}`,
-                { headers }
-              );
-              if (imagesResponse.ok) {
-                const images = await imagesResponse.json();
-                return {
-                  ...product,
-                  images: images
-                    .map((img) =>
-                      img.s3_url
-                        ? {
-                            id: img.image_id,
-                            url: img.s3_url,
-                            fileName: img.file_name,
-                          }
-                        : null
-                    )
-                    .filter(Boolean),
-                };
-              }
-            } catch (error) {
-              console.error(
-                `Error fetching images for product ${product.id}:`,
-                error
-              );
-            }
-          }
-          return { ...product, images: [] };
-        })
-      );
-
-      setProducts(productsWithImages);
-    } catch (err) {
-      setError(err.message);
-      console.error("Error fetching products:", err);
-    } finally {
-      setLoading(false);
-    }
-  };
+    },
+    [searchQuery, sortField, sortDir, currentPage, pageSize, selectedUniversity]
+  );
 
   // Handle university selection
   const handleUniversitySelect = (universityId) => {
@@ -268,8 +326,17 @@ const ProductCard = () => {
         if (!response.ok) throw new Error("Failed to fetch wishlist");
 
         const wishlistItems = await response.json();
-        setWishlistedItems(
-          new Set(wishlistItems.map((item) => item.productId))
+        const wishlistSet = new Set(
+          wishlistItems.map((item) => item.productId)
+        );
+        setWishlistedItems(wishlistSet);
+
+        // Update products with wishlist status
+        setProducts((prevProducts) =>
+          prevProducts.map((product) => ({
+            ...product,
+            isWishlisted: wishlistSet.has(product.id),
+          }))
         );
       } catch (error) {
         console.error("Error fetching wishlist status:", error);
@@ -307,54 +374,7 @@ const ProductCard = () => {
 
   return (
     <>
-      {/* <Dialog open={open} onOpenChange={setOpen} className="z-9999">
-        {console.log("Dialog")}
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Select Your University</DialogTitle>
-          </DialogHeader>
-          <div className="p-4">
-            <Select
-              onValueChange={(value) => {
-                handleUniversitySelect(value);
-                setOpen(false);
-              }}
-            >
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder="Choose a university" />
-              </SelectTrigger>
-              <SelectContent>
-                {universities.map((university) => (
-                  <SelectItem key={university.id} value={university.id}>
-                    {university.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-        </DialogContent>
-      </Dialog> */}
       <div className="m-4">
-        {/* University selection for manual change */}
-        {!isAuthenticated && selectedUniversity && (
-          <div className="mb-4">
-            <Select
-              value={selectedUniversity}
-              onValueChange={handleUniversitySelect}
-            >
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {universities.map((university) => (
-                  <SelectItem key={university.id} value={university.id}>
-                    {university.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-        )}
         <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
           {products.map((product) => (
             <div
@@ -365,13 +385,9 @@ const ProductCard = () => {
               {/* Image Section */}
               <div className="relative h-64 overflow-hidden">
                 <img
-                  src={product.images?.[0]?.url || "/api/placeholder/400/320"}
+                  src={product.images?.[0]?.url} // Use the url directly
                   alt={product.name}
                   className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
-                  onError={(e) => {
-                    e.target.onerror = null;
-                    e.target.src = "/api/placeholder/400/320";
-                  }}
                 />
                 <Button
                   variant="ghost"
