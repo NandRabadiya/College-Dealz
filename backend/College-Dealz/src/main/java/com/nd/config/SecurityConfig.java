@@ -61,7 +61,7 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(
                         req->req.requestMatchers("/login/**","/register/**", "/refresh_token/**","/socket.io/**","/api/universities/**",  // Allow public access to universities endpoint
-                                        "/api/products/public/university/**" )
+                                        "/api/products/public/university/**" , "/send-otp**","/verify**","/resend-otp**" )
                                 .permitAll()
                                 .requestMatchers("/api/admin_only/**")
                                .hasAuthority("ADMIN")

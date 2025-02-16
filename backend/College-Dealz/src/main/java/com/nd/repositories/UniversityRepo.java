@@ -19,4 +19,6 @@ public interface UniversityRepo extends JpaRepository<University,Integer> {
     Optional<University> findById(Integer integer);
 
     Optional<University> getUniversitiesByDomain(String domain);
+
+
 }

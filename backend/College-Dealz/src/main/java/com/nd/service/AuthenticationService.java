@@ -1,6 +1,7 @@
 package com.nd.service;
 
 import com.nd.dto.AuthResponse;
+import com.nd.dto.UserRegisterRequest;
 import com.nd.entities.Role;
 import com.nd.entities.Token;
 import com.nd.entities.University;
@@ -37,12 +38,13 @@ public class AuthenticationService {
     private final TokenRepository tokenRepository;
     private final AuthenticationManager authenticationManager;
     private final UniversityRepo universityRepo;
+    private final EmailService emailService;
 
     public AuthenticationService(RoleRepo roleRepository, UserRepo repository,
                                  PasswordEncoder passwordEncoder,
                                  JwtService jwtService,
                                  TokenRepository tokenRepository,
-                                 AuthenticationManager authenticationManager, UniversityRepo universityRepo) {
+                                 AuthenticationManager authenticationManager, UniversityRepo universityRepo, EmailService emailService) {
         this.roleRepository = roleRepository;
         this.repository = repository;
         this.passwordEncoder = passwordEncoder;
@@ -50,25 +52,24 @@ public class AuthenticationService {
         this.tokenRepository = tokenRepository;
         this.authenticationManager = authenticationManager;
         this.universityRepo = universityRepo;
+        this.emailService = emailService;
     }
 
-    public AuthResponse register(User request) {
+    public AuthResponse register(UserRegisterRequest request) {
         if (repository.findByEmail(request.getEmail()).isPresent()) {
             return new AuthResponse(null, null, "User already exists");
         }
 
-        System.out.println("\n\n Authentication Service register method  \n\n");
+        if (!emailService.isEmailVerified(request.getEmail())) {
+            return new AuthResponse(null, null, "Please verify your email before registering.");
+        }
 
         User user = new User();
         user.setName(request.getName());
 
         String domain = request.getEmail().substring(request.getEmail().indexOf("@") + 1);
-
         University university = universityRepo.getUniversitiesByDomain(domain)
-                .orElseThrow(() -> new ResourceNotFoundException("University not found for domain: " + domain));
-
-
-
+                .orElseThrow(() -> new RuntimeException("University not found for domain: " + domain));
 
         user.setUniversity(university);
         user.setEmail(request.getEmail());
@@ -83,10 +84,13 @@ public class AuthenticationService {
         String accessToken = jwtService.generateAccessToken(user);
         String refreshToken = jwtService.generateRefreshToken(user);
 
-        saveUserToken(accessToken, refreshToken, user);
+        // ✅ After successful registration, remove the email from the verified list
+        emailService.removeVerifiedEmail(request.getEmail());
+
 
         return new AuthResponse(accessToken, refreshToken, "User registration was successful");
     }
+
 
     public AuthResponse authenticate(User request) {
         authenticationManager.authenticate(
@@ -95,6 +99,7 @@ public class AuthenticationService {
                         request.getPassword()
                 )
         );
+
 
         User user = repository.findByEmail(request.getEmail()).orElseThrow();
         String accessToken = jwtService.generateAccessToken(user);
