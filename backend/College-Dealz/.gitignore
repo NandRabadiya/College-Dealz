@@ -22,6 +22,7 @@ target/
 application.properties
 application-nd.properties
 application-vn.properties
+application-ti.properties
 workspace.xml
 
 ### NetBeans ###
