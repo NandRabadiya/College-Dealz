@@ -10,6 +10,12 @@ import {
   GET_USER_SUCCESS,
   GET_USER_FAILURE,
   LOGOUT,
+  SEND_OTP_REQUEST,
+  SEND_OTP_SUCCESS,
+  SEND_OTP_FAILURE,
+  VERIFY_OTP_REQUEST,
+  VERIFY_OTP_SUCCESS,
+  VERIFY_OTP_FAILURE
 } from "./ActionTypes";
 import { API_BASE_URL } from "../../pages/Api/api";
 
@@ -71,20 +77,25 @@ export const signupFailure = (error) => ({
   payload: error,
 });
 
+// Modified signup action to include OTP verification
 export const signup = (details) => async (dispatch) => {
   dispatch(signupRequest());
   try {
-    const response = await axios.post(`${API_BASE_URL}/register`, details);
+    const response = await axios.post(`${API_BASE_URL}/register`, {
+      ...details,
+      verified: true // Add this flag to indicate OTP verification is complete
+    });
     const user = response.data;
     if (user.access_token) {
       localStorage.setItem("jwt", user.access_token);
-      dispatch(getUser(user.acces_token));
+      dispatch(getUser(user.access_token));
     }
-    // Display success message from backend
-    const message = user.message || "Signup successful!";
-    dispatch(signupSuccess({ user, message }));
+    dispatch(signupSuccess({ user, message: user.message || "Signup successful!" }));
+    return { type: "SIGNUP_SUCCESS" };
   } catch (error) {
-    dispatch(signupFailure(error.response?.data?.message || "Signup failed"));
+    const errorMessage = error.response?.data?.message || "Signup failed";
+    dispatch(signupFailure(errorMessage));
+    return { type: "SIGNUP_FAILURE", payload: { message: errorMessage } };
   }
 };
 
@@ -136,4 +147,66 @@ export const logout = () => async (dispatch) => {
   }
 
   dispatch({ type: LOGOUT });
+};
+
+// Send OTP Action
+export const sendOtpRequest = () => ({ type: SEND_OTP_REQUEST });
+export const sendOtpSuccess = (message) => ({ type: SEND_OTP_SUCCESS, payload: message });
+export const sendOtpFailure = (error) => ({ type: SEND_OTP_FAILURE, payload: error });
+
+export const sendOtp = (email) => async (dispatch) => {
+  dispatch(sendOtpRequest());
+  try {
+    console.log("Sending OTP to:", email);
+    const params = new URLSearchParams({ email });
+    const response = await axios.post(`${API_BASE_URL}/send-otp?${params}`);
+    console.log("OTP sent:", response.data);
+    dispatch(sendOtpSuccess(response.data.message));
+    return { type: "SEND_OTP_SUCCESS", payload: response.data };
+  } catch (error) {
+    console.error('OTP Error details:', {
+      status: error.response?.status,
+      data: error.response?.data,
+      message: error.message
+    });
+    const errorMessage = error.response?.data?.message || "Failed to send OTP";
+    dispatch(sendOtpFailure(errorMessage));
+    return { type: "SEND_OTP_FAILURE", payload: { message: errorMessage } };
+  }
+};
+
+// Resend OTP Action
+export const resendOtp = (email) => async (dispatch) => {
+  dispatch(sendOtpRequest());
+  try {
+    const response = await axios.post(`${API_BASE_URL}/resend-otp`, null, {
+      params: { email }
+    });
+    dispatch(sendOtpSuccess(response.data));
+    return { type: "SEND_OTP_SUCCESS", payload: response.data };
+  } catch (error) {
+    const errorMessage = error.response?.data?.message || "Failed to resend OTP";
+    dispatch(sendOtpFailure(errorMessage));
+    return { type: "SEND_OTP_FAILURE", payload: { message: errorMessage } };
+  }
+};
+
+// Verify OTP Action
+export const verifyOtpRequest = () => ({ type: VERIFY_OTP_REQUEST });
+export const verifyOtpSuccess = (message) => ({ type: VERIFY_OTP_SUCCESS, payload: message });
+export const verifyOtpFailure = (error) => ({ type: VERIFY_OTP_FAILURE, payload: error });
+
+export const verifyOtp = (email, otp) => async (dispatch) => {
+  dispatch(verifyOtpRequest());
+  try {
+    const response = await axios.post(`${API_BASE_URL}/verify`, null, {
+      params: { email, otp }
+    });
+    dispatch(verifyOtpSuccess(response.data));
+    return { type: "VERIFY_OTP_SUCCESS", payload: response.data };
+  } catch (error) {
+    const errorMessage = error.response?.data?.message || "Failed to verify OTP";
+    dispatch(verifyOtpFailure(errorMessage));
+    return { type: "VERIFY_OTP_FAILURE", payload: { message: errorMessage } };
+  }
 };

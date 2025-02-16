@@ -29,5 +29,9 @@
         </introspection-scope>
       </schema-mapping>
     </data-source>
+    <data-source name="TiDB cloud" uuid="ad7398a0-dcd5-4769-990f-0683f4c898a6">
+      <database-info product="" version="" jdbc-version="" driver-name="" driver-version="" dbms="TIDB" />
+      <schema-mapping />
+    </data-source>
   </component>
 </project>

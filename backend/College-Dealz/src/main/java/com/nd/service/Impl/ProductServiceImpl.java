@@ -288,7 +288,7 @@ public class ProductServiceImpl implements ProductService {
         return productPage.map(this::mapToDto);
     }
 
-    @Override
+   // @Override
     public List<ProductDto> getProductsByUniversityId(String authHeader) {
         return List.of();
     }
