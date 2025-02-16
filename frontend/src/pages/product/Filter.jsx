@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
+import * as SliderPrimitive from '@radix-ui/react-slider';
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { Slider } from "@/components/ui/slider";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Filter as FilterIcon } from "lucide-react";
@@ -15,6 +15,27 @@ const categories = [
   "Lab Equipment", "Study Materials", "Others"
 ];
 
+// Custom Slider Component
+const CustomSlider = React.forwardRef(({ className, ...props }, ref) => (
+  <SliderPrimitive.Root
+    ref={ref}
+    className="relative flex w-full touch-none select-none items-center"
+    {...props}
+  >
+    <SliderPrimitive.Track className="relative h-1.5 w-full grow overflow-hidden rounded-full bg-primary/20">
+      <SliderPrimitive.Range className="absolute h-full bg-primary" />
+    </SliderPrimitive.Track>
+    {props.value.map((_, index) => (
+      <SliderPrimitive.Thumb
+        key={index}
+        className="block h-4 w-4 rounded-full border border-primary/50 bg-background shadow transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
+      />
+    ))}
+  </SliderPrimitive.Root>
+));
+
+CustomSlider.displayName = "CustomSlider";
+
 const FilterComponent = ({ onFilterChange, className = "" }) => {
   const [priceRange, setPriceRange] = useState([0, 10000]);
   const [minInputValue, setMinInputValue] = useState("0");
@@ -22,14 +43,12 @@ const FilterComponent = ({ onFilterChange, className = "" }) => {
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [isOpen, setIsOpen] = useState(false);
 
-  // Update input fields when slider changes
   const handleSliderChange = (value) => {
     setPriceRange(value);
     setMinInputValue(value[0].toString());
     setMaxInputValue(value[1].toString());
   };
 
-  // Handle min price input change
   const handleMinInputChange = (e) => {
     const value = e.target.value;
     setMinInputValue(value);
@@ -46,7 +65,6 @@ const FilterComponent = ({ onFilterChange, className = "" }) => {
     }
   };
 
-  // Handle max price input change
   const handleMaxInputChange = (e) => {
     const value = e.target.value;
     setMaxInputValue(value);
@@ -63,7 +81,6 @@ const FilterComponent = ({ onFilterChange, className = "" }) => {
     }
   };
 
-  // Handle input blur events to validate and format
   const handleInputBlur = (type) => {
     const value = type === 'min' ? minInputValue : maxInputValue;
     if (value === "") {
@@ -146,7 +163,7 @@ const FilterComponent = ({ onFilterChange, className = "" }) => {
               />
             </div>
           </div>
-          <Slider 
+          <CustomSlider 
             value={priceRange}
             min={0}
             max={10000}
