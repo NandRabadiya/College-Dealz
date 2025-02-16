@@ -59,6 +59,8 @@ public class User implements UserDetails {
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private List<Token> tokens;
 
+//    @Transient
+//    private String otp;
 
     @Column(name = "email_verified")
     private boolean emailVerified = false;

@@ -73,6 +73,8 @@ public class ProductController {
     }
 
 
+
+
     @PostMapping("/university")
     public ResponseEntity<Page<ProductDto>> getProductsByUniversity(
             @RequestHeader("Authorization") String authHeader,
@@ -100,6 +102,8 @@ public class ProductController {
                 request.getMinPrice(),
                 request.getMaxPrice()
         );
+        return ResponseEntity.ok(products);
+    }
 
         return ResponseEntity.ok(products);
     }
@@ -108,6 +112,26 @@ public class ProductController {
         List<ProductDto> products = productService.getAllProducts(authHeader);
         return ResponseEntity.ok(products);
     }
+
+    @GetMapping("/search/{searchTerm}")
+    public ResponseEntity<?> searchProducts(
+            @RequestHeader("Authorization") String authHeader,
+            @PathVariable String searchTerm,
+            @PageableDefault(page = 0, size = 10) Pageable pageable) {
+
+        int universityId = jwtService.getUniversityIdFromToken(authHeader);
+        Page<ProductDto> products = productService.searchProductsByUniversity(universityId, searchTerm, pageable);
+
+        if (products.isEmpty()) {
+            // Return a custom message when no products are found
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(Map.of("message", "No such product found. Please check the spelling or try a different search term."));
+        }
+
+        return ResponseEntity.ok(products);
+    }
+
+
 
     @GetMapping("/seller")
     public ResponseEntity<List<ProductDto>> getProductsBySeller(@RequestHeader("Authorization") String authHeader) {

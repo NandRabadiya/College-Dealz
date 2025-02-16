@@ -33,7 +33,6 @@ public interface ProductService {
             BigDecimal maxPrice);
     Page<ProductDto> searchProductsByUniversity(int universityId, String searchTerm, Pageable pageable);
 
-    List<ProductDto> getProductsByUniversityId(String authHeader);
     List<ProductDto> getProductsByUniversityId(Integer universityId);
     void deleteProduct(Integer productId);
     ProductDto createProductWithImages(ProductDto productDto, String authHeader) throws IOException;

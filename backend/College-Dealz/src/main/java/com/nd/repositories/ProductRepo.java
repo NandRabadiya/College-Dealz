@@ -30,8 +30,6 @@ public interface ProductRepo extends JpaRepository<Product, Integer>, JpaSpecifi
     @Query("SELECT p FROM Product p WHERE p.university.id = :universityId")
     Page<Product> findByUniversityId(@Param("universityId") int universityId, Pageable pageable);
 
-//    @Query("SELECT p FROM Product p WHERE p.university.id = :universityId AND LOWER(p.name) LIKE LOWER(CONCAT('%', :name, '%'))")
-//    Page<Product> findByUniversityIdAndNameContainingIgnoreCase(@Param("universityId") int universityId, @Param("name") String name, Pageable pageable);
 
     Page<Product> findByUniversityIdAndCategory(int universityId, Category category, Pageable pageable);
 
