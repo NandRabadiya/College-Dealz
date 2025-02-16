@@ -224,10 +224,16 @@ const NavBar = ({ onSearch, onSort }) => {
                 <div className="flex flex-col space-y-6 mt-6">
                   <img src={logo} alt="Logo" className="h-16 mx-auto" />
                   <NavigationItems isMobile />
-                  <ProductSort onSort={handleSort} />
-                  <ProductSearch onSearch={handleSearch} />
+                  {/* <ProductSort onSort={handleSort} />
+                  <ProductSearch onSearch={handleSearch} /> */}
                   <ActionButtons isMobile />
-                  <div
+                  
+                </div>
+              </SheetContent>
+            </Sheet>
+
+            <img src={logo} alt="Logo" className="h-8" />
+            <div
                     className="flex items-center space-x-4 mt-4 cursor-pointer"
                     onClick={handleProfile}
                   >
@@ -235,25 +241,7 @@ const NavBar = ({ onSearch, onSort }) => {
                       <AvatarImage src="/api/placeholder/32/32" />
                       <AvatarFallback>UN</AvatarFallback>
                     </Avatar>
-                    <span>Profile</span>
                   </div>
-                </div>
-              </SheetContent>
-            </Sheet>
-
-            <img src={logo} alt="Logo" className="h-8" />
-
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => setShowMobileSearch(!showMobileSearch)}
-            >
-              {showMobileSearch ? (
-                <X className="h-5 w-5" />
-              ) : (
-                <Search className="h-5 w-5" />
-              )}
-            </Button>
           </div>
 
           {showMobileSearch && (

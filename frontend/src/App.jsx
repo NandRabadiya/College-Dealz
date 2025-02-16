@@ -44,6 +44,7 @@ function App() {
   // Handlers
   const handleSearch = (query) => setSearchQuery(query);
   const handleSort = (field, dir) => {
+    console.log('App.js sort update:', field, dir); // Add this log
     setSortField(field);
     setSortDir(dir);
   };

@@ -27,10 +27,13 @@ import {
 import debounce from "lodash/debounce";
 
 const ProductCard = ({
-  initialSearchQuery,
-  initialsortField,
-  initialsortDir,
+  searchQuery,
+  sortField,
+  sortDir,
 }) => {
+  console.log('ProductCard received props:', { searchQuery, sortField, sortDir }); // Add this log
+
+
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -47,9 +50,9 @@ const ProductCard = ({
   const [totalPages, setTotalPages] = useState(0);
   const [pageSize, setPageSize] = useState(2);
   const [totalElements, setTotalElements] = useState(0);
-  const [sortField, setSortField] = useState(initialsortField || "postDate");
-  const [sortDir, setSortDir] = useState(initialsortDir || "desc");
-  const [searchQuery, setSearchQuery] = useState(initialSearchQuery || ""); // Rename state variable
+ // const [sortField, setSortField] = useState("postDate");
+  //const [sortDir, setSortDir] = useState("desc");
+  //const [searchQuery, setSearchQuery] = useState(""); // Rename state variable
   const placeholderImage = "/api/placeholder/400/320";
 
   const [isAuthenticated, setIsAuthenticated] = useState(
@@ -61,10 +64,11 @@ const ProductCard = ({
   }, [searchQuery, sortField, sortDir, currentPage]);
 
   useEffect(() => {
+    console.log('ProductCard useEffect triggered with:', { searchQuery, sortField, sortDir });
     const universityId = isAuthenticated ? null : selectedUniversity;
     fetchProducts(universityId, currentPage, searchQuery, sortField, sortDir);
-  }, [searchQuery, sortField, sortDir, currentPage]);
-
+  }, [searchQuery, sortField, sortDir, currentPage, isAuthenticated, selectedUniversity]);
+  
   // Fetch universities on component mount
   useEffect(() => {
     const fetchUniversities = async () => {
@@ -100,21 +104,21 @@ const ProductCard = ({
     [isAuthenticated, selectedUniversity, currentPage, sortField, sortDir] // Include sort dependencies
   );
 
-  useEffect(() => {
-    const universityId = isAuthenticated ? null : selectedUniversity;
-    fetchProducts(universityId, currentPage, searchQuery, sortField, sortDir); // Pass all parameters
-  }, [
-    searchQuery,
-    sortField,
-    sortDir,
-    currentPage,
-    isAuthenticated,
-    selectedUniversity,
-  ]); // Add isAuthenticated & selectedUniversity
+  // useEffect(() => {
+  //   const universityId = isAuthenticated ? null : selectedUniversity;
+  //   fetchProducts(universityId, currentPage, searchQuery, sortField, sortDir); // Pass all parameters
+  // }, [
+  //   searchQuery,
+  //   sortField,
+  //   sortDir,
+  //   currentPage,
+  //   isAuthenticated,
+  //   selectedUniversity,
+  // ]); // Add isAuthenticated & selectedUniversity
 
   // Modified product fetch function to handle both authenticated and non-authenticated cases
   const fetchProducts = useCallback(
-    async (universityId = null, page = currentPage) => {
+    async (universityId = null, page = currentPage, query = searchQuery, field = sortField, direction = sortDir) => {
       try {
         setLoading(true);
         const token = localStorage.getItem("jwt");
@@ -131,26 +135,26 @@ const ProductCard = ({
           ? `${API_BASE_URL}/api/products/university`
           : `${API_BASE_URL}/api/products/public/university/${universityId}`;
 
-        console.log("searchQuery ", searchQuery);
-        console.log("sortField ", sortField);
-        console.log("sortDir ", sortDir);
-        console.log("currentPage ", currentPage);
+          console.log("Fetching with params:", {
+            query,
+            field,
+            direction,
+            page
+          });
           const response = await fetch(endpoint, {
-
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            ...headers,
-          },
-          body: JSON.stringify({
-            page: page,
-            size: pageSize,
-            sortField: sortField, // Use parameters here
-            sortDir: sortDir, // Use parameters here
-            searchQuery: searchQuery, // Use the provided query
-          }),
-        });
-
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              ...headers,
+            },
+            body: JSON.stringify({
+              page: page,
+              size: pageSize,
+              sortField: field,
+              sortDir: direction,
+              searchQuery: query,
+            }),
+          });
         if (!response.ok) throw new Error("Failed to fetch products");
 
         const responseData = await response.json();
@@ -226,7 +230,9 @@ const ProductCard = ({
         setLoading(false);
       }
     },
-    [searchQuery, sortField, sortDir, currentPage, pageSize, selectedUniversity]
+    // [searchQuery, sortField, sortDir, currentPage, pageSize, selectedUniversity]
+    [currentPage, pageSize, selectedUniversity]
+
   );
 
   // Handle university selection

@@ -6,6 +6,7 @@ import Profile from './dasboard/Profile'
 import Authenticate from './authentication/Authenticate'
 
 const Home = ({ searchQuery, sortField, sortDir }) => {
+  console.log('Home received sort props:', { sortField, sortDir }); // Add this log
   return (
     <div>
       <div className="bg-background">
