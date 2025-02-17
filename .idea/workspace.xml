@@ -4,15 +4,11 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="c6564612-8fe2-49e4-bb4c-5d4305a5e686" name="Changes" comment="OTP verification &#10;addded.">
-      <change beforePath="$PROJECT_DIR$/.idea/dataSources/333a7710-965d-4a32-a916-862e6b5f19d0.xml" beforeDir="false" />
+    <list default="true" id="c6564612-8fe2-49e4-bb4c-5d4305a5e686" name="Changes" comment="Configuration Changes.">
+      <change afterPath="$PROJECT_DIR$/backend/College-Dealz/src/main/java/com/nd/config/EnvConfig.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/backend/College-Dealz/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/backend/College-Dealz/.gitignore" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/College-Dealz/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/backend/College-Dealz/pom.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/College-Dealz/src/main/resources/application-nd.properties" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/College-Dealz/src/main/resources/application-vn.properties" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/package-lock.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/package.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/College-Dealz/src/main/java/com/nd/CollegeDealzApplication.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/College-Dealz/src/main/java/com/nd/CollegeDealzApplication.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -57,6 +53,9 @@
   &quot;associatedIndex&quot;: 0
 }</component>
   <component name="ProjectId" id="2qpRoDILp8VeDT8QBsgWtEmAk8E" />
+  <component name="ProjectLevelVcsManager">
+    <ConfirmationsSetting value="1" id="Add" />
+  </component>
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
@@ -88,6 +87,11 @@
     ]
   }
 }</component>
+  <component name="RecentsManager">
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="C:\Users\hp\Desktop\College-Dealz\College-Dealz\backend\College-Dealz\src\main\resources" />
+    </key>
+  </component>
   <component name="RunManager">
     <configuration name="CollegeDealzApplication" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot" nameIsGenerated="true">
       <option name="FRAME_DEACTIVATION_UPDATE_POLICY" value="UpdateClassesAndResources" />
@@ -239,7 +243,15 @@
       <option name="project" value="LOCAL" />
       <updated>1739724987386</updated>
     </task>
-    <option name="localTasksCounter" value="14" />
+    <task id="LOCAL-00014" summary="Configuration Changes.">
+      <option name="closed" value="true" />
+      <created>1739797460836</created>
+      <option name="number" value="00014" />
+      <option name="presentableId" value="LOCAL-00014" />
+      <option name="project" value="LOCAL" />
+      <updated>1739797460836</updated>
+    </task>
+    <option name="localTasksCounter" value="15" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -284,7 +296,8 @@
     <MESSAGE value="ProductController bug fixed." />
     <MESSAGE value="Search method appded in controller." />
     <MESSAGE value="OTP verification &#10;addded." />
-    <option name="LAST_COMMIT_MESSAGE" value="OTP verification &#10;addded." />
+    <MESSAGE value="Configuration Changes." />
+    <option name="LAST_COMMIT_MESSAGE" value="Configuration Changes." />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
