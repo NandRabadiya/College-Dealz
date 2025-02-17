@@ -9,15 +9,11 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authorization.AuthorizationDecision;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
-import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -28,7 +24,7 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
-import java.util.Collection;
+import java.util.Arrays;
 
 @Configuration
 @EnableWebSecurity
@@ -115,7 +111,13 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration corsConfig = new CorsConfiguration();
-        corsConfig.addAllowedOriginPattern("http://localhost:*"); // Frontend origin
+        corsConfig.setAllowedOriginPatterns(Arrays.asList(
+                "http://localhost:*",  // Allow local development
+                "https://college-dealz-nands-projects-9a72e00e.vercel.app",
+                "https://college-dealz.vercel.app",
+                "https://college-dealz-mdtgfjzaa-nands-projects-9a72e00e.vercel.app",
+                "https://college-dealz-git-main-nands-projects-9a72e00e.vercel.app"
+        ));// Frontend origin
         corsConfig.addAllowedHeader("*");
         corsConfig.addAllowedMethod("*");
         corsConfig.setAllowCredentials(true);  // Allow credentials
@@ -126,78 +128,3 @@ public class SecurityConfig {
     }
 
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//import com.nd.entities.User;
-//import org.springframework.beans.factory.annotation.Autowired;
-//import org.springframework.context.annotation.Bean;
-//import org.springframework.context.annotation.Configuration;
-//import org.springframework.security.authentication.AuthenticationProvider;
-//import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
-//import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-//import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-//import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
-//import org.springframework.security.core.userdetails.UserDetails;
-//import org.springframework.security.core.userdetails.UserDetailsService;
-//import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-//import org.springframework.security.crypto.password.PasswordEncoder;
-//import org.springframework.security.provisioning.InMemoryUserDetailsManager;
-//import org.springframework.security.web.SecurityFilterChain;
-//import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
-//
-//@Configuration
-//@EnableWebSecurity
-//public class SecurityConfig {
-//
-//
-//    @Bean
-//    public PasswordEncoder passwordEncoder() {
-//        return new BCryptPasswordEncoder();
-//    }
-//
-////    @Bean
-////    public AuthenticationProvider authenticationProvider() {
-////        DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
-////        provider.setUserDetailsService(userDetailsService);
-////        provider.setPasswordEncoder(passwordEncoder());
-////        return provider;
-////    }
-//
-//    @Autowired
-//    private OAuthAuthenticationSuccessHandler handler;
-//
-//
-//        @Bean
-//        public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-//            http
-//                    .csrf(csrf -> csrf.disable()) // Disable CSRF (optional)
-//                    .authorizeHttpRequests(auth -> auth
-//                            .anyRequest().permitAll() // Require authentication for all requests
-//                    );
-////                    return http.build();
-//            http.oauth2Login(oauth -> {
-//                oauth.successHandler(handler);
-//            });
-//
-//            http.logout(logoutForm -> {
-//                logoutForm.logoutUrl("/do-logout");
-//                logoutForm.logoutSuccessUrl("/login?logout=true");
-//            });
-//
-//            return http.build();
-//        }
-//
-//    }
