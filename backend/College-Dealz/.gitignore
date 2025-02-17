@@ -23,6 +23,7 @@ application.properties
 application-nd.properties
 application-vn.properties
 workspace.xml
+.env
 
 ### NetBeans ###
 /nbproject/private/
