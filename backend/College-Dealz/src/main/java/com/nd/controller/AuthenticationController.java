@@ -54,7 +54,7 @@ public class AuthenticationController {
     @PostMapping("/send-otp")
     public ResponseEntity<OtpResponse> sendOtp(@RequestParam String email) {
 
-
+        System.out.println("\n\n"+email+"\n\n");
             return ResponseEntity.ok(emailService.sendOtp(email));
 
     }

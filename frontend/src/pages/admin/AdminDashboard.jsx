@@ -46,58 +46,57 @@ function AdminDashboard() {
   }, []);
 
   // Fetch functions
- // Fetch functions with proper error handling
- const fetchUniversities = async () => {
-  try {
-    const response = await axios.get(`${API_BASE_URL}/api/universities`, {
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem("jwt")}`,
-      },
-    });
-    setUniversities(response.data);
-  } catch (error) {
-    console.error("Error fetching universities:", error);
-  }
-};
-const fetchProducts = async () => {
-  try {
-    const response = await axios.get(`${API_BASE_URL}/api/products`, {
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem("jwt")}`,
-      },
-    });
-    setProducts(response.data);
-  } catch (error) {
-    console.error("Error fetching products:", error);
-  }
-};
+  // Fetch functions with proper error handling
+  const fetchUniversities = async () => {
+    try {
+      const response = await axios.get(`${API_BASE_URL}/api/universities`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("jwt")}`,
+        },
+      });
+      setUniversities(response.data);
+    } catch (error) {
+      console.error("Error fetching universities:", error);
+    }
+  };
+  const fetchProducts = async () => {
+    try {
+      const response = await axios.get(`${API_BASE_URL}/api/products`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("jwt")}`,
+        },
+      });
+      setProducts(response.data);
+    } catch (error) {
+      console.error("Error fetching products:", error);
+    }
+  };
 
- 
-const fetchUsers = async () => {
-  try {
-    const response = await axios.get(`${API_BASE_URL}/api/users`, {
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem("jwt")}`,
-      },
-    });
-    setUsers(response.data);
-  } catch (error) {
-    console.error("Error fetching users:", error);
-  }
-};
+  const fetchUsers = async () => {
+    try {
+      const response = await axios.get(`${API_BASE_URL}/api/users`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("jwt")}`,
+        },
+      });
+      setUsers(response.data);
+    } catch (error) {
+      console.error("Error fetching users:", error);
+    }
+  };
 
-const fetchAdmins = async () => {
-  try {
-    const response = await axios.get(`${API_BASE_URL}/api/admin_only/all`, {
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem("jwt")}`,
-      },
-    });
-    setAdmins(response.data);
-  } catch (error) {
-    console.error("Error fetching admins:", error);
-  }
-};
+  const fetchAdmins = async () => {
+    try {
+      const response = await axios.get(`${API_BASE_URL}/api/admin_only/all`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("jwt")}`,
+        },
+      });
+      setAdmins(response.data);
+    } catch (error) {
+      console.error("Error fetching admins:", error);
+    }
+  };
 
   // University handlers
   const handleSubmit = async (e) => {
@@ -155,16 +154,18 @@ const fetchAdmins = async () => {
   // Admin management handlers
   // Fixed handleToggleAdmin function
   const handleToggleAdmin = async (userId, isAdmin) => {
-    if (window.confirm(
-      `Are you sure you want to ${isAdmin ? "remove" : "make"} this user ${
-        isAdmin ? "from" : "an"
-      } admin?`
-    )) {
+    if (
+      window.confirm(
+        `Are you sure you want to ${isAdmin ? "remove" : "make"} this user ${
+          isAdmin ? "from" : "an"
+        } admin?`
+      )
+    ) {
       try {
         if (!isAdmin) {
           await axios.post(
             `${API_BASE_URL}/api/admin_only/add/${userId}`,
-            {},  // Empty body object
+            {}, // Empty body object
             {
               headers: {
                 Authorization: `Bearer ${localStorage.getItem("jwt")}`,
@@ -188,58 +189,58 @@ const fetchAdmins = async () => {
     }
   };
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       {/* Header */}
-      <header className="bg-white shadow-sm">
+      <header className="bg-white dark:bg-gray-800 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 py-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center">
-            <h1 className="text-2xl font-bold text-gray-900">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center space-y-4 sm:space-y-0">
+            <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
               Admin Dashboard
             </h1>
-            <div className="space-x-4">
+            <div className="flex flex-wrap gap-2">
               <button
                 onClick={() => setActiveTab("universities")}
-                className={`px-4 py-2 rounded-md ${
+                className={`px-3 py-2 rounded-md text-sm flex items-center ${
                   activeTab === "universities"
                     ? "bg-blue-600 text-white"
-                    : "bg-gray-100 text-gray-700"
+                    : "bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200"
                 }`}
               >
-                <School className="inline-block mr-2 h-5 w-5" />
-                Universities
+                <School className="h-4 w-4 mr-1" />
+                <span className="hidden sm:inline">Universities</span>
               </button>
               <button
                 onClick={() => setActiveTab("products")}
-                className={`px-4 py-2 rounded-md ${
+                className={`px-3 py-2 rounded-md text-sm flex items-center ${
                   activeTab === "products"
                     ? "bg-blue-600 text-white"
-                    : "bg-gray-100 text-gray-700"
+                    : "bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200"
                 }`}
               >
-                <Package className="inline-block mr-2 h-5 w-5" />
-                Products
+                <Package className="h-4 w-4 mr-1" />
+                <span className="hidden sm:inline">Products</span>
               </button>
               <button
                 onClick={() => setActiveTab("users")}
-                className={`px-4 py-2 rounded-md ${
+                className={`px-3 py-2 rounded-md text-sm flex items-center ${
                   activeTab === "users"
                     ? "bg-blue-600 text-white"
-                    : "bg-gray-100 text-gray-700"
+                    : "bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200"
                 }`}
               >
-                <Users className="inline-block mr-2 h-5 w-5" />
-                Users
+                <Users className="h-4 w-4 mr-1" />
+                <span className="hidden sm:inline">Users</span>
               </button>
               <button
                 onClick={() => setActiveTab("admins")}
-                className={`px-4 py-2 rounded-md ${
+                className={`px-3 py-2 rounded-md text-sm flex items-center ${
                   activeTab === "admins"
                     ? "bg-blue-600 text-white"
-                    : "bg-gray-100 text-gray-700"
+                    : "bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200"
                 }`}
               >
-                <Shield className="inline-block mr-2 h-5 w-5" />
-                Admins
+                <Shield className="h-4 w-4 mr-1" />
+                <span className="hidden sm:inline">Admins</span>
               </button>
             </div>
           </div>
@@ -250,8 +251,8 @@ const fetchAdmins = async () => {
         {/* Universities Tab */}
         {activeTab === "universities" && (
           <div>
-            <div className="flex justify-between items-center mb-6">
-              <h2 className="text-xl font-semibold text-gray-900">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 space-y-4 sm:space-y-0">
+              <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
                 Manage Universities
               </h2>
               <button
@@ -260,7 +261,7 @@ const fetchAdmins = async () => {
                   setEditingUniversity(null);
                   setFormData({ name: "", domain: "", location: "" });
                 }}
-                className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
+                className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 w-full sm:w-auto justify-center sm:justify-start"
               >
                 <PlusCircle className="h-5 w-5" />
                 Add University
@@ -268,13 +269,13 @@ const fetchAdmins = async () => {
             </div>
 
             {isAddingUniversity && (
-              <div className="mb-8 bg-white p-6 rounded-lg shadow-md">
-                <h3 className="text-lg font-medium mb-4">
+              <div className="mb-8 bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
+                <h3 className="text-lg font-medium mb-4 text-gray-900 dark:text-white">
                   {editingUniversity ? "Edit University" : "Add New University"}
                 </h3>
                 <form onSubmit={handleSubmit} className="space-y-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700">
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                       Name
                     </label>
                     <input
@@ -283,12 +284,12 @@ const fetchAdmins = async () => {
                       onChange={(e) =>
                         setFormData({ ...formData, name: e.target.value })
                       }
-                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                      className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
                       required
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700">
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                       Domain
                     </label>
                     <input
@@ -297,12 +298,12 @@ const fetchAdmins = async () => {
                       onChange={(e) =>
                         setFormData({ ...formData, domain: e.target.value })
                       }
-                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                      className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
                       required
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700">
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                       Location
                     </label>
                     <input
@@ -311,7 +312,7 @@ const fetchAdmins = async () => {
                       onChange={(e) =>
                         setFormData({ ...formData, location: e.target.value })
                       }
-                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                      className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
                     />
                   </div>
                   <div className="flex justify-end gap-4">
@@ -321,7 +322,7 @@ const fetchAdmins = async () => {
                         setIsAddingUniversity(false);
                         setEditingUniversity(null);
                       }}
-                      className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
+                      className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-50 dark:hover:bg-gray-600"
                     >
                       Cancel
                     </button>
@@ -336,60 +337,62 @@ const fetchAdmins = async () => {
               </div>
             )}
 
-            <div className="bg-white shadow-md rounded-lg overflow-hidden">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
-                  <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Name
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Domain
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Location
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Actions
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
-                  {universities.map((university) => (
-                    <tr key={university.id}>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm font-medium text-gray-900">
-                          {university.name}
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm text-gray-500">
-                          {university.domain}
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm text-gray-500">
-                          {university.location || "N/A"}
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        <button
-                          onClick={() => handleEdit(university)}
-                          className="text-blue-600 hover:text-blue-900 mr-4"
-                        >
-                          Edit
-                        </button>
-                        <button
-                          onClick={() => handleDelete(university.id)}
-                          className="text-red-600 hover:text-red-900"
-                        >
-                          Delete
-                        </button>
-                      </td>
+            <div className="bg-white dark:bg-gray-800 shadow-md rounded-lg overflow-hidden">
+              <div className="overflow-x-auto">
+                <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                  <thead className="bg-gray-50 dark:bg-gray-700">
+                    <tr>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                        Name
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                        Domain
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                        Location
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                        Actions
+                      </th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                    {universities.map((university) => (
+                      <tr key={university.id}>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="text-sm font-medium text-gray-900 dark:text-white">
+                            {university.name}
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="text-sm text-gray-500 dark:text-gray-400">
+                            {university.domain}
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="text-sm text-gray-500 dark:text-gray-400">
+                            {university.location || "N/A"}
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                          <button
+                            onClick={() => handleEdit(university)}
+                            className="text-blue-600 dark:text-blue-400 hover:text-blue-900 dark:hover:text-blue-300 mr-4"
+                          >
+                            Edit
+                          </button>
+                          <button
+                            onClick={() => handleDelete(university.id)}
+                            className="text-red-600 dark:text-red-400 hover:text-red-900 dark:hover:text-red-300"
+                          >
+                            Delete
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             </div>
           </div>
         )}
@@ -397,16 +400,15 @@ const fetchAdmins = async () => {
         {/* Products Tab */}
         {activeTab === "products" && (
           <div>
-            <h2 className="text-xl font-semibold text-gray-900 mb-6">
+            <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-6">
               Manage Products
             </h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {products.map((product) => (
                 <div
                   key={product.id}
-                  className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300"
+                  className="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300"
                 >
-                  
                   <div className="relative">
                     <img
                       src={
@@ -465,8 +467,8 @@ const fetchAdmins = async () => {
                       <span
                         className={`px-3 py-1 rounded-full text-xs font-semibold ${
                           product.condition === "NEW"
-                            ? "bg-green-100 text-green-800"
-                            : "bg-yellow-100 text-yellow-800"
+                            ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
+                            : "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200"
                         }`}
                       >
                         {product.condition}
@@ -475,38 +477,38 @@ const fetchAdmins = async () => {
                   </div>
                   <div className="p-4">
                     <div className="flex justify-between items-start mb-2">
-                      <h3 className="text-lg font-semibold text-gray-900">
+                      <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
                         {product.name}
                       </h3>
-                      <div className="text-lg font-bold text-blue-600">
+                      <div className="text-lg font-bold text-blue-600 dark:text-blue-400">
                         ₹{product.price.toLocaleString("en-IN")}
                       </div>
                     </div>
-                    <p className="text-gray-600 text-sm mb-4">
+                    <p className="text-gray-600 dark:text-gray-300 text-sm mb-4">
                       {product.description}
                     </p>
                     <div className="space-y-2">
                       <div className="flex items-center text-sm">
-                        <Tag className="h-4 w-4 text-gray-400 mr-2" />
-                        <span className="px-2 py-1 bg-gray-100 rounded-md text-gray-700">
+                        <Tag className="h-4 w-4 text-gray-400 dark:text-gray-500 mr-2" />
+                        <span className="px-2 py-1 bg-gray-100 dark:bg-gray-700 rounded-md text-gray-700 dark:text-gray-300">
                           {product.category}
                         </span>
                       </div>
-                      <div className="flex items-center text-sm">
-                        <Clock className="h-4 w-4 text-gray-400 mr-2" />
+                      <div className="flex items-center text-sm text-gray-600 dark:text-gray-300">
+                        <Clock className="h-4 w-4 text-gray-400 dark:text-gray-500 mr-2" />
                         <span>
                           {product.monthsOld}{" "}
                           {product.monthsOld === 1 ? "month" : "months"} old
                         </span>
                       </div>
                       {product.location && (
-                        <div className="flex items-center text-sm">
-                          <MapPinIcon className="h-4 w-4 text-gray-400 mr-2" />
+                        <div className="flex items-center text-sm text-gray-600 dark:text-gray-300">
+                          <MapPinIcon className="h-4 w-4 text-gray-400 dark:text-gray-500 mr-2" />
                           <span>{product.location}</span>
                         </div>
                       )}
-                      <div className="flex items-center text-sm">
-                        <Calendar className="h-4 w-4 text-gray-400 mr-2" />
+                      <div className="flex items-center text-sm text-gray-600 dark:text-gray-300">
+                        <Calendar className="h-4 w-4 text-gray-400 dark:text-gray-500 mr-2" />
                         <span>
                           {new Date(product.createdAt).toLocaleDateString(
                             "en-IN",
@@ -529,88 +531,90 @@ const fetchAdmins = async () => {
         {/* Users Tab */}
         {activeTab === "users" && (
           <div>
-            <h2 className="text-xl font-semibold text-gray-900 mb-6">
+            <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-6">
               Manage Users
             </h2>
-            <div className="bg-white shadow-md rounded-lg overflow-hidden">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
-                  <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      User
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Email
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      University
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Email Verification
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Actions
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
-                  {users.map((user) => (
-                    <tr key={user.user_id}>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="flex items-center">
-                          <img
-                            className="h-10 w-10 rounded-full"
-                            src={
-                              user.profile_picture ||
-                              "https://placeholder.co/40"
-                            }
-                            alt=""
-                          />
-                          <div className="ml-4">
-                            <div className="text-sm font-medium text-gray-900">
-                              {user.name}
-                            </div>
-                            <div className="text-sm text-gray-500">
-                              Joined{" "}
-                              {new Date(user.created_at).toLocaleDateString()}
+            <div className="bg-white dark:bg-gray-800 shadow-md rounded-lg overflow-hidden">
+              <div className="overflow-x-auto">
+                <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                  <thead className="bg-gray-50 dark:bg-gray-700">
+                    <tr>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                        User
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                        Email
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                        University
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                        Email Verification
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                        Actions
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                    {users.map((user) => (
+                      <tr key={user.user_id}>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="flex items-center">
+                            <img
+                              className="h-10 w-10 rounded-full"
+                              src={
+                                user.profile_picture ||
+                                "https://placeholder.co/40"
+                              }
+                              alt=""
+                            />
+                            <div className="ml-4">
+                              <div className="text-sm font-medium text-gray-900 dark:text-white">
+                                {user.name}
+                              </div>
+                              <div className="text-sm text-gray-500 dark:text-gray-400">
+                                Joined{" "}
+                                {new Date(user.created_at).toLocaleDateString()}
+                              </div>
                             </div>
                           </div>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="flex items-center">
-                          <Mail className="h-4 w-4 text-gray-400 mr-2" />
-                          <span className="text-sm text-gray-900">
-                            {user.email}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="flex items-center">
+                            <Mail className="h-4 w-4 text-gray-400 dark:text-gray-500 mr-2" />
+                            <span className="text-sm text-gray-900 dark:text-white">
+                              {user.email}
+                            </span>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                          {user.universityName}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <span
+                            className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                              user.email_verified
+                                ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
+                                : "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200"
+                            }`}
+                          >
+                            {user.email_verified ? "Verified" : "Pending"}
                           </span>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {user.universityName}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <span
-                          className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                            user.email_verified
-                              ? "bg-green-100 text-green-800"
-                              : "bg-yellow-100 text-yellow-800"
-                          }`}
-                        >
-                          {user.email_verified ? "Verified" : "Pending"}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        <button
-                          onClick={() => handleToggleAdmin(user.id, false)}
-                          className="text-blue-600 hover:text-blue-900"
-                        >
-                          Make Admin
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm">
+                          <button
+                            onClick={() => handleToggleAdmin(user.id, false)}
+                            className="text-blue-600 dark:text-blue-400 hover:text-blue-900 dark:hover:text-blue-300"
+                          >
+                            Make Admin
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             </div>
           </div>
         )}
@@ -618,75 +622,80 @@ const fetchAdmins = async () => {
         {/* Admins Tab */}
         {activeTab === "admins" && (
           <div>
-            <h2 className="text-xl font-semibold text-gray-900 mb-6">
+            <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-6">
               Manage Administrators
             </h2>
-            <div className="bg-white shadow-md rounded-lg overflow-hidden">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
-                  <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Admin
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Email
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      University
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Actions
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
-                  {admins.map((admin) => (
-                    <tr key={admin.user_id}>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="flex items-center">
-                          <img
-                            className="h-10 w-10 rounded-full"
-                            src={
-                              admin.profile_picture ||
-                              "https://via.placeholder.com/40"
-                            }
-                            alt=""
-                          />
-                          <div className="ml-4">
-                            <div className="text-sm font-medium text-gray-900">
-                              {admin.name}
-                            </div>
-                            <div className="text-sm text-gray-500">
-                              Admin since{" "}
-                              {new Date(admin.admin_since).toLocaleDateString()}
+            <div className="bg-white dark:bg-gray-800 shadow-md rounded-lg overflow-hidden">
+              <div className="overflow-x-auto">
+                <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                  <thead className="bg-gray-50 dark:bg-gray-700">
+                    <tr>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                        Admin
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                        Email
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                        University
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                        Actions
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                    {admins.map((admin) => (
+                      <tr key={admin.user_id}>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="flex items-center">
+                            <img
+                              className="h-10 w-10 rounded-full"
+                              src={
+                                admin.profile_picture ||
+                                "https://via.placeholder.com/40"
+                              }
+                              alt=""
+                            />
+                            <div className="ml-4">
+                              <div className="text-sm font-medium text-gray-900 dark:text-white">
+                                {admin.name}
+                              </div>
+                              <div className="text-sm text-gray-500 dark:text-gray-400">
+                                Admin since{" "}
+                                {new Date(
+                                  admin.admin_since
+                                ).toLocaleDateString()}
+                              </div>
                             </div>
                           </div>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="flex items-center">
-                          <Mail className="h-4 w-4 text-gray-400 mr-2" />
-                          <span className="text-sm text-gray-900">
-                            {admin.email}
-                          </span>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {universities.find((u) => u.id === admin.university_id)
-                          ?.name || "N/A"}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        <button
-                          onClick={() => handleToggleAdmin(admin.id, true)}
-                          className="text-red-600 hover:text-red-900"
-                        >
-                          Remove Admin
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="flex items-center">
+                            <Mail className="h-4 w-4 text-gray-400 dark:text-gray-500 mr-2" />
+                            <span className="text-sm text-gray-900 dark:text-white">
+                              {admin.email}
+                            </span>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                          {universities.find(
+                            (u) => u.id === admin.university_id
+                          )?.name || "N/A"}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm">
+                          <button
+                            onClick={() => handleToggleAdmin(admin.id, true)}
+                            className="text-red-600 dark:text-red-400 hover:text-red-900 dark:hover:text-red-300"
+                          >
+                            Remove Admin
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             </div>
           </div>
         )}
@@ -694,5 +703,4 @@ const fetchAdmins = async () => {
     </div>
   );
 }
-
 export default AdminDashboard;

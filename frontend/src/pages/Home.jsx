@@ -5,13 +5,14 @@ import ProductDetails from './product/ProductDetails'
 import Profile from './dasboard/Profile'
 import Authenticate from './authentication/Authenticate'
 
-const Home = () => {
+const Home = ({ searchQuery, sortField, sortDir }) => {
+  console.log('Home received sort props:', { sortField, sortDir }); // Add this log
   return (
     <div>
       <div className="bg-background">
           
           <main className="container mx-auto py-4">
-            <ProductCard/>
+          <ProductCard searchQuery={searchQuery} sortField={sortField} sortDir={sortDir} />
           </main>
           </div>
     </div>

@@ -37,15 +37,35 @@ function App() {
       dispatch(getUser(token));
     }
   }, [dispatch]);
+  // Search and sort state
+  const [searchQuery, setSearchQuery] = useState("");
+  const [sortField, setSortField] = useState("postDate");
+  const [sortDir, setSortDir] = useState("desc");
+  // Handlers
+  const handleSearch = (query) => setSearchQuery(query);
+  const handleSort = (field, dir) => {
+    console.log('App.js sort update:', field, dir); // Add this log
+    setSortField(field);
+    setSortDir(dir);
+  };
 
   return (
     <>
       <Router>
-        <NavBar />
+      <NavBar onSearch={handleSearch} onSort={handleSort} /> {/* Pass the handlers */}
 
         <Routes>
           {/* Public Route */}
-          <Route path="/" element={<Home />} />
+          <Route
+            path="/"
+            element={
+              <Home
+                searchQuery={searchQuery}
+                sortField={sortField}
+                sortDir={sortDir}
+              />
+            }
+          />{" "}
           <Route path="/messages" element={<Messages />} />
           {/* Login/Register Route */}
           <Route
@@ -53,10 +73,8 @@ function App() {
             element={<Authenticate isOpen={true} />}
           />
           <Route path="/admin" element={<AdminDashboard />} />
-
           {/* Protected Route */}
-          <Route path="/oauth2/redirect" element={<OAuth2RedirectHandler />} /> 
-
+          <Route path="/oauth2/redirect" element={<OAuth2RedirectHandler />} />
           <Route
             path="/dashboard"
             element={
@@ -81,7 +99,6 @@ function App() {
               </ProtectedRoute>
             }
           />
-
           <Route
             path="/product/:productId"
             element={
@@ -98,7 +115,6 @@ function App() {
               </ProtectedRoute>
             }
           />
-
           {/* 404 Route */}
           <Route path="*" element={<h1>404 Not Found</h1>} />
         </Routes>

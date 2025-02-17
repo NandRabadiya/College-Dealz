@@ -75,11 +75,12 @@ public class ProductController {
 
 
 
-    @PostMapping("/university/{universityId}")
+    @PostMapping("/university")
     public ResponseEntity<Page<ProductDto>> getProductsByUniversity(
-            @PathVariable int universityId,
+            @RequestHeader("Authorization") String authHeader,
             @RequestBody(required = false) ProductSortFilterRequest request) {
 
+        int universityId = jwtService.getUniversityIdFromToken(authHeader);
         // If no body is provided, create a default request.
         if (request == null) {
             request = new ProductSortFilterRequest();
@@ -104,6 +105,8 @@ public class ProductController {
         return ResponseEntity.ok(products);
     }
 
+       // return ResponseEntity.ok(products);
+   // }
     @GetMapping
     public ResponseEntity<List<ProductDto>> getAllProducts(@RequestHeader("Authorization") String authHeader) {
         List<ProductDto> products = productService.getAllProducts(authHeader);

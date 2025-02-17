@@ -9,6 +9,12 @@ import {
   GET_USER_SUCCESS,
   GET_USER_FAILURE,
   LOGOUT,
+  SEND_OTP_REQUEST,
+  SEND_OTP_SUCCESS,
+  SEND_OTP_FAILURE,
+  VERIFY_OTP_REQUEST,
+  VERIFY_OTP_SUCCESS,
+  VERIFY_OTP_FAILURE
 } from "./ActionTypes";
 
 const initialState = {
@@ -17,6 +23,8 @@ const initialState = {
   error: null,
   jwt: null,
   isAuthenticated: false,
+  otpStatus: null,
+  otpVerified: false
 };
 
 const authReducer = (state = initialState, action) => {
@@ -62,9 +70,50 @@ const authReducer = (state = initialState, action) => {
       return {
         ...initialState,
       };
+  //   default:
+  //     return state;
+  // }
+  case SEND_OTP_REQUEST:
+    case VERIFY_OTP_REQUEST:
+      return {
+        ...state,
+        loading: true,
+        error: null,
+        otpStatus: null
+      };
+
+    case SEND_OTP_SUCCESS:
+      return {
+        ...state,
+        loading: false,
+        error: null,
+        otpStatus: action.payload
+      };
+
+    case VERIFY_OTP_SUCCESS:
+      return {
+        ...state,
+        loading: false,
+        error: null,
+        otpVerified: true,
+        otpStatus: action.payload
+      };
+
+    case SEND_OTP_FAILURE:
+    case VERIFY_OTP_FAILURE:
+      return {
+        ...state,
+        loading: false,
+        error: action.payload,
+        otpStatus: null
+      };
+
+    // ... (keep remaining cases)
+
     default:
       return state;
-  }
+    }
+
 };
 
 export default authReducer;
