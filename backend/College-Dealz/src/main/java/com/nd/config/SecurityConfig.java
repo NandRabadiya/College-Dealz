@@ -29,6 +29,7 @@ import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import java.util.Collection;
+import java.util.Arrays;
 
 @Configuration
 @EnableWebSecurity
@@ -60,7 +61,7 @@ public class SecurityConfig {
                  .cors(cors->cors.configurationSource(corsConfigurationSource()))
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(
-                        req->req.requestMatchers("/login/**","/register/**", "/refresh_token/**","/socket.io/**","/api/universities/**",  // Allow public access to universities endpoint
+                        req->req.requestMatchers("/login/**","/register/**", "/refresh_token/**","/socket.io/**","/api/universities**",  // Allow public access to universities endpoint
                                         "/api/products/public/university/**" , "/send-otp**","/verify**","/resend-otp**" )
                                 .permitAll()
                                 .requestMatchers("/api/admin_only/**")
@@ -115,7 +116,15 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration corsConfig = new CorsConfiguration();
-        corsConfig.addAllowedOriginPattern("http://localhost:*"); // Frontend origin
+//        corsConfig.addAllowedOriginPattern("http://localhost:*"); // Frontend origin
+        corsConfig.setAllowedOriginPatterns(Arrays.asList(
+                "http://localhost:*",  // Allow local development
+                "https://college-dealz-nands-projects-9a72e00e.vercel.app",
+                "https://college-dealz.vercel.app",
+                "https://college-dealz-mdtgfjzaa-nands-projects-9a72e00e.vercel.app",
+                "https://college-dealz-git-main-nands-projects-9a72e00e.vercel.app"
+        ));// Frontend origin
+
         corsConfig.addAllowedHeader("*");
         corsConfig.addAllowedMethod("*");
         corsConfig.setAllowCredentials(true);  // Allow credentials

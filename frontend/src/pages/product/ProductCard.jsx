@@ -27,7 +27,7 @@ import {
 import debounce from "lodash/debounce";
 import { useMediaQuery } from "react-responsive";
 import FilterComponent from "./Filter";
-const ProductCard = ({ searchQuery, sortField, sortDir }) => {
+const ProductCard = ({ searchQuery, sortField, sortDir, selectedUniversity }) => {
   console.log("ProductCard received props:", {
     searchQuery,
     sortField,
@@ -37,22 +37,19 @@ const ProductCard = ({ searchQuery, sortField, sortDir }) => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [universities, setUniversities] = useState([]);
-  const [selectedUniversity, setSelectedUniversity] = useState(null);
-  const [showUniversityDialog, setShowUniversityDialog] = useState(false);
-  const [dialogInitialized, setDialogInitialized] = useState(false);
-  const [open, setOpen] = useState(false);
+  // const [universities, setUniversities] = useState([]);
+  // const [selectedUniversity, setSelectedUniversity] = useState(null);
+  // const [showUniversityDialog, setShowUniversityDialog] = useState(false);
+  // const [dialogInitialized, setDialogInitialized] = useState(false);
+  // const [open, setOpen] = useState(false);
   const [wishlistedItems, setWishlistedItems] = useState(new Set());
-  const [fetchTrigger, setFetchTrigger] = useState(0); // New state variable
+  // const [fetchTrigger, setFetchTrigger] = useState(0); // New state variable
 
   // Pagination state
   const [currentPage, setCurrentPage] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
   const [pageSize, setPageSize] = useState(2);
   const [totalElements, setTotalElements] = useState(0);
-  // const [sortField, setSortField] = useState("postDate");
-  //const [sortDir, setSortDir] = useState("desc");
-  //const [searchQuery, setSearchQuery] = useState(""); // Rename state variable
   const placeholderImage = "/api/placeholder/400/320";
 
   const [isAuthenticated, setIsAuthenticated] = useState(
@@ -77,6 +74,7 @@ const ProductCard = ({ searchQuery, sortField, sortDir }) => {
       sortDir,
       newFilters
     );
+    setCurrentPage(0);
   };
   const navigate = useNavigate();
   useEffect(() => {
@@ -101,29 +99,21 @@ const ProductCard = ({ searchQuery, sortField, sortDir }) => {
   ]);
 
   // Fetch universities on component mount
-  useEffect(() => {
-    const fetchUniversities = async () => {
-      try {
-        const response = await fetch(`${API_BASE_URL}/api/universities`);
-        if (!response.ok) throw new Error("Failed to fetch universities");
-        const data = await response.json();
-        setUniversities(data);
-        setDialogInitialized(true);
-      } catch (err) {
-        console.error("Error fetching universities:", err);
-        setError("Failed to fetch universities");
-      }
-    };
-    fetchUniversities();
-  }, []);
-
-  // Show university selection dialog for non-logged-in users
-  useEffect(() => {
-    if (dialogInitialized && !isAuthenticated && !selectedUniversity) {
-      console.log("Showing university dialog");
-      setShowUniversityDialog(true);
-    }
-  }, [isAuthenticated, selectedUniversity, dialogInitialized]);
+ // useEffect(() => {
+  //   const fetchUniversities = async () => {
+  //     try {
+  //       const response = await fetch(`${API_BASE_URL}/api/universities`);
+  //       if (!response.ok) throw new Error("Failed to fetch universities");
+  //       const data = await response.json();
+  //       //setUniversities(data);
+  //       //setDialogInitialized(true);
+  //     } catch (err) {
+  //       console.error("Error fetching universities:", err);
+  //       setError("Failed to fetch universities");
+  //     }
+  //   };
+  //   fetchUniversities();
+  // }, []);
 
   // Debounced search function (correct dependencies)
   const debouncedSearch = useCallback(
@@ -163,7 +153,7 @@ const ProductCard = ({ searchQuery, sortField, sortDir }) => {
 
       console.log("JWT",token)
       // Don't fetch if we need a university ID but don't have one
-      if (!token && !universityId) {
+      if (!token && !selectedUniversity) {
         setShowUniversityDialog(true);
         setProducts([]);
         setLoading(false);
@@ -174,7 +164,7 @@ const ProductCard = ({ searchQuery, sortField, sortDir }) => {
       // Use different endpoints based on authentication status
       const endpoint = token
         ? `${API_BASE_URL}/api/products/university`
-        : `${API_BASE_URL}/api/products/public/university/${universityId}`;
+        : `${API_BASE_URL}/api/products/public/university/${selectedUniversity}`;
 
       console.log("Fetching with params:", {
         query,
@@ -301,11 +291,20 @@ const ProductCard = ({ searchQuery, sortField, sortDir }) => {
     fetchProducts(universityId);
   };
 
+  // Effect to fetch products when dependencies change
   useEffect(() => {
-    if (isAuthenticated) {
+    if (isAuthenticated || selectedUniversity) {
       fetchProducts();
     }
-  }, [isAuthenticated]);
+  }, [
+    searchQuery,
+    sortField,
+    sortDir,
+    currentPage,
+    isAuthenticated,
+    selectedUniversity,
+    filters
+  ]);
   const handleProtectedAction = (action, e) => {
     if (e) e.stopPropagation();
     if (!isAuthenticated) {
@@ -425,10 +424,11 @@ const ProductCard = ({ searchQuery, sortField, sortDir }) => {
   };
   const handlePageChange = (newPage) => {
     if (newPage >= 0 && newPage < totalPages) {
-      const universityId = isAuthenticated ? null : selectedUniversity;
-      fetchProducts(universityId, newPage);
+      setCurrentPage(newPage);
     }
   };
+
+
   if (loading) {
     return <div className="m-4 text-center">Loading products...</div>;
   }
@@ -447,6 +447,12 @@ const ProductCard = ({ searchQuery, sortField, sortDir }) => {
         />
 
         <div className="flex-1">
+        {products.length === 0 ? (
+            <div className="text-center py-8">
+              <p className="text-muted-foreground">No products found.</p>
+            </div>
+          ) : (
+            <>
           <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
             {products.map((product) => (
               <div
@@ -560,6 +566,8 @@ const ProductCard = ({ searchQuery, sortField, sortDir }) => {
               </Button>
             </div>
           </div>
+          </>
+          )}
         </div>
       </div>
     </div>

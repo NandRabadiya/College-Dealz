@@ -30,7 +30,13 @@
       </schema-mapping>
     </data-source>
     <data-source name="TiDB cloud" uuid="ad7398a0-dcd5-4769-990f-0683f4c898a6">
-      <database-info product="" version="" jdbc-version="" driver-name="" driver-version="" dbms="TIDB" />
+      <database-info product="" version="" jdbc-version="" driver-name="" driver-version="" dbms="TIDB">
+        <extra-name-characters>#@</extra-name-characters>
+        <identifier-quote-string>`</identifier-quote-string>
+      </database-info>
+      <case-sensitivity plain-identifiers="mixed" quoted-identifiers="mixed" />
+      <secret-storage>master_key</secret-storage>
+      <user-name>24wG58Rac1TBSzs.root</user-name>
       <schema-mapping />
     </data-source>
   </component>

@@ -20,6 +20,7 @@ import WishList from "./pages/wishlist/WishList";
 import Wantlist from "./pages/wantlist/Wantlist";
 import OAuth2RedirectHandler from "./redux/Auth/OAuth2RedirectHandler";
 import Messages from "./pages/chat/Messages";
+import UniversitySelector from "./pages/UniversitySelector";
 
 // PrivateRoute component
 const PrivateRoute = ({ element, isLoggedIn, redirectTo }) => {
@@ -41,6 +42,8 @@ function App() {
   const [searchQuery, setSearchQuery] = useState("");
   const [sortField, setSortField] = useState("postDate");
   const [sortDir, setSortDir] = useState("desc");
+  const [showUniversitySelector, setShowUniversitySelector] = useState(false);
+  const [selectedUniversity, setSelectedUniversity] = useState(null);
   // Handlers
   const handleSearch = (query) => setSearchQuery(query);
   const handleSort = (field, dir) => {
@@ -48,12 +51,32 @@ function App() {
     setSortField(field);
     setSortDir(dir);
   };
+  useEffect(() => {
+    const token = localStorage.getItem("jwt");
+    //const savedUniversity = localStorage.getItem("selectedUniversity");
+    
+    if (token) {
+      dispatch(getUser(token));
+    } else  {
+      setShowUniversitySelector(true);
+    } 
+    console.log("App.js useEffect", { token });
+  }, [dispatch]);
 
+  const handleUniversitySelect = (universityId) => {
+    setSelectedUniversity(universityId);
+    localStorage.setItem("selectedUniversity", universityId);
+    setShowUniversitySelector(false);
+  };
   return (
     <>
       <Router>
       <NavBar onSearch={handleSearch} onSort={handleSort} /> {/* Pass the handlers */}
-
+      <UniversitySelector
+          isOpen={showUniversitySelector}
+          onOpenChange={setShowUniversitySelector}
+          onUniversitySelect={handleUniversitySelect}
+        />
         <Routes>
           {/* Public Route */}
           <Route
@@ -63,6 +86,7 @@ function App() {
                 searchQuery={searchQuery}
                 sortField={sortField}
                 sortDir={sortDir}
+                selectedUniversity={selectedUniversity}
               />
             }
           />{" "}
