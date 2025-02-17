@@ -24,7 +24,7 @@ const UniversitySelector = ({ onUniversitySelect, isOpen, onOpenChange }) => {
   useEffect(() => {
     const fetchUniversities = async () => {
       try {
-        const response = await fetch(`${API_BASE_URL}/api/universities`);
+        const response = await fetch(`${API_BASE_URL}/api/universities/public`);
         if (!response.ok) throw new Error('Failed to fetch universities');
         const data = await response.json();
         setUniversities(data);
