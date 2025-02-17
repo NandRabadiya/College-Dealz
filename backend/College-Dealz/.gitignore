@@ -19,12 +19,9 @@ target/
 *.iml
 *.ipr
 *.xml
-application.properties
-application-nd.properties
-application-vn.properties
-application-ti.properties
-workspace.xml
 
+workspace.xml
+.env
 ### NetBeans ###
 /nbproject/private/
 /nbbuild/
