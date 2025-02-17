@@ -18,6 +18,8 @@ import {
   VERIFY_OTP_FAILURE
 } from "./ActionTypes";
 import { API_BASE_URL } from "../../pages/Api/api";
+import { AUTH_STATE_CHANGE_EVENT } from '../../pages/NavBar'; // Adjust the import path as needed
+
 
 // Login Action
 export const loginRequest = () => ({ type: LOGIN_REQUEST });
@@ -38,6 +40,7 @@ export const login = (credentials) => async (dispatch) => {
 
     if (data.access_token) {
       localStorage.setItem("jwt", data.access_token);
+      window.dispatchEvent(new CustomEvent(AUTH_STATE_CHANGE_EVENT));
       dispatch(loginSuccess({ user: data }));
       try {
         const userResponse = await axios.get(
@@ -88,6 +91,7 @@ export const signup = (details) => async (dispatch) => {
     const user = response.data;
     if (user.access_token) {
       localStorage.setItem("jwt", user.access_token);
+      window.dispatchEvent(new CustomEvent(AUTH_STATE_CHANGE_EVENT));
       dispatch(getUser(user.access_token));
     }
     dispatch(signupSuccess({ user, message: user.message || "Signup successful!" }));
@@ -142,6 +146,7 @@ export const logout = () => async (dispatch) => {
 
     // Clear token from local storage
     localStorage.removeItem("jwt");
+    window.dispatchEvent(new CustomEvent(AUTH_STATE_CHANGE_EVENT));
   } catch (error) {
     console.error("Logout failed:", error);
   }

@@ -26,13 +26,41 @@ import { useLocation, useNavigate } from "react-router-dom";
 import NotificationBell from "./notification/Notification";
 import { ProductSearch, ProductSort } from "./SearchSortComponents";
 
+
+export const AUTH_STATE_CHANGE_EVENT = 'authStateChanged';
+
 const NavBar = ({ onSearch, onSort }) => {
   const [showMobileSearch, setShowMobileSearch] = useState(false);
   const [theme, setTheme] = useState("light");
   const [isAuthenticated, setIsAuthenticated] = useState(
     Boolean(localStorage.getItem("jwt"))
   );
+  useEffect(() => {
+    const checkAuth = () => {
+      const token = localStorage.getItem("jwt");
+      setIsAuthenticated(Boolean(token));
+    };
 
+    // Initial check
+    checkAuth();
+    // Create a storage event listener
+    const handleAuthChange = () => {
+      checkAuth();
+    };
+
+    // Add event listener for auth state changes
+    window.addEventListener(AUTH_STATE_CHANGE_EVENT, handleAuthChange);
+
+    // Cleanup
+    return () => {
+      window.removeEventListener(AUTH_STATE_CHANGE_EVENT, handleAuthChange);
+    };
+  }, []);
+
+  // Function to dispatch auth state change event
+  const dispatchAuthEvent = () => {
+    window.dispatchEvent(new Event("authStateChange"));
+  };
   // Handle Search Change
   const handleSearch = (query) => {
     onSearch(query);  // Pass the search query to the parent component (ProductCard)
@@ -95,6 +123,16 @@ const NavBar = ({ onSearch, onSort }) => {
     });
   };
 
+  // Handle logo click
+  const handleLogoClick = () => {
+    navigate('/');
+  };
+
+  // Handle login/signup
+  const handleAuthClick = () => {
+    navigate('/Authenticate', { state: { from: '/' } });
+  };
+
   // Initialize theme from system preference or localStorage
   useEffect(() => {
     const savedTheme = localStorage.getItem("theme");
@@ -140,6 +178,41 @@ const NavBar = ({ onSearch, onSort }) => {
       )}
     </Button>
   );
+ // Shared components
+ const LogoSection = ({ className = "" }) => (
+  <img 
+    src="/logo.png" 
+    alt="Logo" 
+    className={`h-8 cursor-pointer ${className}`}
+    onClick={handleLogoClick}
+  />
+);
+
+const AuthSection = ({ isMobile = false }) => (
+  <div className={`flex items-center ${isMobile ? "w-full" : "space-x-4"}`}>
+    {!isAuthenticated ? (
+      <Button 
+        variant="outline" 
+        onClick={handleAuthClick}
+        className={isMobile ? "w-full" : ""}
+      >
+        Login/Signup
+      </Button>
+    ) : (
+      <Button 
+        variant="ghost" 
+        onClick={handleProfile}
+        className={`${isMobile ? "w-full flex items-center justify-start gap-2" : "p-2"}`}
+      >
+        <Avatar className="h-8 w-8">
+          <AvatarImage src="/api/placeholder/32/32" />
+          <AvatarFallback>UN</AvatarFallback>
+        </Avatar>
+        {isMobile && <span>Profile</span>}
+      </Button>
+    )}
+  </div>
+);
 
   const NavigationItems = ({ isMobile = false }) => (
     <div
@@ -194,20 +267,18 @@ const NavBar = ({ onSearch, onSort }) => {
       <NotificationBell>
         <div className="relative cursor-pointer">
           <Bell className="w-6 h-6" />
-          {/* You can move the notification dot here if needed */}
         </div>
-        {/* {isMobile && <span className="ml-2">Notifications</span>} */}
       </NotificationBell>
       <ThemeToggle isMobile={isMobile} />
     </div>
   );
 
-  const SearchBar = ({ className = "" }) => (
-    <div className={`relative ${className}`}>
-      <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-      <Input placeholder="Search..." className="pl-8" />
-    </div>
-  );
+  // const SearchBar = ({ className = "" }) => (
+  //   <div className={`relative ${className}`}>
+  //     <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+  //     <Input placeholder="Search..." className="pl-8" />
+  //   </div>
+  // );
 
   return (
     <nav className="w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50">
@@ -224,24 +295,16 @@ const NavBar = ({ onSearch, onSort }) => {
                 <div className="flex flex-col space-y-6 mt-6">
                   <img src={logo} alt="Logo" className="h-16 mx-auto" />
                   <NavigationItems isMobile />
-                  {/* <ProductSort onSort={handleSort} />
-                  <ProductSearch onSearch={handleSearch} /> */}
                   <ActionButtons isMobile />
                   
                 </div>
               </SheetContent>
             </Sheet>
-
-            <img src={logo} alt="Logo" className="h-8" />
-            <div
-                    className="flex items-center space-x-4 mt-4 cursor-pointer"
-                    onClick={handleProfile}
-                  >
-                    <Avatar onClick={handleProfile}>
-                      <AvatarImage src="/api/placeholder/32/32" />
-                      <AvatarFallback>UN</AvatarFallback>
-                    </Avatar>
-                  </div>
+            <LogoSection className="flex-shrink-0" />
+            <div className="flex items-center space-x-4">
+              <ThemeToggle />
+              <AuthSection />
+            </div>
           </div>
 
           {showMobileSearch && (
@@ -252,15 +315,11 @@ const NavBar = ({ onSearch, onSort }) => {
         </div>
 
         <div className="hidden lg:flex flex-col items-center py-2 space-y-4">
-          <img src={logo} alt="Logo" className="h-8" />
-
+          <LogoSection />
           <div className="w-full flex items-center justify-between space-x-6">
             <NavigationItems />
             <ActionButtons />
-            <Avatar onClick={handleProfile}>
-              <AvatarImage src="/api/placeholder/32/32" />
-              <AvatarFallback>UN</AvatarFallback>
-            </Avatar>
+            <AuthSection />
           </div>
         </div>
       </div>
