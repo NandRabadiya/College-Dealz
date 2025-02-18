@@ -25,131 +25,34 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import debounce from "lodash/debounce";
-import { useMediaQuery } from "react-responsive";
 import FilterComponent from "./Filter";
-const ProductCard = ({ searchQuery, sortField, sortDir }) => {
-  console.log("ProductCard received props:", {
-    searchQuery,
-    sortField,
-    sortDir,
-  }); // Add this log
 
+const ProductCard = ({ searchQuery, sortField, sortDir, selectedUniversity }) => {
+  console.log("ProductCard mounted with university:", selectedUniversity);
+  
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [universities, setUniversities] = useState([]);
-  const [selectedUniversity, setSelectedUniversity] = useState(null);
-  const [showUniversityDialog, setShowUniversityDialog] = useState(false);
-  const [dialogInitialized, setDialogInitialized] = useState(false);
-  const [open, setOpen] = useState(false);
   const [wishlistedItems, setWishlistedItems] = useState(new Set());
-  const [fetchTrigger, setFetchTrigger] = useState(0); // New state variable
-
-  // Pagination state
   const [currentPage, setCurrentPage] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
   const [pageSize, setPageSize] = useState(2);
   const [totalElements, setTotalElements] = useState(0);
-  // const [sortField, setSortField] = useState("postDate");
-  //const [sortDir, setSortDir] = useState("desc");
-  //const [searchQuery, setSearchQuery] = useState(""); // Rename state variable
+  const [open, setOpen] = useState(false);
   const placeholderImage = "/api/placeholder/400/320";
+  const navigate = useNavigate();
 
   const [isAuthenticated, setIsAuthenticated] = useState(
     Boolean(localStorage.getItem("jwt"))
   );
+  
   const [filters, setFilters] = useState({
     minPrice: 0,
     maxPrice: 10000,
     categories: "",
   });
 
-  const handleFilterChange = (newFilters) => {
-    console.log("Filter change:", newFilters);
-    setFilters(newFilters);
-    // Include filters in your fetchProducts call
-    const universityId = isAuthenticated ? null : selectedUniversity;
-    fetchProducts(
-      universityId,
-      currentPage,
-      searchQuery,
-      sortField,
-      sortDir,
-      newFilters
-    );
-  };
-  const navigate = useNavigate();
-  useEffect(() => {
-    fetchProducts();
-  }, [searchQuery, sortField, sortDir, currentPage]);
-
-  useEffect(() => {
-    console.log("ProductCard useEffect triggered with:", {
-      searchQuery,
-      sortField,
-      sortDir,
-    });
-    const universityId = isAuthenticated ? null : selectedUniversity;
-    fetchProducts(universityId, currentPage, searchQuery, sortField, sortDir);
-  }, [
-    searchQuery,
-    sortField,
-    sortDir,
-    currentPage,
-    isAuthenticated,
-    selectedUniversity,
-  ]);
-
-  // Fetch universities on component mount
-  useEffect(() => {
-    const fetchUniversities = async () => {
-      try {
-        const response = await fetch(`${API_BASE_URL}/api/universities`);
-        if (!response.ok) throw new Error("Failed to fetch universities");
-        const data = await response.json();
-        setUniversities(data);
-        setDialogInitialized(true);
-      } catch (err) {
-        console.error("Error fetching universities:", err);
-        setError("Failed to fetch universities");
-      }
-    };
-    fetchUniversities();
-  }, []);
-
-  // Show university selection dialog for non-logged-in users
-  useEffect(() => {
-    if (dialogInitialized && !isAuthenticated && !selectedUniversity) {
-      console.log("Showing university dialog");
-      setShowUniversityDialog(true);
-    }
-  }, [isAuthenticated, selectedUniversity, dialogInitialized]);
-
-  // Debounced search function (correct dependencies)
-  const debouncedSearch = useCallback(
-    debounce((query, sortField, sortDir) => {
-      // Add sort parameters
-      const universityId = isAuthenticated ? null : selectedUniversity;
-      fetchProducts(universityId, currentPage, query, sortField, sortDir); // Pass sort parameters
-    }, 500),
-    [isAuthenticated, selectedUniversity, currentPage, sortField, sortDir] // Include sort dependencies
-  );
-  useEffect(() => {
-    const universityId = isAuthenticated ? null : selectedUniversity;
-    fetchProducts(universityId, currentPage, searchQuery, sortField, sortDir); // Pass all parameters
-  }, [
-    searchQuery,
-    sortField,
-    sortDir,
-    currentPage,
-    isAuthenticated,
-    selectedUniversity,
-  ]); // Add isAuthenticated & selectedUniversity
-
-
-  // Modified product fetch function to handle both authenticated and non-authenticated cases
   const fetchProducts = async (
-    universityId = null,
     page = currentPage,
     query = searchQuery,
     field = sortField,
@@ -161,40 +64,24 @@ const ProductCard = ({ searchQuery, sortField, sortDir }) => {
       const token = localStorage.getItem("jwt");
       const headers = token ? { Authorization: `Bearer ${token}` } : {};
 
-      console.log("JWT",token)
-      // Don't fetch if we need a university ID but don't have one
-      if (!token && !universityId) {
-        setShowUniversityDialog(true);
-        setProducts([]);
-        setLoading(false);
-        return;
-      }
-  
-
-      // Use different endpoints based on authentication status
       const endpoint = token
         ? `${API_BASE_URL}/api/products/university`
-        : `${API_BASE_URL}/api/products/public/university/${universityId}`;
+        : `${API_BASE_URL}/api/products/public/university/${selectedUniversity}`;
 
-      console.log("Fetching with params:", {
-        query,
-        field,
-        direction,
-        page,
-      });
-      // Construct request body based on backend DTO expectations
+      console.log("Fetching from endpoint:", endpoint);
+
       const requestBody = {
         page: page,
         size: pageSize,
-        sortField: field || "postDate", // Default sort field
-        sortDir: direction || "desc", // Default sort direction
+        sortField: field || "postDate",
+        sortDir: direction || "desc",
         searchQuery: query || "",
-        category: filterValues.categories, // Array of selected categories
+        category: filterValues.categories,
         minPrice: filterValues.minPrice,
         maxPrice: filterValues.maxPrice,
       };
 
-      console.log("Sending request with body:", requestBody); // Debug log
+      console.log("Request body:", requestBody);
 
       const response = await fetch(endpoint, {
         method: "POST",
@@ -205,122 +92,90 @@ const ProductCard = ({ searchQuery, sortField, sortDir }) => {
         body: JSON.stringify(requestBody),
       });
 
-      // Log response status and headers for debugging
-      console.log("Response status:", response.status);
-      console.log("Response headers:", Object.fromEntries(response.headers));
-      // if (!response.ok) throw new Error("Failed to fetch products");
       if (!response.ok) {
-        // Try to get error message from response
         const errorData = await response.json().catch(() => null);
         throw new Error(
           errorData?.message || `HTTP error! status: ${response.status}`
         );
       }
+
       const responseData = await response.json();
-      // Extract products array from the content property
-      const data = responseData.content || [];
-      console.log("Fetched products:", data);
-      // Update pagination state
+      console.log("Received response:", responseData);
+
+      if (!responseData.content) {
+        console.error("No content in response:", responseData);
+        throw new Error("Invalid response format");
+      }
+
+      const productsWithImages = responseData.content.map((product) => ({
+        ...product,
+        images: product.imageUrls?.length > 0
+          ? product.imageUrls.map((url, index) => ({
+              id: `${product.id}-${index}`,
+              url: url,
+              fileName: `image-${index}`,
+            }))
+          : [
+              {
+                id: product.id,
+                url: placeholderImage,
+                fileName: "placeholder",
+              },
+            ],
+      }));
+
+      console.log("Processed products:", productsWithImages);
+      setProducts(productsWithImages);
       setTotalPages(responseData.totalPages);
       setTotalElements(responseData.totalElements);
       setCurrentPage(responseData.number);
-
-      // Process products with images
-      const productsWithImages = data.map((product) => {
-        const hasImages = product.imageUrls?.length > 0;
-        return {
-          ...product,
-          images: hasImages
-            ? product.imageUrls.map((url, index) => ({
-                id: `${product.id}-${index}`,
-                url: url,
-                fileName: `image-${index}`,
-              }))
-            : [
-                {
-                  id: product.id,
-                  url: placeholderImage,
-                  fileName: "placeholder",
-                },
-              ],
-          hasImages: hasImages, // Add a flag to track if real images exist
-        };
-      });
-      //     // Fetch images if needed
-      //     if (token) {
-      //       try {
-      //         const imagesResponse = await fetch(
-      //           `${API_BASE_URL}/api/images/product/${product.id}`,
-      //           { headers }
-      //         );
-      //         if (imagesResponse.ok) {
-      //           const images = await imagesResponse.json();
-      //           return {
-      //             ...product,
-      //             images: images
-      //               .map((img) =>
-      //                 img.s3_url
-      //                   ? {
-      //                       id: img.image_id,
-      //                       url: img.s3_url,
-      //                       fileName: img.file_name,
-      //                     }
-      //                   : null
-      //               )
-      //               .filter(Boolean),
-      //           };
-      //         }
-      //       } catch (error) {
-      //         console.error(
-      //           `Error fetching images for product ${product.id}:`,
-      //           error
-      //         );
-      //       }
-      //     }
-      //     return { ...product, images: [] };
-      //   })
-      // );
-
-      setProducts(productsWithImages);
+      setError(null);
     } catch (err) {
-      setError(err.message);
       console.error("Error fetching products:", err);
+      setError(err.message);
+      setProducts([]);
     } finally {
       setLoading(false);
     }
   };
-  // [searchQuery, sortField, sortDir, currentPage, pageSize, selectedUniversity]
-  // [currentPage, pageSize, selectedUniversity]
 
-  //);
-
-  // Handle university selection
-  const handleUniversitySelect = (universityId) => {
-    setSelectedUniversity(universityId);
-    setShowUniversityDialog(false);
-    fetchProducts(universityId);
-  };
-
+  // Main effect for fetching products
   useEffect(() => {
-    if (isAuthenticated) {
+    if (selectedUniversity || isAuthenticated) {
+      console.log("Triggering product fetch. University:", selectedUniversity);
       fetchProducts();
     }
-  }, [isAuthenticated]);
+  }, [
+    searchQuery,
+    sortField,
+    sortDir,
+    currentPage,
+    selectedUniversity,
+    isAuthenticated,
+    filters
+  ]);
+
+  const handleFilterChange = (newFilters) => {
+    console.log("Filter change:", newFilters);
+    setFilters(newFilters);
+    setCurrentPage(0);
+    fetchProducts(0, searchQuery, sortField, sortDir, newFilters);
+  };
+
   const handleProtectedAction = (action, e) => {
     if (e) e.stopPropagation();
     if (!isAuthenticated) {
       console.log("User not authenticated");
+      setOpen(true);
     } else {
       action();
     }
   };
 
-  // Navigate to product details page
   const handleProductClick = (productId) => {
     navigate(`/product/${productId}`);
   };
 
-  // Add product to Wishlist
   const handleWishlist = async (productId, e) => {
     if (e) {
       e.preventDefault();
@@ -328,13 +183,12 @@ const ProductCard = ({ searchQuery, sortField, sortDir }) => {
     }
 
     if (!isAuthenticated) {
-      setOpen(true); // Show login/university dialog
+      setOpen(true);
       return;
     }
-    const token = localStorage.getItem("jwt");
-    console.log("Adding to wishlist:", productId);
 
     try {
+      const token = localStorage.getItem("jwt");
       const response = await fetch(
         `${API_BASE_URL}/api/wishlist/${productId}`,
         {
@@ -345,13 +199,11 @@ const ProductCard = ({ searchQuery, sortField, sortDir }) => {
           },
         }
       );
-      // Handle page change
 
       if (!response.ok) {
         throw new Error("Failed to add to wishlist");
       }
 
-      // Update local state to reflect wishlist change
       setWishlistedItems((prev) => {
         const newSet = new Set(prev);
         if (newSet.has(productId)) {
@@ -362,7 +214,6 @@ const ProductCard = ({ searchQuery, sortField, sortDir }) => {
         return newSet;
       });
 
-      // Optionally update the products state to reflect the change
       setProducts((prevProducts) =>
         prevProducts.map((product) =>
           product.id === productId
@@ -372,10 +223,9 @@ const ProductCard = ({ searchQuery, sortField, sortDir }) => {
       );
     } catch (error) {
       console.error("Error updating wishlist:", error);
-      // Add error handling UI feedback here
     }
   };
-  // Add this effect to fetch initial wishlist status
+
   useEffect(() => {
     const fetchWishlistStatus = async () => {
       if (!isAuthenticated) return;
@@ -396,7 +246,6 @@ const ProductCard = ({ searchQuery, sortField, sortDir }) => {
         );
         setWishlistedItems(wishlistSet);
 
-        // Update products with wishlist status
         setProducts((prevProducts) =>
           prevProducts.map((product) => ({
             ...product,
@@ -411,24 +260,23 @@ const ProductCard = ({ searchQuery, sortField, sortDir }) => {
     fetchWishlistStatus();
   }, [isAuthenticated]);
 
-  // Start chat with seller
   const handleChat = (product, e) => {
     handleProtectedAction(() => {
       console.log("Starting chat about:", product);
     }, e);
   };
 
-  // Share product
   const handleShare = (product, e) => {
     e.stopPropagation();
     console.log("Sharing product:", product);
   };
+
   const handlePageChange = (newPage) => {
     if (newPage >= 0 && newPage < totalPages) {
-      const universityId = isAuthenticated ? null : selectedUniversity;
-      fetchProducts(universityId, newPage);
+      setCurrentPage(newPage);
     }
   };
+
   if (loading) {
     return <div className="m-4 text-center">Loading products...</div>;
   }
@@ -439,7 +287,6 @@ const ProductCard = ({ searchQuery, sortField, sortDir }) => {
 
   return (
     <div className="container mx-auto px-4">
-      {/* <div className="m-4"> */}
       <div className="flex flex-col lg:flex-row gap-6">
         <FilterComponent
           onFilterChange={handleFilterChange}
@@ -447,119 +294,123 @@ const ProductCard = ({ searchQuery, sortField, sortDir }) => {
         />
 
         <div className="flex-1">
-          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
-            {products.map((product) => (
-              <div
-                key={product.id}
-                className="group relative overflow-hidden rounded-lg border bg-card transition-all hover:shadow-md cursor-pointer"
-                onClick={() => handleProductClick(product.id)}
-              >
-                {/* Image Section */}
-                <div className="relative h-64 overflow-hidden">
-                  <img
-                    src={product.images?.[0]?.url} // Use the url directly
-                    alt={product.name}
-                    className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
-                  />
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="absolute right-2 top-2 bg-background/80 backdrop-blur-sm hover:bg-background/90 z-10"
-                    onClick={(e) => handleWishlist(product.id, e)}
+          {products.length === 0 ? (
+            <div className="text-center py-8">
+              <p className="text-muted-foreground">No products found.</p>
+            </div>
+          ) : (
+            <>
+              <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
+                {products.map((product) => (
+                  <div
+                    key={product.id}
+                    className="group relative overflow-hidden rounded-lg border bg-card transition-all hover:shadow-md cursor-pointer"
+                    onClick={() => handleProductClick(product.id)}
                   >
-                    <Heart
-                      className={`h-6 w-6 transition-colors duration-200 ${
-                        wishlistedItems.has(product.id)
-                          ? "fill-primary text-primary"
-                          : "text-primary hover:fill-primary/20"
-                      }`}
-                    />
+                    <div className="relative h-64 overflow-hidden">
+                      <img
+                        src={product.images?.[0]?.url}
+                        alt={product.name}
+                        className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                      />
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="absolute right-2 top-2 bg-background/80 backdrop-blur-sm hover:bg-background/90 z-10"
+                        onClick={(e) => handleWishlist(product.id, e)}
+                      >
+                        <Heart
+                          className={`h-6 w-6 transition-colors duration-200 ${
+                            wishlistedItems.has(product.id)
+                              ? "fill-primary text-primary"
+                              : "text-primary hover:fill-primary/20"
+                          }`}
+                        />
+                      </Button>
+                    </div>
+
+                    <div className="p-4">
+                      <div className="mb-2 flex items-start justify-between gap-2">
+                        <h3 className="font-semibold leading-tight text-foreground text-xl line-clamp-2">
+                          {product.name}
+                        </h3>
+                        <div className="text-xl font-bold text-primary whitespace-nowrap">
+                          ₹{product.price}
+                        </div>
+                      </div>
+
+                      <div className="mb-3 text-sm text-muted-foreground">
+                        <div className="flex items-center gap-2">
+                          <Badge variant="secondary" className="font-normal">
+                            {product.seller?.name || "Unknown Seller"}
+                          </Badge>
+                          <span className="text-xs">•</span>
+                          <span className="text-xs">
+                            {new Date(product.postDate).toLocaleDateString()}
+                          </span>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center justify-between gap-2 pt-2 border-t">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="flex-1 text-foreground hover:bg-muted"
+                          onClick={(e) => handleChat(product, e)}
+                        >
+                          <MessageCircle className="mr-2 h-4 w-4 text-inherit" />
+                          Chat
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="flex-1 text-foreground hover:bg-muted"
+                          onClick={(e) => handleShare(product, e)}
+                        >
+                          <Share2 className="mr-2 h-4 w-4 text-inherit" />
+                          Share
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <div className="mt-8 flex flex-col sm:flex-row items-center justify-between gap-4 px-2">
+                <div className="text-sm text-muted-foreground order-2 sm:order-1">
+                  Showing {products.length} of {totalElements} items
+                </div>
+
+                <div className="flex items-center space-x-2 order-1 sm:order-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handlePageChange(currentPage - 1)}
+                    disabled={currentPage === 0}
+                    className="w-24"
+                  >
+                    <ChevronLeft className="mr-2 h-4 w-4" />
+                    Previous
+                  </Button>
+
+                  <div className="text-sm text-muted-foreground">
+                    Page {currentPage + 1} of {totalPages}
+                  </div>
+
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handlePageChange(currentPage + 1)}
+                    disabled={currentPage === totalPages - 1}
+                    className="w-24"
+                  >
+                    Next
+                    <ChevronRight className="ml-2 h-4 w-4" />
                   </Button>
                 </div>
-
-                {/* Product Info Section */}
-                <div className="p-4">
-                  <div className="mb-2 flex items-start justify-between gap-2">
-                    <h3 className="font-semibold leading-tight text-foreground text-xl line-clamp-2">
-                      {product.name}
-                    </h3>
-                    <div className="text-xl font-bold text-primary whitespace-nowrap">
-                      ₹{product.price}
-                    </div>
-                  </div>
-
-                  <div className="mb-3 text-sm text-muted-foreground">
-                    <div className="flex items-center gap-2">
-                      <Badge variant="secondary" className="font-normal">
-                        {product.seller?.name || "Unknown Seller"}
-                      </Badge>
-                      <span className="text-xs">•</span>
-                      <span className="text-xs">
-                        {new Date(product.postDate).toLocaleDateString()}
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Action Buttons */}
-                  <div className="flex items-center justify-between gap-2 pt-2 border-t">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="flex-1 text-foreground hover:bg-muted"
-                      onClick={(e) => handleChat(product, e)}
-                    >
-                      <MessageCircle className="mr-2 h-4 w-4 text-inherit" />
-                      Chat
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="flex-1 text-foreground hover:bg-muted"
-                      onClick={(e) => handleShare(product, e)}
-                    >
-                      <Share2 className="mr-2 h-4 w-4 text-inherit" />
-                      Share
-                    </Button>
-                  </div>
-                </div>
               </div>
-            ))}
-          </div>
-
-          {/* Pagination UI */}
-          <div className="mt-8 flex flex-col sm:flex-row items-center justify-between gap-4 px-2">
-            <div className="text-sm text-muted-foreground order-2 sm:order-1">
-              Showing {products.length} of {totalElements} items
-            </div>
-
-            <div className="flex items-center space-x-2 order-1 sm:order-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => handlePageChange(currentPage - 1)}
-                disabled={currentPage === 0}
-                className="w-24"
-              >
-                <ChevronLeft className="mr-2 h-4 w-4" />
-                Previous
-              </Button>
-
-              <div className="text-sm text-muted-foreground">
-                Page {currentPage + 1} of {totalPages}
-              </div>
-
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => handlePageChange(currentPage + 1)}
-                disabled={currentPage === totalPages - 1}
-                className="w-24"
-              >
-                Next
-                <ChevronRight className="ml-2 h-4 w-4" />
-              </Button>
-            </div>
-          </div>
+            </>
+          )}
         </div>
       </div>
     </div>

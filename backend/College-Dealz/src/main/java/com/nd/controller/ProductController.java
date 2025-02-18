@@ -105,8 +105,35 @@ public class ProductController {
         return ResponseEntity.ok(products);
     }
 
-       // return ResponseEntity.ok(products);
-   // }
+    @PostMapping("/public/university/{universityId}")
+    public ResponseEntity<Page<ProductDto>> getProductsByUniversity(
+            @PathVariable Integer universityId,
+            @RequestBody(required = false) ProductSortFilterRequest request) {
+
+        // If no body is provided, create a default request.
+        if (request == null) {
+            request = new ProductSortFilterRequest();
+        }
+
+        // Log parameters for debugging
+        System.out.println("\n\nSortField: " + request.getSortField() + ", SortDir: " + request.getSortDir() +
+                ", Page: " + request.getPage() + ", Size: " + request.getSize() +
+                ", Category: " + request.getCategory() + ", MinPrice: " + request.getMinPrice() +
+                ", MaxPrice: " + request.getMaxPrice());
+
+        Page<ProductDto> products = productService.getProductsByUniversityId(
+                universityId,
+                request.getSortField(),
+                request.getSortDir(),
+                request.getPage(),
+                request.getSize(),
+                request.getCategory(),
+                request.getMinPrice(),
+                request.getMaxPrice()
+        );
+        return ResponseEntity.ok(products);
+    }
+
     @GetMapping
     public ResponseEntity<List<ProductDto>> getAllProducts(@RequestHeader("Authorization") String authHeader) {
         List<ProductDto> products = productService.getAllProducts(authHeader);

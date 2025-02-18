@@ -70,9 +70,6 @@ const authReducer = (state = initialState, action) => {
       return {
         ...initialState,
       };
-  //   default:
-  //     return state;
-  // }
   case SEND_OTP_REQUEST:
     case VERIFY_OTP_REQUEST:
       return {

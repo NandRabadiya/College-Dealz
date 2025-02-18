@@ -21,7 +21,7 @@ public class UniversityController {
     private UniversityService universityService;
 
     // GET: Retrieve all universities
-    @GetMapping
+    @GetMapping("/public")
     public ResponseEntity<List<UniversityDto>> getAllUniversities() {
         return ResponseEntity.ok(universityService.getAllUniversities());
     }
