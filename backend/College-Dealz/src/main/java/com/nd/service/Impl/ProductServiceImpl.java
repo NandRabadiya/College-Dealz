@@ -1,8 +1,11 @@
 package com.nd.service.Impl;
 
+import com.nd.dto.InterestedBuyerDto;
 import com.nd.entities.*;
 import com.nd.dto.ProductDto;
 import com.nd.enums.Category;
+import com.nd.enums.ProductStatus;
+import com.nd.exceptions.ProductException;
 import com.nd.exceptions.ResourceNotFoundException;
 import com.nd.repositories.ImageRepo;
 import com.nd.repositories.ProductRepo;
@@ -237,6 +240,59 @@ public class ProductServiceImpl implements ProductService {
     }
 
 
+    @Override
+    public ProductDto relistProduct(Integer productId) throws ProductException {
+        // Find the old product; throw an exception if not found
+        Product oldProduct = productRepo.findById(productId)
+                .orElseThrow(() -> new ProductException("Product not found with id: " + productId));
+
+        // Create a new Product instance and copy over product-related fields
+        Product newProduct = new Product();
+        newProduct.setName(oldProduct.getName());
+        newProduct.setDescription(oldProduct.getDescription());
+        newProduct.setPrice(oldProduct.getPrice());
+        newProduct.setCondition(oldProduct.getCondition());
+        newProduct.setMonthsOld(oldProduct.getMonthsOld());
+        newProduct.setCategory(oldProduct.getCategory());
+        // Do NOT copy location
+        newProduct.setSeller(oldProduct.getSeller());
+        newProduct.setUniversity(oldProduct.getUniversity());
+
+        // Copy all images: create new Image objects associated with the new product
+        List<Image> newImages = new ArrayList<>();
+        if (oldProduct.getImages() != null) {
+            for (Image oldImage : oldProduct.getImages()) {
+                Image newImage = new Image();
+                newImage.setS3Url(oldImage.getS3Url()); // Assuming image URL is stored in S3
+                newImage.setFileName(oldImage.getFileName());
+                newImage.setContentType(oldImage.getContentType());
+                newImage.setImageData(oldImage.getImageData());
+                newImage.setProduct(newProduct);
+                newImages.add(newImage);
+            }
+        }
+        newProduct.setImages(newImages);
+
+        // Reset associations that should not be copied
+        newProduct.setChats(new ArrayList<>());
+        newProduct.setWishlists(new ArrayList<>());
+
+        // Set new timestamps and status for the new product listing
+        Instant now = Instant.now();
+        newProduct.setPostDate(now);
+        newProduct.setCreatedAt(now);
+        newProduct.setUpdatedAt(now);
+        newProduct.setStatus(ProductStatus.RELISTED);
+
+        // Save the new product
+        Product savedProduct = productRepo.save(newProduct);
+
+
+        ProductDto productDto= mapToDto(savedProduct);
+
+        return productDto;
+    }
+
 
 
     @Override
@@ -307,6 +363,20 @@ public class ProductServiceImpl implements ProductService {
         } else {
             throw new RuntimeException("Product with ID " + productId + " not found.");
         }
+    }
+
+    @Override
+    public List<InterestedBuyerDto> getInterestedBuyers(int productId) {
+        Product product = productRepo.findById(productId)
+                .orElseThrow(() -> new RuntimeException("Product not found"));
+
+        return product.getChats().stream()
+                .map(chat -> new InterestedBuyerDto(
+                        chat.getSender().getId(),
+                        chat.getSender().getName(),
+                        chat.getSender().getEmail()))
+                .distinct()
+                .collect(Collectors.toList());
     }
 
     private Product mapToEntity(ProductDto productDto) {

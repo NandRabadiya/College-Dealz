@@ -71,10 +71,6 @@ public class Product {
     @Column(name = "status", nullable = false)
     private ProductStatus status=ProductStatus.AVAILABLE;
 
-    @Size(max = 255)
-    @Column(name = "location")
-    private String location;
-
     @NotNull
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "seller_id", nullable = false)

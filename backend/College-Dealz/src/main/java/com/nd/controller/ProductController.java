@@ -1,7 +1,9 @@
 package com.nd.controller;
 
+import com.nd.dto.InterestedBuyerDto;
 import com.nd.dto.ProductDto;
 import com.nd.dto.ProductSortFilterRequest;
+import com.nd.exceptions.ProductException;
 import com.nd.service.JwtService;
 import com.nd.service.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -73,7 +75,11 @@ public class ProductController {
     }
 
 
-
+    @PostMapping("/{productId}/relist")
+    public ResponseEntity<ProductDto> relistProduct(@PathVariable Integer productId) throws ProductException {
+        ProductDto newProduct = productService.relistProduct(productId);
+        return ResponseEntity.ok(newProduct);
+    }
 
     @PostMapping("/university")
     public ResponseEntity<Page<ProductDto>> getProductsByUniversity(
@@ -176,6 +182,12 @@ public class ProductController {
             // Handle exception if product is not found
             return ResponseEntity.status(404).body("Error: " + ex.getMessage());
         }
+    }
+
+    @GetMapping("/{productId}/interested-buyers")
+    public ResponseEntity<List<InterestedBuyerDto>> getInterestedBuyers(@PathVariable int productId) {
+        List<InterestedBuyerDto> buyers = productService.getInterestedBuyers(productId);
+        return ResponseEntity.ok(buyers);
     }
 
 }
