@@ -8,7 +8,29 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import PostADeal from ".././product/PostADeal";
 import { API_BASE_URL } from "../../pages/Api/api";
 import { Image as ImageIcon } from "lucide-react";
@@ -20,6 +42,16 @@ const UserDeals = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [currentImageIndexes, setCurrentImageIndexes] = useState({});
+  const [soldDialogOpen, setSoldDialogOpen] = useState(false);
+  const [selectedDeal, setSelectedDeal] = useState(null);
+  const [soldType, setSoldType] = useState(null);
+  const [soldFormData, setSoldFormData] = useState({
+    buyerEmail: "",
+    soldPrice: "",
+    soldDate: "",
+    soldToUniversityStudent: "no",
+    sellingReason: "",
+  });
 
   useEffect(() => {
     fetchUserDeals();
@@ -221,6 +253,205 @@ const UserDeals = () => {
       currency: "INR",
     }).format(price);
 
+    const handleSoldButtonClick = (deal) => {
+      setSelectedDeal(deal);
+    };
+  
+    const handleSoldTypeSelect = (type) => {
+      setSoldType(type);
+      setSoldDialogOpen(true);
+    };
+  
+    const handleSoldFormSubmit = async (e) => {
+      e.preventDefault();
+      const formData = {
+        productId: selectedDeal.id,
+        soldType,
+        ...soldFormData,
+      };
+      await handleMarkAsSold(formData);
+    };
+      // Mock function to simulate marking a deal as sold
+  const handleMarkAsSold = async (dealData) => {
+    try {
+      // In the real implementation, this would be an API call
+      console.log("Marking deal as sold with data:", dealData);
+      
+      // Simulate API success - update the local deals state
+      setDeals(prevDeals => 
+        prevDeals.map(deal => 
+          deal.id === selectedDeal.id 
+            ? { ...deal, status: 'SOLD', soldDetails: dealData }
+            : deal
+        )
+      );
+
+      // Close dialog and reset form
+      setSoldDialogOpen(false);
+      setSoldType(null);
+      setSelectedDeal(null);
+      setSoldFormData({
+        buyerEmail: "",
+        soldPrice: "",
+        soldDate: "",
+        soldToUniversityStudent: "no",
+        sellingReason: "",
+      });
+    } catch (error) {
+      console.error("Error marking deal as sold:", error);
+    }
+  };
+    const renderSoldForm = () => {
+      if (soldType === "platform") {
+        return (
+          <form onSubmit={handleSoldFormSubmit} className="space-y-4">
+            <div>
+              <Label htmlFor="buyerEmail">Buyer Email</Label>
+              <Input
+                id="buyerEmail"
+                value={soldFormData.buyerEmail}
+                onChange={(e) =>
+                  setSoldFormData({ ...soldFormData, buyerEmail: e.target.value })
+                }
+                required
+              />
+            </div>
+            <div>
+              <Label htmlFor="soldPrice">Sold Price</Label>
+              <Input
+                id="soldPrice"
+                type="number"
+                value={soldFormData.soldPrice}
+                onChange={(e) =>
+                  setSoldFormData({ ...soldFormData, soldPrice: e.target.value })
+                }
+                required
+              />
+            </div>
+            <div>
+              <Label htmlFor="soldDate">Sell Date</Label>
+              <Input
+                id="soldDate"
+                type="date"
+                value={soldFormData.soldDate}
+                onChange={(e) =>
+                  setSoldFormData({ ...soldFormData, soldDate: e.target.value })
+                }
+                required
+              />
+            </div>
+            <Button type="submit" className="w-full">Submit</Button>
+          </form>
+        );
+      }
+  
+      if (soldType === "outside") {
+        return (
+          <form onSubmit={handleSoldFormSubmit} className="space-y-4">
+            <div>
+              <Label>Sold to University Student?</Label>
+              <RadioGroup
+                value={soldFormData.soldToUniversityStudent}
+                onValueChange={(value) =>
+                  setSoldFormData({
+                    ...soldFormData,
+                    soldToUniversityStudent: value,
+                  })
+                }
+                className="flex gap-4"
+              >
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="yes" id="yes" />
+                  <Label htmlFor="yes">Yes</Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="no" id="no" />
+                  <Label htmlFor="no">No</Label>
+                </div>
+              </RadioGroup>
+            </div>
+            <div>
+              <Label htmlFor="sellingReason">Reason for Selling Outside</Label>
+              <Input
+                id="sellingReason"
+                value={soldFormData.sellingReason}
+                onChange={(e) =>
+                  setSoldFormData({
+                    ...soldFormData,
+                    sellingReason: e.target.value,
+                  })
+                }
+                required
+              />
+            </div>
+            <div>
+              <Label htmlFor="soldPrice">Sold Price</Label>
+              <Input
+                id="soldPrice"
+                type="number"
+                value={soldFormData.soldPrice}
+                onChange={(e) =>
+                  setSoldFormData({ ...soldFormData, soldPrice: e.target.value })
+                }
+                required
+              />
+            </div>
+            <div>
+              <Label htmlFor="soldDate">Sell Date</Label>
+              <Input
+                id="soldDate"
+                type="date"
+                value={soldFormData.soldDate}
+                onChange={(e) =>
+                  setSoldFormData({ ...soldFormData, soldDate: e.target.value })
+                }
+                required
+              />
+            </div>
+            <Button type="submit" className="w-full">Submit</Button>
+          </form>
+        );
+      }
+  
+      return null;
+    };
+
+      // Replace the existing CardFooter in the deal card with this:
+      const renderCardFooter = (deal) => (
+        <CardFooter className="justify-between">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant="secondary"
+                size="sm"
+              >
+                Mark as Sold
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent>
+              <DropdownMenuItem onClick={() => {
+                handleSoldButtonClick(deal);
+                handleSoldTypeSelect("platform");
+              }}>
+                Sold on Platform
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => {
+                handleSoldButtonClick(deal);
+                handleSoldTypeSelect("outside");
+              }}>
+                Sold Outside
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="flex items-center gap-2 text-destructive"
+          >
+            <Trash2 className="h-4 w-4" /> Remove
+          </Button>
+        </CardFooter>
+      );
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
@@ -280,14 +511,12 @@ const UserDeals = () => {
                   <Badge variant="outline">{deal.category}</Badge>
                   <Badge variant="outline">{deal.condition}</Badge>
                 </div>
-              </CardContent>
-              <CardFooter className="justify-between">
+             </CardContent>
+              {/*<CardFooter className="justify-between">
                 <Button
                   variant="secondary"
                   size="sm"
                   className="flex items-center gap-2"
-                  onClick={() => {/* Mark as sold function will be added later */}}
-                >
                   Mark as Sold
                 </Button>
                 <Button
@@ -298,12 +527,26 @@ const UserDeals = () => {
                 >
                   <Trash2 className="h-4 w-4" /> Remove
                 </Button>
-              </CardFooter>
+              </CardFooter> */} 
+              {renderCardFooter(deal)}
             </Card>
           ))}
         </div>
+        
       )}
       {error && <div className="text-red-500 text-center py-2">{error}</div>}
+      <Dialog open={soldDialogOpen} onOpenChange={setSoldDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>
+              {soldType === "platform"
+                ? "Mark as Sold on Platform"
+                : "Mark as Sold Outside"}
+            </DialogTitle>
+          </DialogHeader>
+          {renderSoldForm()}
+        </DialogContent>
+      </Dialog>
 
       {isAddingDeal && (
         <PostADeal onClose={handleDealUpdate} editDeal={editingDeal} />
