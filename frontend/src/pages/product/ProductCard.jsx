@@ -8,9 +8,9 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { API_BASE_URL } from "../Api/api";
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -27,9 +27,15 @@ import {
 import debounce from "lodash/debounce";
 import FilterComponent from "./Filter";
 
-const ProductCard = ({ searchQuery, sortField, sortDir, selectedUniversity }) => {
+
+const ProductCard = ({
+  searchQuery,
+  sortField,
+  sortDir,
+  selectedUniversity,
+}) => {
   console.log("ProductCard mounted with university:", selectedUniversity);
-  
+
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -41,17 +47,28 @@ const ProductCard = ({ searchQuery, sortField, sortDir, selectedUniversity }) =>
   const [open, setOpen] = useState(false);
   const placeholderImage = "/api/placeholder/400/320";
   const navigate = useNavigate();
+  const location = useLocation();
+  const [currentSort, setCurrentSort] = useState(
+    `${sortField || "postDate"}-${sortDir || "desc"}`
+  );
+  const [currentSearch, setCurrentSearch] = useState(searchQuery || "");
+  const [currentFilters, setCurrentFilters] = useState({
+    minPrice: 0,
+    maxPrice: 5000,
+    categories: "",
+  });
 
   const [isAuthenticated, setIsAuthenticated] = useState(
     Boolean(localStorage.getItem("jwt"))
   );
-  
+
   const [filters, setFilters] = useState({
     minPrice: 0,
     maxPrice: 10000,
     categories: "",
   });
 
+  // Modified fetchProducts function in ProductCard.jsx
   const fetchProducts = async (
     page = currentPage,
     query = searchQuery,
@@ -64,32 +81,53 @@ const ProductCard = ({ searchQuery, sortField, sortDir, selectedUniversity }) =>
       const token = localStorage.getItem("jwt");
       const headers = token ? { Authorization: `Bearer ${token}` } : {};
 
-      const endpoint = token
-        ? `${API_BASE_URL}/api/products/university`
-        : `${API_BASE_URL}/api/products/public/university/${selectedUniversity}`;
+      let endpoint;
+      let method = "POST";
+      let body;
+
+      if (token) {
+        if (query) {
+          // Use search endpoint for authenticated users when there's a search query
+          endpoint = `${API_BASE_URL}/api/products/search/${query}`;
+          method = "GET";
+          body = null;
+        } else {
+          // Use regular endpoint for normal listing
+          endpoint = `${API_BASE_URL}/api/products/university`;
+          body = {
+            page: page,
+            size: pageSize,
+            sortField: field || "postDate",
+            sortDir: direction || "desc",
+            category: filterValues.categories,
+            minPrice: filterValues.minPrice,
+            maxPrice: filterValues.maxPrice,
+          };
+        }
+      } else {
+        // For non-authenticated users, always use the public endpoint
+        endpoint = `${API_BASE_URL}/api/products/public/university/${selectedUniversity}`;
+        body = {
+          page: page,
+          size: pageSize,
+          sortField: field || "postDate",
+          sortDir: direction || "desc",
+          category: filterValues.categories,
+          minPrice: filterValues.minPrice,
+          maxPrice: filterValues.maxPrice,
+        };
+      }
 
       console.log("Fetching from endpoint:", endpoint);
-
-      const requestBody = {
-        page: page,
-        size: pageSize,
-        sortField: field || "postDate",
-        sortDir: direction || "desc",
-        searchQuery: query || "",
-        category: filterValues.categories,
-        minPrice: filterValues.minPrice,
-        maxPrice: filterValues.maxPrice,
-      };
-
-      console.log("Request body:", requestBody);
+      console.log("Request body:", body);
 
       const response = await fetch(endpoint, {
-        method: "POST",
+        method: method,
         headers: {
-          "Content-Type": "application/json",
+          ...(method === "POST" && { "Content-Type": "application/json" }),
           ...headers,
         },
-        body: JSON.stringify(requestBody),
+        ...(body && { body: JSON.stringify(body) }),
       });
 
       if (!response.ok) {
@@ -102,33 +140,39 @@ const ProductCard = ({ searchQuery, sortField, sortDir, selectedUniversity }) =>
       const responseData = await response.json();
       console.log("Received response:", responseData);
 
-      if (!responseData.content) {
-        console.error("No content in response:", responseData);
-        throw new Error("Invalid response format");
-      }
-
-      const productsWithImages = responseData.content.map((product) => ({
+      // Handle both paginated and non-paginated responses
+      const content = responseData.content || responseData;
+      const productsWithImages = (
+        Array.isArray(content) ? content : [content]
+      ).map((product) => ({
         ...product,
-        images: product.imageUrls?.length > 0
-          ? product.imageUrls.map((url, index) => ({
-              id: `${product.id}-${index}`,
-              url: url,
-              fileName: `image-${index}`,
-            }))
-          : [
-              {
-                id: product.id,
-                url: placeholderImage,
-                fileName: "placeholder",
-              },
-            ],
+        images:
+          product.imageUrls?.length > 0
+            ? product.imageUrls.map((url, index) => ({
+                id: `${product.id}-${index}`,
+                url: url,
+                fileName: `image-${index}`,
+              }))
+            : [
+                {
+                  id: product.id,
+                  url: placeholderImage,
+                  fileName: "placeholder",
+                },
+              ],
       }));
 
-      console.log("Processed products:", productsWithImages);
       setProducts(productsWithImages);
-      setTotalPages(responseData.totalPages);
-      setTotalElements(responseData.totalElements);
-      setCurrentPage(responseData.number);
+      if (responseData.totalPages) {
+        setTotalPages(responseData.totalPages);
+        setTotalElements(responseData.totalElements);
+        setCurrentPage(responseData.number);
+      } else {
+        // If it's a search response without pagination
+        setTotalPages(1);
+        setTotalElements(productsWithImages.length);
+        setCurrentPage(0);
+      }
       setError(null);
     } catch (err) {
       console.error("Error fetching products:", err);
@@ -152,14 +196,24 @@ const ProductCard = ({ searchQuery, sortField, sortDir, selectedUniversity }) =>
     currentPage,
     selectedUniversity,
     isAuthenticated,
-    filters
+    filters,
   ]);
 
   const handleFilterChange = (newFilters) => {
-    console.log("Filter change:", newFilters);
-    setFilters(newFilters);
+    setCurrentFilters(newFilters);
     setCurrentPage(0);
-    fetchProducts(0, searchQuery, sortField, sortDir, newFilters);
+    fetchProducts(0, currentSearch, sortField, sortDir, newFilters);
+  };
+  const handleSort = (value) => {
+    const [field, dir] = value.split("-");
+    setCurrentSort(value);
+    fetchProducts(currentPage, currentSearch, field, dir, currentFilters);
+  };
+
+  const handleSearch = (query) => {
+    setCurrentSearch(query);
+    setCurrentPage(0);
+    fetchProducts(0, query, sortField, sortDir, currentFilters);
   };
 
   const handleProtectedAction = (action, e) => {
@@ -290,11 +344,16 @@ const ProductCard = ({ searchQuery, sortField, sortDir, selectedUniversity }) =>
       <div className="flex flex-col lg:flex-row gap-6">
         <FilterComponent
           onFilterChange={handleFilterChange}
+          currentFilters={currentFilters}
           className="lg:sticky lg:top-4"
         />
 
         <div className="flex-1">
-          {products.length === 0 ? (
+          {loading ? (
+            <div className="flex justify-center items-center min-h-[200px]">
+              <Loader2 className="h-8 w-8 animate-spin" />
+            </div>
+          ) : products.length === 0 ? (
             <div className="text-center py-8">
               <p className="text-muted-foreground">No products found.</p>
             </div>

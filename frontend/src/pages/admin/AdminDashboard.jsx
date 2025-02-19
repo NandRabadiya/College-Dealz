@@ -19,8 +19,22 @@ import {
   MapPinIcon,
   ChevronLeft,
   ChevronRight,
+  AlertTriangle,
+  MessageSquare,
+  ThumbsUp,
 } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
 import { API_BASE_URL } from "../Api/api";
+import { set } from "lodash";
 
 function AdminDashboard() {
   const [activeTab, setActiveTab] = useState("universities");
@@ -36,6 +50,12 @@ function AdminDashboard() {
     domain: "",
     location: "",
   });
+  const [feedback, setFeedback] = useState([]);
+  const [isReportDialogOpen, setIsReportDialogOpen] = useState(false);
+  const [selectedItemForReport, setSelectedItemForReport] = useState(null);
+  const [reportType, setReportType] = useState(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [reportStates, setReportStates] = useState({});
 
   // Fetch data
   useEffect(() => {
@@ -43,8 +63,161 @@ function AdminDashboard() {
     fetchProducts();
     fetchUsers();
     fetchAdmins();
+    fetchFeedback();
   }, []);
 
+  const fetchFeedback = async () => {
+    try {
+      const response = await axios.get(`${API_BASE_URL}/api/feedback`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("jwt")}`,
+        },
+      });
+      setFeedback(response.data);
+    } catch (error) {
+      console.error("Error fetching feedback:", error);
+    }
+  };
+
+  // Report handlers
+  const handleReportUser = async (userId) => {
+    try {
+      setIsSubmitting(true);
+      await axios.post(
+        `${API_BASE_URL}/api/reports/user/${userId}`,
+        { reason: reportReason },
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("jwt")}`,
+          },
+        }
+      );
+      //setReportReason("");
+      alert("User warned successfully");
+    } catch (error) {
+      console.error("Error warning user:", error);
+      alert("Failed to send warning");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+
+  const handleReportProduct = async (productId) => {
+    try {
+      setIsSubmitting(true);
+      await axios.post(
+        `${API_BASE_URL}/api/reports/product/${productId}`,
+        { reason: reportReason },
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("jwt")}`,
+          },
+        }
+      );
+      //setReportReason("");
+      alert("Product warned successfully");
+    } catch (error) {
+      console.error("Error warning product:", error);
+      alert("Failed to send warning");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  // Report Dialog Component
+  // Modified Report Dialog Component
+  const ReportDialog = ({ type, id, onReport }) => {
+    const [isOpen, setIsOpen] = useState(false);
+    const [reason, setReason] = useState("");
+    const [isSubmitting, setIsSubmitting] = useState(false);
+
+    const handleSubmit = async () => {
+      if (!reason.trim()) {
+        alert("Please enter a reason for the warning");
+        return;
+      }
+
+      setIsSubmitting(true);
+      try {
+        if (type === "User") {
+          await axios.post(
+            `${API_BASE_URL}/api/reports/user/${id}`,
+            { reason },
+            {
+              headers: {
+                Authorization: `Bearer ${localStorage.getItem("jwt")}`,
+              },
+            }
+          );
+        } else {
+          await axios.post(
+            `${API_BASE_URL}/api/reports/product/${id}`,
+            { reason },
+            {
+              headers: {
+                Authorization: `Bearer ${localStorage.getItem("jwt")}`,
+              },
+            }
+          );
+        }
+        alert(`${type} warned successfully`);
+        setIsOpen(false);
+        setReason("");
+      } catch (error) {
+        console.error(`Error warning ${type.toLowerCase()}:`, error);
+        alert("Failed to send warning");
+      } finally {
+        setIsSubmitting(false);
+      }
+    };
+
+    return (
+      <>
+        <Button variant="ghost" size="icon" onClick={() => setIsOpen(true)}>
+          <AlertTriangle className="h-5 w-5 text-red-500" />
+        </Button>
+
+        <Dialog open={isOpen} onOpenChange={setIsOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Warn {type}</DialogTitle>
+            </DialogHeader>
+            <div className="py-4">
+              <label className="block text-sm font-medium mb-2">
+                Reason for warning
+              </label>
+              <Textarea
+                value={reason}
+                onChange={(e) => setReason(e.target.value)}
+                placeholder={`Enter reason for warning this ${type.toLowerCase()}...`}
+                className="w-full"
+                disabled={isSubmitting}
+              />
+            </div>
+            <DialogFooter>
+              <Button 
+                variant="outline" 
+                onClick={() => {
+                  setIsOpen(false);
+                  setReason("");
+                }}
+                disabled={isSubmitting}
+              >
+                Cancel
+              </Button>
+              <Button 
+                onClick={handleSubmit}
+                disabled={isSubmitting || !reason.trim()}
+              >
+                {isSubmitting ? "Sending..." : "Send Warning"}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      </>
+    );
+  };
   // Fetch functions
   // Fetch functions with proper error handling
   const fetchUniversities = async () => {
@@ -242,6 +415,17 @@ function AdminDashboard() {
                 <Shield className="h-4 w-4 mr-1" />
                 <span className="hidden sm:inline">Admins</span>
               </button>
+              <button
+                onClick={() => setActiveTab("feedback")}
+                className={`px-3 py-2 rounded-md text-sm flex items-center ${
+                  activeTab === "feedback"
+                    ? "bg-blue-600 text-white"
+                    : "bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200"
+                }`}
+              >
+                <MessageSquare className="h-4 w-4 mr-1" />
+                <span className="hidden sm:inline">Feedback</span>
+              </button>
             </div>
           </div>
         </div>
@@ -397,136 +581,139 @@ function AdminDashboard() {
           </div>
         )}
 
-        {/* Products Tab */}
-        {activeTab === "products" && (
-          <div>
-            <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-6">
-              Manage Products
-            </h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {products.map((product) => (
-                <div
-                  key={product.id}
-                  className="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300"
+ {/* Products Tab Content */}
+{activeTab === "products" && (
+  <div>
+    <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-6">
+      Manage Products
+    </h2>
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+      {products.map((product) => (
+        <div
+          key={product.id}
+          className="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300"
+        >
+          <div className="relative">
+            <img
+              src={
+                product.imageUrls?.[
+                  currentImageIndexes[product.id] || 0
+                ] || "https://placeholder.co/300x200"
+              }
+              alt={product.name}
+              className="w-full h-48 object-cover"
+            />
+            {product.imageUrls?.length > 1 && (
+              <>
+                <button
+                  onClick={() =>
+                    setCurrentImageIndexes((prev) => ({
+                      ...prev,
+                      [product.id]:
+                        ((prev[product.id] || 0) - 1 + product.imageUrls.length) %
+                        product.imageUrls.length,
+                    }))
+                  }
+                  className="absolute left-2 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white rounded-full p-1 transition-colors duration-200"
                 >
-                  <div className="relative">
-                    <img
-                      src={
-                        product.imageUrls?.[
-                          currentImageIndexes[product.id] || 0
-                        ] || "https://placeholder.co/300x200"
-                      }
-                      alt={product.name}
-                      className="w-full h-48 object-cover"
+                  <ChevronLeft className="h-6 w-6" />
+                </button>
+                <button
+                  onClick={() =>
+                    setCurrentImageIndexes((prev) => ({
+                      ...prev,
+                      [product.id]:
+                        ((prev[product.id] || 0) + 1) %
+                        product.imageUrls.length,
+                    }))
+                  }
+                  className="absolute right-2 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white rounded-full p-1 transition-colors duration-200"
+                >
+                  <ChevronRight className="h-6 w-6" />
+                </button>
+                <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1">
+                  {product.imageUrls.map((_, index) => (
+                    <div
+                      key={index}
+                      className={`h-1.5 w-1.5 rounded-full transition-colors duration-200 ${
+                        (currentImageIndexes[product.id] || 0) === index
+                          ? "bg-white"
+                          : "bg-white/50"
+                      }`}
                     />
-                    {product.imageUrls?.length > 1 && (
-                      <>
-                        <button
-                          onClick={() =>
-                            setCurrentImageIndexes((prev) => ({
-                              ...prev,
-                              [product.id]:
-                                ((prev[product.id] || 0) -
-                                  1 +
-                                  product.imageUrls.length) %
-                                product.imageUrls.length,
-                            }))
-                          }
-                          className="absolute left-2 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white rounded-full p-1 transition-colors duration-200"
-                        >
-                          <ChevronLeft className="h-6 w-6" />
-                        </button>
-                        <button
-                          onClick={() =>
-                            setCurrentImageIndexes((prev) => ({
-                              ...prev,
-                              [product.id]:
-                                ((prev[product.id] || 0) + 1) %
-                                product.imageUrls.length,
-                            }))
-                          }
-                          className="absolute right-2 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white rounded-full p-1 transition-colors duration-200"
-                        >
-                          <ChevronRight className="h-6 w-6" />
-                        </button>
-                        <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1">
-                          {product.imageUrls.map((_, index) => (
-                            <div
-                              key={index}
-                              className={`h-1.5 w-1.5 rounded-full transition-colors duration-200 ${
-                                (currentImageIndexes[product.id] || 0) === index
-                                  ? "bg-white"
-                                  : "bg-white/50"
-                              }`}
-                            />
-                          ))}
-                        </div>
-                      </>
-                    )}
-                    <div className="absolute top-2 right-2">
-                      <span
-                        className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                          product.condition === "NEW"
-                            ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
-                            : "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200"
-                        }`}
-                      >
-                        {product.condition}
-                      </span>
-                    </div>
-                  </div>
-                  <div className="p-4">
-                    <div className="flex justify-between items-start mb-2">
-                      <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-                        {product.name}
-                      </h3>
-                      <div className="text-lg font-bold text-blue-600 dark:text-blue-400">
-                        ₹{product.price.toLocaleString("en-IN")}
-                      </div>
-                    </div>
-                    <p className="text-gray-600 dark:text-gray-300 text-sm mb-4">
-                      {product.description}
-                    </p>
-                    <div className="space-y-2">
-                      <div className="flex items-center text-sm">
-                        <Tag className="h-4 w-4 text-gray-400 dark:text-gray-500 mr-2" />
-                        <span className="px-2 py-1 bg-gray-100 dark:bg-gray-700 rounded-md text-gray-700 dark:text-gray-300">
-                          {product.category}
-                        </span>
-                      </div>
-                      <div className="flex items-center text-sm text-gray-600 dark:text-gray-300">
-                        <Clock className="h-4 w-4 text-gray-400 dark:text-gray-500 mr-2" />
-                        <span>
-                          {product.monthsOld}{" "}
-                          {product.monthsOld === 1 ? "month" : "months"} old
-                        </span>
-                      </div>
-                      {product.location && (
-                        <div className="flex items-center text-sm text-gray-600 dark:text-gray-300">
-                          <MapPinIcon className="h-4 w-4 text-gray-400 dark:text-gray-500 mr-2" />
-                          <span>{product.location}</span>
-                        </div>
-                      )}
-                      <div className="flex items-center text-sm text-gray-600 dark:text-gray-300">
-                        <Calendar className="h-4 w-4 text-gray-400 dark:text-gray-500 mr-2" />
-                        <span>
-                          {new Date(product.createdAt).toLocaleDateString(
-                            "en-IN",
-                            {
-                              day: "numeric",
-                              month: "short",
-                              year: "numeric",
-                            }
-                          )}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
+                  ))}
                 </div>
-              ))}
+              </>
+            )}
+            {/* Report icon moved to top right */}
+            <div className="absolute top-2 right-2 z-10">
+              <ReportDialog
+                type="Product"
+                id={product.id}
+                onReport={handleReportProduct}
+              />
             </div>
           </div>
-        )}
+          <div className="p-4">
+            <div className="flex justify-between items-start mb-2">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                {product.name}
+              </h3>
+              <div className="text-lg font-bold text-blue-600 dark:text-blue-400">
+                ₹{product.price.toLocaleString("en-IN")}
+              </div>
+            </div>
+            <p className="text-gray-600 dark:text-gray-300 text-sm mb-4">
+              {product.description}
+            </p>
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center text-sm">
+                  <Tag className="h-4 w-4 text-gray-400 dark:text-gray-500 mr-2" />
+                  <span className="px-2 py-1 bg-gray-100 dark:bg-gray-700 rounded-md text-gray-700 dark:text-gray-300">
+                    {product.category}
+                  </span>
+                </div>
+                {/* Condition badge moved here */}
+                <span
+                  className={`px-2 py-1 rounded-md text-xs font-semibold ${
+                    product.condition === "NEW"
+                      ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
+                      : "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200"
+                  }`}
+                >
+                  {product.condition}
+                </span>
+              </div>
+              <div className="flex items-center text-sm text-gray-600 dark:text-gray-300">
+                <Clock className="h-4 w-4 text-gray-400 dark:text-gray-500 mr-2" />
+                <span>
+                  {product.monthsOld} {product.monthsOld === 1 ? "month" : "months"} old
+                </span>
+              </div>
+              {product.location && (
+                <div className="flex items-center text-sm text-gray-600 dark:text-gray-300">
+                  <MapPinIcon className="h-4 w-4 text-gray-400 dark:text-gray-500 mr-2" />
+                  <span>{product.location}</span>
+                </div>
+              )}
+              <div className="flex items-center text-sm text-gray-600 dark:text-gray-300">
+                <Calendar className="h-4 w-4 text-gray-400 dark:text-gray-500 mr-2" />
+                <span>
+                  {new Date(product.createdAt).toLocaleDateString("en-IN", {
+                    day: "numeric",
+                    month: "short",
+                    year: "numeric",
+                  })}
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+  </div>
+)}
 
         {/* Users Tab */}
         {activeTab === "users" && (
@@ -603,12 +790,19 @@ function AdminDashboard() {
                           </span>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm">
-                          <button
-                            onClick={() => handleToggleAdmin(user.id, false)}
-                            className="text-blue-600 dark:text-blue-400 hover:text-blue-900 dark:hover:text-blue-300"
-                          >
-                            Make Admin
-                          </button>
+                          <div className="flex items-center space-x-4">
+                            <button
+                              onClick={() => handleToggleAdmin(user.id, false)}
+                              className="text-blue-600 dark:text-blue-400 hover:text-blue-900 dark:hover:text-blue-300"
+                            >
+                              Make Admin
+                            </button>
+                            <ReportDialog
+                              type="User"
+                              id={user.id}
+                              onReport={handleReportUser}
+                            />
+                          </div>
                         </td>
                       </tr>
                     ))}
@@ -699,8 +893,45 @@ function AdminDashboard() {
             </div>
           </div>
         )}
+        {/* Feedback Tab Content */}
+        {activeTab === "feedback" && (
+          <div>
+            <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-6">
+              User Feedback
+            </h2>
+            <div className="grid gap-6">
+              {feedback.map((item) => (
+                <div
+                  key={item.id}
+                  className="bg-white dark:bg-gray-800 rounded-lg shadow p-6"
+                >
+                  <div className="flex items-start justify-between mb-4">
+                    <div>
+                      <h3 className="text-lg font-medium text-gray-900 dark:text-white">
+                        {item.userName}
+                      </h3>
+                      <p className="text-sm text-gray-500 dark:text-gray-400">
+                        {new Date(item.createdAt).toLocaleDateString()}
+                      </p>
+                    </div>
+                    <div className="flex items-center">
+                      <ThumbsUp className="h-5 w-5 text-blue-500 mr-2" />
+                      <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                        {item.rating}/5
+                      </span>
+                    </div>
+                  </div>
+                  <p className="text-gray-700 dark:text-gray-300">
+                    {item.comment}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </main>
     </div>
   );
 }
+
 export default AdminDashboard;

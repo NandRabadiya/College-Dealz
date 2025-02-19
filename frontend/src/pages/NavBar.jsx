@@ -35,6 +35,9 @@ const NavBar = ({ onSearch, onSort }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(
     Boolean(localStorage.getItem("jwt"))
   );
+  const [isLoading, setIsLoading] = useState(false);
+const [currentSort, setCurrentSort] = useState("postDate-desc");
+const [currentSearch, setCurrentSearch] = useState("");
   useEffect(() => {
     const checkAuth = () => {
       const token = localStorage.getItem("jwt");
@@ -62,14 +65,25 @@ const NavBar = ({ onSearch, onSort }) => {
     window.dispatchEvent(new Event("authStateChange"));
   };
   // Handle Search Change
-  const handleSearch = (query) => {
-    onSearch(query);  // Pass the search query to the parent component (ProductCard)
+  const handleSearch = async (query) => {
+    setIsLoading(true);
+    try {
+      await onSearch(query);
+      setCurrentSearch(query);
+    } finally {
+      setIsLoading(false);
+    }
   };
-
-  // Handle Sort Change
-  const handleSort = (field) => {
-    const [newSortField, newSortDir] = field.split('-');
-    onSort(newSortField, newSortDir);  // Pass the sort parameters to ProductCard
+  
+  const handleSort = async (value) => {
+    setIsLoading(true);
+    try {
+      const [field, dir] = value.split('-');
+      await onSort(field, dir);
+      setCurrentSort(value);
+    } finally {
+      setIsLoading(false);
+    }
   };
   const navigate = useNavigate();
   const location = useLocation();
@@ -226,9 +240,17 @@ const AuthSection = ({ isMobile = false }) => (
       >
         <Label>College</Label>
       </div>
-      <ProductSort onSort={handleSort} />
-      <ProductSearch onSearch={handleSearch} />
-    </div>
+      <ProductSort 
+      onSort={handleSort} 
+      currentSort={currentSort}
+      isLoading={isLoading}
+    />
+    <ProductSearch 
+      onSearch={handleSearch} 
+      isAuthenticated={isAuthenticated}
+      isLoading={isLoading}
+      currentSearch={currentSearch}
+    /></div>
   );
 
   const ActionButtons = ({ isMobile = false }) => (

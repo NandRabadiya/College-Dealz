@@ -36,12 +36,17 @@ const CustomSlider = React.forwardRef(({ className, ...props }, ref) => (
 
 CustomSlider.displayName = "CustomSlider";
 
-const FilterComponent = ({ onFilterChange, className = "" }) => {
-  const [priceRange, setPriceRange] = useState([0, 10000]);
+const FilterComponent = ({ onFilterChange,currentFilters, className = "" }) => {
+  const [priceRange, setPriceRange] = useState([0, 5000]);
   const [minInputValue, setMinInputValue] = useState("0");
-  const [maxInputValue, setMaxInputValue] = useState("10000");
+  const [maxInputValue, setMaxInputValue] = useState("5000");
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [isOpen, setIsOpen] = useState(false);
+  const [filters, setFilters] = useState({
+    minPrice: currentFilters?.minPrice || "",
+    maxPrice: currentFilters?.maxPrice || "",
+    categories: currentFilters?.categories || "",
+  });
 
   const handleSliderChange = (value) => {
     setPriceRange(value);
@@ -94,7 +99,7 @@ const FilterComponent = ({ onFilterChange, className = "" }) => {
     }
 
     let numValue = Number(value);
-    numValue = Math.max(0, Math.min(10000, numValue));
+    numValue = Math.max(0, Math.min(5000, numValue));
     
     if (type === 'min') {
       setMinInputValue(numValue.toString());
@@ -109,23 +114,25 @@ const FilterComponent = ({ onFilterChange, className = "" }) => {
     setSelectedCategory(category);
   };
 
-  const applyFilters = () => {
+  const applyFilters = (e) => {
+    e.preventDefault();
     onFilterChange({
-      minPrice: priceRange[0],
-      maxPrice: priceRange[1],
-      categories: selectedCategory === "All" ? "" : selectedCategory
+      ...filters,
+      minPrice: filters.minPrice || 0,
+      maxPrice: filters.maxPrice || 5000,
+      categories: selectedCategory === "All" ? "" : filters.categories
     });
     setIsOpen(false);
   };
 
   const clearFilters = () => {
-    setPriceRange([0, 10000]);
+    setPriceRange([0, 5000]);
     setMinInputValue("0");
-    setMaxInputValue("10000");
+    setMaxInputValue("5000");
     setSelectedCategory("All");
     onFilterChange({
       minPrice: 0,
-      maxPrice: 10000,
+      maxPrice: 5000,
       categories: ""
     });
   };
@@ -145,7 +152,7 @@ const FilterComponent = ({ onFilterChange, className = "" }) => {
                 onChange={handleMinInputChange}
                 onBlur={() => handleInputBlur('min')}
                 min={0}
-                max={10000}
+                max={5000}
                 className="mt-1"
               />
             </div>
@@ -158,7 +165,7 @@ const FilterComponent = ({ onFilterChange, className = "" }) => {
                 onChange={handleMaxInputChange}
                 onBlur={() => handleInputBlur('max')}
                 min={0}
-                max={10000}
+                max={5000}
                 className="mt-1"
               />
             </div>
@@ -166,8 +173,8 @@ const FilterComponent = ({ onFilterChange, className = "" }) => {
           <CustomSlider 
             value={priceRange}
             min={0}
-            max={10000}
-            step={100}
+            max={5000}
+            step={10}
             onValueChange={handleSliderChange}
             className="w-full"
           />

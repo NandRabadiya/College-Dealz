@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Pencil, Trash2, Plus } from "lucide-react";
+import { Pencil, Trash2, Plus, ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -19,6 +19,7 @@ const UserDeals = () => {
   const [editingDeal, setEditingDeal] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [currentImageIndexes, setCurrentImageIndexes] = useState({});
 
   useEffect(() => {
     fetchUserDeals();
@@ -41,67 +42,62 @@ const UserDeals = () => {
 
       if (response.ok) {
         const data = await response.json();
-        // For each product, fetch its images
         const dealsWithImages = await Promise.all(
           data.map(async (deal) => {
-            console.log("Processing deal:", deal);
             const dealId = deal.id || deal.product_id;
             if (!dealId) {
               console.warn("Deal missing ID:", deal);
               return { ...deal, images: [] };
             }
-            
-          // If the deal already has imageUrls, use those
-          if (deal.imageUrls && deal.imageUrls.length > 0) {
-            return {
-              ...deal,
-              id: dealId,
-              images: deal.imageUrls.map((url, index) => ({
-                id: `${dealId}-${index}`,
-                url: url,
-                fileName: `image-${index}`
-              }))
-            };
-          }
 
-          // Otherwise, try to fetch images from the API
-          try {
-            const imagesResponse = await fetch(
-              `${API_BASE_URL}/api/images/product/${dealId}`,
-              {
-                headers: {
-                  Authorization: `Bearer ${token}`,
-                },
-              }
-            );
-            if (imagesResponse.ok) {
-              const images = await imagesResponse.json();
+            if (deal.imageUrls && deal.imageUrls.length > 0) {
               return {
                 ...deal,
-                id: dealId, // Ensure consistent id field
-                images: images
-                .map((img) => {
-                  // Check if we have an S3 URL first
-                  if (img.s3_url) {
-                    return {
-                      id: img.image_id,
-                      url: img.s3_url,
-                      fileName: img.file_name
-                    };
-                  }
-                  return null;
-                })
-                .filter(Boolean) // Remove any null entries
-            };
-          }
-          console.warn(`Failed to fetch images for deal ${dealId}`);
-          return { ...deal, images: [] };
-        } catch (error) {
-          console.error(`Error fetching images for deal ${dealId}:`, error);
-          return { ...deal, images: [] };
-        }
-      })
-    );
+                id: dealId,
+                images: deal.imageUrls.map((url, index) => ({
+                  id: `${dealId}-${index}`,
+                  url: url,
+                  fileName: `image-${index}`
+                }))
+              };
+            }
+
+            try {
+              const imagesResponse = await fetch(
+                `${API_BASE_URL}/api/images/product/${dealId}`,
+                {
+                  headers: {
+                    Authorization: `Bearer ${token}`,
+                  },
+                }
+              );
+              if (imagesResponse.ok) {
+                const images = await imagesResponse.json();
+                return {
+                  ...deal,
+                  id: dealId,
+                  images: images
+                    .map((img) => {
+                      if (img.s3_url) {
+                        return {
+                          id: img.image_id,
+                          url: img.s3_url,
+                          fileName: img.file_name
+                        };
+                      }
+                      return null;
+                    })
+                    .filter(Boolean)
+                };
+              }
+              console.warn(`Failed to fetch images for deal ${dealId}`);
+              return { ...deal, images: [] };
+            } catch (error) {
+              console.error(`Error fetching images for deal ${dealId}:`, error);
+              return { ...deal, images: [] };
+            }
+          })
+        );
         setDeals(dealsWithImages);
         setError(null);
       } else if (response.status === 401) {
@@ -118,7 +114,7 @@ const UserDeals = () => {
   };
 
   const handleDeleteDeal = async (dealId) => {
-    if (window.confirm("Are you sure you want to delete this deal?")) {
+    if (window.confirm("Are you sure you want to remove this deal?")) {
       try {
         const token = localStorage.getItem("jwt");
         const response = await fetch(`${API_BASE_URL}/api/products/${dealId}`, {
@@ -128,9 +124,7 @@ const UserDeals = () => {
           },
         });
         if (response.ok) {
-          // Immediately update local state
           setDeals(deals.filter((deal) => deal.id !== dealId));
-          // Then refresh from server to ensure synchronization
           await fetchUserDeals();
         } else {
           const errorData = await response.json();
@@ -144,33 +138,75 @@ const UserDeals = () => {
 
   const renderDealImage = (deal) => {
     if (deal.images && deal.images.length > 0) {
+      const currentImageIndex = currentImageIndexes[deal.id] || 0;
       return (
-        <img
-          src={deal.images[0].url}
-          alt={deal.name}
-          className="w-full h-48 object-cover rounded-t-lg"
-          onError={(e) => {
-            e.target.onerror = null;
-            // You can replace this with an actual placeholder image path
-            e.target.src = "account.png";
-          }}
-        />
+        <div className="relative">
+          <img
+            src={deal.images[currentImageIndex].url}
+            alt={deal.name}
+            className="w-full h-48 object-cover"
+            onError={(e) => {
+              e.target.onerror = null;
+              e.target.src = "account.png";
+            }}
+          />
+          {deal.images.length > 1 && (
+            <>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setCurrentImageIndexes((prev) => ({
+                    ...prev,
+                    [deal.id]: ((prev[deal.id] || 0) - 1 + deal.images.length) % deal.images.length,
+                  }));
+                }}
+                className="absolute left-2 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white rounded-full p-1 transition-colors duration-200"
+              >
+                <ChevronLeft className="h-6 w-6" />
+              </button>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setCurrentImageIndexes((prev) => ({
+                    ...prev,
+                    [deal.id]: ((prev[deal.id] || 0) + 1) % deal.images.length,
+                  }));
+                }}
+                className="absolute right-2 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white rounded-full p-1 transition-colors duration-200"
+              >
+                <ChevronRight className="h-6 w-6" />
+              </button>
+              <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1">
+                {deal.images.map((_, index) => (
+                  <div
+                    key={index}
+                    className={`h-1.5 w-1.5 rounded-full transition-colors duration-200 ${
+                      currentImageIndex === index ? "bg-white" : "bg-white/50"
+                    }`}
+                  />
+                ))}
+              </div>
+            </>
+          )}
+        </div>
       );
     }
     return (
-      <div className="w-full h-48 bg-muted flex items-center justify-center rounded-t-lg">
+      <div className="w-full h-48 bg-muted flex items-center justify-center">
         <ImageIcon className="h-12 w-12 text-muted-foreground" />
       </div>
     );
   };
+
   const handleEditDeal = (deal) => {
     const editDeal = {
       ...deal,
-      id: deal.id, // Ensure we're using product_id for editing
+      id: deal.id,
     };
     setEditingDeal(editDeal);
     setIsAddingDeal(true);
   };
+
   const handleDealUpdate = async (success = false) => {
     if (success) {
       await fetchUserDeals();
@@ -221,16 +257,18 @@ const UserDeals = () => {
               key={deal.id || `deal-${index}`}
               className="hover:shadow-lg transition-shadow"
             >
-              <CardHeader className="relative">
+              <CardHeader className="relative p-0">
                 {renderDealImage(deal)}
-                <Badge
-                  className="absolute top-2 right-2"
-                  variant={deal.condition === "new" ? "default" : "secondary"}
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="absolute top-2 right-2 bg-white/80 hover:bg-white/90"
+                  onClick={() => handleEditDeal(deal)}
                 >
-                  {deal.condition}
-                </Badge>
+                  <Pencil className="h-4 w-4" />
+                </Button>
               </CardHeader>
-              <CardContent className="space-y-2">
+              <CardContent className="space-y-2 pt-4">
                 <CardTitle>{deal.name}</CardTitle>
                 <p className="text-xl font-bold text-primary">
                   {formatPrice(deal.price)}
@@ -238,16 +276,19 @@ const UserDeals = () => {
                 <p className="text-sm text-muted-foreground line-clamp-2">
                   {deal.description}
                 </p>
-                <Badge variant="outline">{deal.category}</Badge>
+                <div className="flex flex-wrap gap-2">
+                  <Badge variant="outline">{deal.category}</Badge>
+                  <Badge variant="outline">{deal.condition}</Badge>
+                </div>
               </CardContent>
               <CardFooter className="justify-between">
                 <Button
-                  variant="ghost"
+                  variant="secondary"
                   size="sm"
                   className="flex items-center gap-2"
-                  onClick={() => handleEditDeal(deal)}
+                  onClick={() => {/* Mark as sold function will be added later */}}
                 >
-                  <Pencil className="h-4 w-4" /> Edit
+                  Mark as Sold
                 </Button>
                 <Button
                   variant="ghost"
@@ -255,7 +296,7 @@ const UserDeals = () => {
                   className="flex items-center gap-2 text-destructive"
                   onClick={() => handleDeleteDeal(deal.id)}
                 >
-                  <Trash2 className="h-4 w-4" /> Delete
+                  <Trash2 className="h-4 w-4" /> Remove
                 </Button>
               </CardFooter>
             </Card>
