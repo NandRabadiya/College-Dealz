@@ -21,6 +21,7 @@ import Wantlist from "./pages/wantlist/Wantlist";
 import OAuth2RedirectHandler from "./redux/Auth/OAuth2RedirectHandler";
 import Messages from "./pages/chat/Messages";
 import UniversitySelector from "./pages/UniversitySelector";
+import PublicProductDetails from "./pages/product/PublicProductDetails";
 
 // PrivateRoute component
 const PrivateRoute = ({ element, isLoggedIn, redirectTo }) => {
@@ -97,6 +98,7 @@ function App() {
             element={<Authenticate isOpen={true} />}
           />
           <Route path="/admin" element={<AdminDashboard />} />
+          <Route path="/product/public/pro" element={<PublicProductDetails />} />
           {/* Protected Route */}
           <Route path="/oauth2/redirect" element={<OAuth2RedirectHandler />} />
           <Route
