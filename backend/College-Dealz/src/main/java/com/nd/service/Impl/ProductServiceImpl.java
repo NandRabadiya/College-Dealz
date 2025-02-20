@@ -1,6 +1,7 @@
 package com.nd.service.Impl;
 
 import com.nd.dto.InterestedBuyerDto;
+import com.nd.dto.ShareProductDto;
 import com.nd.entities.*;
 import com.nd.dto.ProductDto;
 import com.nd.enums.Category;
@@ -290,6 +291,8 @@ public class ProductServiceImpl implements ProductService {
 
         ProductDto productDto= mapToDto(savedProduct);
 
+        deleteProduct(productId);
+
         return productDto;
     }
 
@@ -450,5 +453,20 @@ public class ProductServiceImpl implements ProductService {
         return productDto;
     }
 
+    public ShareProductDto getsharedProduct(int id ){
+
+        ProductDto product =getProductById(id);
+
+        ShareProductDto shareProductDto = new ShareProductDto();
+
+        shareProductDto.setProduct_id(product.getId());
+        shareProductDto.setProduct_name(product.getName());
+        shareProductDto.setProduct_description(product.getDescription());
+        shareProductDto.setProduct_price(product.getPrice());
+        shareProductDto.setImage_urls(product.getImageUrls());
+
+        return shareProductDto;
+
+    }
 
 }

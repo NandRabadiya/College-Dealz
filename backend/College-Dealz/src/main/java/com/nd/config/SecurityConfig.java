@@ -26,6 +26,7 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import java.util.Collection;
 import java.util.Arrays;
+import java.util.List;
 
 @Configuration
 @EnableWebSecurity
@@ -50,17 +51,28 @@ public class SecurityConfig {
 
     }
 
+    List<String> publicUrls = List.of(
+            "/login/**",
+            "/register/**",
+            "/refresh_token/**",
+            "/socket.io/**",
+            "/api/universities/public**",
+            "/api/products/public/university/**",
+            "/send-otp**",
+            "/verify**",
+            "/resend-otp**",
+            "/api/products/public/shared-product/**"
+    );
+
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
          http
                  .cors(cors->cors.configurationSource(corsConfigurationSource()))
                 .csrf(AbstractHttpConfigurer::disable)
-                .authorizeHttpRequests(
-                        req->req.requestMatchers("/login/**","/register/**", "/refresh_token/**","/socket.io/**","/api/universities/public**",  // Allow public access to universities endpoint
-                                        "/api/products/public/university/**" , "/send-otp**","/verify**","/resend-otp**" )
-                                .permitAll()
-                                .requestMatchers("/api/admin_only/**")
+                 .authorizeHttpRequests(req ->
+                         req.requestMatchers(publicUrls.toArray(String[]::new))
+                                 .permitAll().requestMatchers("/api/admin_only/**")
                                .hasAuthority("ADMIN")
                                 .anyRequest()
                                 .authenticated()

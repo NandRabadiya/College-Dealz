@@ -3,6 +3,7 @@ package com.nd.controller;
 import com.nd.dto.InterestedBuyerDto;
 import com.nd.dto.ProductDto;
 import com.nd.dto.ProductSortFilterRequest;
+import com.nd.dto.ShareProductDto;
 import com.nd.exceptions.ProductException;
 import com.nd.service.JwtService;
 import com.nd.service.ProductService;
@@ -188,6 +189,14 @@ public class ProductController {
     public ResponseEntity<List<InterestedBuyerDto>> getInterestedBuyers(@PathVariable int productId) {
         List<InterestedBuyerDto> buyers = productService.getInterestedBuyers(productId);
         return ResponseEntity.ok(buyers);
+    }
+
+    @GetMapping("/public/shared-product/{productId}")
+    public ResponseEntity<ShareProductDto> getSharedProduct(@PathVariable int productId) {
+
+        ShareProductDto shareProductDto=productService.getsharedProduct(productId);
+
+        return ResponseEntity.ok(shareProductDto);
     }
 
 }
