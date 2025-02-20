@@ -1,5 +1,18 @@
 import React, { useState, useEffect } from "react";
-import { Pencil, Trash2, Plus, ChevronLeft, ChevronRight } from "lucide-react";
+import {
+  Pencil,
+  Trash2,
+  Plus,
+  ChevronLeft,
+  ChevronRight,
+  Share2,
+  X,
+  MessageSquare,
+  Facebook,
+  Mail,
+  Link,
+  Image as ImageIcon,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -13,6 +26,7 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogFooter,
 } from "@/components/ui/dialog";
 import {
   DropdownMenu,
@@ -22,6 +36,8 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Select,
   SelectContent,
@@ -33,7 +49,6 @@ import { Badge } from "@/components/ui/badge";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import PostADeal from ".././product/PostADeal";
 import { API_BASE_URL } from "../../pages/Api/api";
-import { Image as ImageIcon } from "lucide-react";
 
 const UserDeals = () => {
   const [deals, setDeals] = useState([]);
@@ -52,6 +67,13 @@ const UserDeals = () => {
     soldToUniversityStudent: "no",
     sellingReason: "",
   });
+  const [interestedBuyers, setInterestedBuyers] = useState([]);
+  const [selectedBuyer, setSelectedBuyer] = useState(null);
+  const [removeDialogOpen, setRemoveDialogOpen] = useState(false);
+  const [repostDialogOpen, setRepostDialogOpen] = useState(false);
+  const [removalReason, setRemovalReason] = useState("");
+  const [understoodRepost, setUnderstoodRepost] = useState(false);
+  const [currentDealId, setCurrentDealId] = useState(null);
 
   useEffect(() => {
     fetchUserDeals();
@@ -89,8 +111,8 @@ const UserDeals = () => {
                 images: deal.imageUrls.map((url, index) => ({
                   id: `${dealId}-${index}`,
                   url: url,
-                  fileName: `image-${index}`
-                }))
+                  fileName: `image-${index}`,
+                })),
               };
             }
 
@@ -114,12 +136,12 @@ const UserDeals = () => {
                         return {
                           id: img.image_id,
                           url: img.s3_url,
-                          fileName: img.file_name
+                          fileName: img.file_name,
                         };
                       }
                       return null;
                     })
-                    .filter(Boolean)
+                    .filter(Boolean),
                 };
               }
               console.warn(`Failed to fetch images for deal ${dealId}`);
@@ -145,28 +167,153 @@ const UserDeals = () => {
     }
   };
 
-  const handleDeleteDeal = async (dealId) => {
-    if (window.confirm("Are you sure you want to remove this deal?")) {
-      try {
-        const token = localStorage.getItem("jwt");
-        const response = await fetch(`${API_BASE_URL}/api/products/${dealId}`, {
-          method: "DELETE",
+  const fetchInterestedBuyers = async (dealId) => {
+    try {
+      const token = localStorage.getItem("jwt");
+      const response = await fetch(
+        `${API_BASE_URL}/api/interested-buyers/${dealId}`,
+        {
           headers: {
             Authorization: `Bearer ${token}`,
           },
-        });
-        if (response.ok) {
-          setDeals(deals.filter((deal) => deal.id !== dealId));
-          await fetchUserDeals();
-        } else {
-          const errorData = await response.json();
-          console.error("Delete failed:", errorData);
         }
-      } catch (error) {
-        console.error("Error deleting deal:", error);
+      );
+      if (response.ok) {
+        const buyers = await response.json();
+        setInterestedBuyers(buyers);
       }
+    } catch (error) {
+      console.error("Error fetching interested buyers:", error);
     }
   };
+
+  const handleRepost = async () => {
+    if (!understoodRepost) return;
+
+    try {
+      const token = localStorage.getItem("jwt");
+      const response = await fetch(
+        `${API_BASE_URL}/api/products/repost/${currentDealId}`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (response.ok) {
+        await fetchUserDeals();
+        setRepostDialogOpen(false);
+        setUnderstoodRepost(false);
+      }
+    } catch (error) {
+      console.error("Error reposting deal:", error);
+    }
+  };
+
+  const handleRemove = async () => {
+    try {
+      const token = localStorage.getItem("jwt");
+      const response = await fetch(
+        `${API_BASE_URL}/api/products/remove/${currentDealId}`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ reason: removalReason }),
+        }
+      );
+
+      if (response.ok) {
+        setDeals(deals.filter((deal) => deal.id !== currentDealId));
+        setRemoveDialogOpen(false);
+        setRemovalReason("");
+      }
+    } catch (error) {
+      console.error("Error removing deal:", error);
+    }
+  };
+
+  const handleShare = (deal, platform, e) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    const productUrl = `${window.location.origin}/product/public/${deal.id}`;
+    const message = `Check out this product: ${deal.name}`;
+
+    switch (platform) {
+      case "whatsapp":
+        window.open(
+          `https://wa.me/?text=${encodeURIComponent(message + " " + productUrl)}`,
+          "_blank"
+        );
+        break;
+      case "facebook":
+        window.open(
+          `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(
+            productUrl
+          )}`,
+          "_blank"
+        );
+        break;
+      case "email":
+        window.open(
+          `mailto:?subject=${encodeURIComponent(
+            deal.name
+          )}&body=${encodeURIComponent(message + "\n\n" + productUrl)}`,
+          "_blank"
+        );
+        break;
+      case "copy":
+        navigator.clipboard.writeText(productUrl).then(() => {
+          alert("Link copied to clipboard!");
+        });
+        break;
+      default:
+        break;
+    }
+  };
+
+  const handleEditDeal = (deal, e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const editDeal = {
+      ...deal,
+      id: deal.id,
+    };
+    setEditingDeal(editDeal);
+    setIsAddingDeal(true);
+  };
+
+  const handleSoldButtonClick = (deal, e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setSelectedDeal(deal);
+  };
+
+  const handleSoldTypeSelect = (type, e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setSoldType(type);
+    setSoldDialogOpen(true);
+  };
+
+  const handleDealUpdate = async (success = false) => {
+    if (success) {
+      await fetchUserDeals();
+    }
+    setIsAddingDeal(false);
+    setEditingDeal(null);
+  };
+
+  const formatPrice = (price) =>
+    new Intl.NumberFormat("en-IN", {
+      style: "currency",
+      currency: "INR",
+    }).format(price);
 
   const renderDealImage = (deal) => {
     if (deal.images && deal.images.length > 0) {
@@ -176,7 +323,7 @@ const UserDeals = () => {
           <img
             src={deal.images[currentImageIndex].url}
             alt={deal.name}
-            className="w-full h-48 object-cover"
+            className="w-full h-48 object-cover rounded-t-lg"
             onError={(e) => {
               e.target.onerror = null;
               e.target.src = "account.png";
@@ -186,10 +333,13 @@ const UserDeals = () => {
             <>
               <button
                 onClick={(e) => {
+                  e.preventDefault();
                   e.stopPropagation();
                   setCurrentImageIndexes((prev) => ({
                     ...prev,
-                    [deal.id]: ((prev[deal.id] || 0) - 1 + deal.images.length) % deal.images.length,
+                    [deal.id]:
+                      ((prev[deal.id] || 0) - 1 + deal.images.length) %
+                      deal.images.length,
                   }));
                 }}
                 className="absolute left-2 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white rounded-full p-1 transition-colors duration-200"
@@ -198,6 +348,7 @@ const UserDeals = () => {
               </button>
               <button
                 onClick={(e) => {
+                  e.preventDefault();
                   e.stopPropagation();
                   setCurrentImageIndexes((prev) => ({
                     ...prev,
@@ -224,236 +375,424 @@ const UserDeals = () => {
       );
     }
     return (
-      <div className="w-full h-48 bg-muted flex items-center justify-center">
+      <div className="w-full h-48 bg-muted flex items-center justify-center rounded-t-lg">
         <ImageIcon className="h-12 w-12 text-muted-foreground" />
       </div>
     );
   };
 
-  const handleEditDeal = (deal) => {
-    const editDeal = {
-      ...deal,
-      id: deal.id,
+  const handleSoldFormSubmit = async (e) => {
+    e.preventDefault();
+    const formData = {
+      productId: selectedDeal.id,
+      soldType,
+      ...soldFormData,
     };
-    setEditingDeal(editDeal);
-    setIsAddingDeal(true);
-  };
-
-  const handleDealUpdate = async (success = false) => {
-    if (success) {
-      await fetchUserDeals();
-    }
-    setIsAddingDeal(false);
-    setEditingDeal(null);
-  };
-
-  const formatPrice = (price) =>
-    new Intl.NumberFormat("en-IN", {
-      style: "currency",
-      currency: "INR",
-    }).format(price);
-
-    const handleSoldButtonClick = (deal) => {
-      setSelectedDeal(deal);
-    };
-  
-    const handleSoldTypeSelect = (type) => {
-      setSoldType(type);
-      setSoldDialogOpen(true);
-    };
-  
-    const handleSoldFormSubmit = async (e) => {
-      e.preventDefault();
-      const formData = {
-        productId: selectedDeal.id,
-        soldType,
-        ...soldFormData,
-      };
-      await handleMarkAsSold(formData);
-    };
-      // Mock function to simulate marking a deal as sold
-  const handleMarkAsSold = async (dealData) => {
     try {
-      // In the real implementation, this would be an API call
-      console.log("Marking deal as sold with data:", dealData);
-      
-      // Simulate API success - update the local deals state
-      setDeals(prevDeals => 
-        prevDeals.map(deal => 
-          deal.id === selectedDeal.id 
-            ? { ...deal, status: 'SOLD', soldDetails: dealData }
-            : deal
-        )
-      );
-
-      // Close dialog and reset form
-      setSoldDialogOpen(false);
-      setSoldType(null);
-      setSelectedDeal(null);
-      setSoldFormData({
-        buyerEmail: "",
-        soldPrice: "",
-        soldDate: "",
-        soldToUniversityStudent: "no",
-        sellingReason: "",
+      const token = localStorage.getItem("jwt");
+      const response = await fetch(`${API_BASE_URL}/api/products/mark-sold`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
       });
+
+      if (response.ok) {
+        await fetchUserDeals();
+        setSoldDialogOpen(false);
+        setSoldType(null);
+        setSelectedDeal(null);
+        setSoldFormData({
+          buyerEmail: "",
+          soldPrice: "",
+          soldDate: "",
+          soldToUniversityStudent: "no",
+          sellingReason: "",
+        });
+      }
     } catch (error) {
       console.error("Error marking deal as sold:", error);
     }
   };
-    const renderSoldForm = () => {
-      if (soldType === "platform") {
-        return (
-          <form onSubmit={handleSoldFormSubmit} className="space-y-4">
-            <div>
-              <Label htmlFor="buyerEmail">Buyer Email</Label>
-              <Input
-                id="buyerEmail"
-                value={soldFormData.buyerEmail}
-                onChange={(e) =>
-                  setSoldFormData({ ...soldFormData, buyerEmail: e.target.value })
-                }
-                required
-              />
-            </div>
-            <div>
-              <Label htmlFor="soldPrice">Sold Price</Label>
-              <Input
-                id="soldPrice"
-                type="number"
-                value={soldFormData.soldPrice}
-                onChange={(e) =>
-                  setSoldFormData({ ...soldFormData, soldPrice: e.target.value })
-                }
-                required
-              />
-            </div>
-            <div>
-              <Label htmlFor="soldDate">Sell Date</Label>
-              <Input
-                id="soldDate"
-                type="date"
-                value={soldFormData.soldDate}
-                onChange={(e) =>
-                  setSoldFormData({ ...soldFormData, soldDate: e.target.value })
-                }
-                required
-              />
-            </div>
-            <Button type="submit" className="w-full">Submit</Button>
-          </form>
-        );
-      }
-  
-      if (soldType === "outside") {
-        return (
-          <form onSubmit={handleSoldFormSubmit} className="space-y-4">
-            <div>
-              <Label>Sold to University Student?</Label>
-              <RadioGroup
-                value={soldFormData.soldToUniversityStudent}
-                onValueChange={(value) =>
-                  setSoldFormData({
-                    ...soldFormData,
-                    soldToUniversityStudent: value,
-                  })
-                }
-                className="flex gap-4"
-              >
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="yes" id="yes" />
-                  <Label htmlFor="yes">Yes</Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="no" id="no" />
-                  <Label htmlFor="no">No</Label>
-                </div>
-              </RadioGroup>
-            </div>
-            <div>
-              <Label htmlFor="sellingReason">Reason for Selling Outside</Label>
-              <Input
-                id="sellingReason"
-                value={soldFormData.sellingReason}
-                onChange={(e) =>
-                  setSoldFormData({
-                    ...soldFormData,
-                    sellingReason: e.target.value,
-                  })
-                }
-                required
-              />
-            </div>
-            <div>
-              <Label htmlFor="soldPrice">Sold Price</Label>
-              <Input
-                id="soldPrice"
-                type="number"
-                value={soldFormData.soldPrice}
-                onChange={(e) =>
-                  setSoldFormData({ ...soldFormData, soldPrice: e.target.value })
-                }
-                required
-              />
-            </div>
-            <div>
-              <Label htmlFor="soldDate">Sell Date</Label>
-              <Input
-                id="soldDate"
-                type="date"
-                value={soldFormData.soldDate}
-                onChange={(e) =>
-                  setSoldFormData({ ...soldFormData, soldDate: e.target.value })
-                }
-                required
-              />
-            </div>
-            <Button type="submit" className="w-full">Submit</Button>
-          </form>
-        );
-      }
-  
-      return null;
-    };
 
-      // Replace the existing CardFooter in the deal card with this:
-      const renderCardFooter = (deal) => (
-        <CardFooter className="justify-between">
+  const renderSoldForm = () => {
+    if (soldType === "platform") {
+      return (
+        <form onSubmit={handleSoldFormSubmit} className="space-y-4">
+          <div>
+            <Label htmlFor="buyerSelect">Select Buyer</Label>
+            <Select
+              value={selectedBuyer}
+              onValueChange={setSelectedBuyer}
+              required
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select a buyer" />
+              </SelectTrigger>
+              <SelectContent>
+                {interestedBuyers.map((buyer) => (
+                  <SelectItem key={buyer.buyerId} value={buyer.buyerId}>
+                    {buyer.buyerName} ({buyer.buyerEmail})
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="text-center text-sm text-muted-foreground">OR</div>
+          <div>
+            <Label htmlFor="buyerEmail">Buyer Email</Label>
+            <Input
+              id="buyerEmail"
+              value={soldFormData.buyerEmail}
+              onChange={(e) =>
+                setSoldFormData({ ...soldFormData, buyerEmail: e.target.value })
+              }
+            />
+          </div>
+          <div>
+            <Label htmlFor="soldPrice">Sold Price</Label>
+            <Input
+              id="soldPrice"
+              type="number"
+              value={soldFormData.soldPrice}
+              onChange={(e) =>
+                setSoldFormData({ ...soldFormData, soldPrice: e.target.value })
+              }
+              required
+            />
+          </div>
+          <div>
+            <Label htmlFor="soldDate">Sell Date</Label>
+            <Input
+              id="soldDate"
+              type="date"
+              value={soldFormData.soldDate}
+              onChange={(e) =>
+                setSoldFormData({ ...soldFormData, soldDate: e.target.value })
+              }
+              required
+            />
+          </div>
+          <Button type="submit" className="w-full">
+            Submit
+          </Button>
+        </form>
+      );
+    }
+
+    if (soldType === "outside") {
+      return (
+        <form onSubmit={handleSoldFormSubmit} className="space-y-4">
+          <div>
+            <Label>Sold to University Student?</Label>
+            <RadioGroup
+              value={soldFormData.soldToUniversityStudent}
+              onValueChange={(value) =>
+                setSoldFormData({
+                  ...soldFormData,
+                  soldToUniversityStudent: value,
+                })
+              }
+              className="flex gap-4"
+            >
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="yes" id="yes" />
+                <Label htmlFor="yes">Yes</Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="no" id="no" />
+                <Label htmlFor="no">No</Label>
+              </div>
+            </RadioGroup>
+          </div>
+          <div>
+            <Label htmlFor="sellingReason">Reason for Selling Outside</Label>
+            <Input
+              id="sellingReason"
+              value={soldFormData.sellingReason}
+              onChange={(e) =>
+                setSoldFormData({
+                  ...soldFormData,
+                  sellingReason: e.target.value,
+                })
+              }
+              required
+            />
+          </div>
+          <div>
+            <Label htmlFor="soldPrice">Sold Price</Label>
+            <Input
+              id="soldPrice"
+              type="number"
+              value={soldFormData.soldPrice}
+              onChange={(e) =>
+                setSoldFormData({ ...soldFormData, soldPrice: e.target.value })
+              }
+              required
+            />
+          </div>
+          <div>
+            <Label htmlFor="soldDate">Sell Date</Label>
+            <Input
+              id="soldDate"
+              type="date"
+              value={soldFormData.soldDate}
+              onChange={(e) =>
+                setSoldFormData({ ...soldFormData, soldDate: e.target.value })
+              }
+              required
+            />
+          </div>
+          <Button type="submit" className="w-full">
+            Submit
+          </Button>
+        </form>
+      );
+    }
+
+    return null;
+  };
+
+  const ProductCard = ({ deal }) => (
+    <Card className="flex flex-col h-full hover:shadow-lg transition-shadow duration-300">
+      <CardHeader className="relative p-0">
+        {renderDealImage(deal)}
+        <Button
+          variant="ghost"
+          size="sm"
+          className="absolute top-2 right-2 bg-white/80 hover:bg-white/90"
+          onClick={(e) => handleEditDeal(deal, e)}
+        >
+          <Pencil className="h-4 w-4" />
+        </Button>
+      </CardHeader>
+
+      <CardContent className="flex-grow space-y-2 pt-4">
+        <CardTitle className="line-clamp-1">{deal.name}</CardTitle>
+        <p className="text-xl font-bold text-primary">
+          {formatPrice(deal.price)}
+        </p>
+        <p className="text-sm text-muted-foreground line-clamp-2">
+          {deal.description}
+        </p>
+        <div className="flex flex-wrap gap-2">
+          <Badge variant="outline">{deal.category}</Badge>
+          <Badge variant="outline">{deal.condition}</Badge>
+        </div>
+      </CardContent>
+
+      <CardFooter className="grid grid-cols-4 gap-2 p-4">
+        <div className="col-span-3 flex gap-2">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button
-                variant="secondary"
-                size="sm"
+              <Button 
+                variant="secondary" 
+                className="flex-1"
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                }}
               >
                 Mark as Sold
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent>
-              <DropdownMenuItem onClick={() => {
-                handleSoldButtonClick(deal);
-                handleSoldTypeSelect("platform");
-              }}>
+            <DropdownMenuContent align="center" className="w-48">
+              <DropdownMenuItem 
+                onClick={(e) => {
+                  handleSoldButtonClick(deal, e);
+                  fetchInterestedBuyers(deal.id);
+                  handleSoldTypeSelect("platform", e);
+                }}
+              >
                 Sold on Platform
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => {
-                handleSoldButtonClick(deal);
-                handleSoldTypeSelect("outside");
-              }}>
+              <DropdownMenuItem 
+                onClick={(e) => {
+                  handleSoldButtonClick(deal, e);
+                  handleSoldTypeSelect("outside", e);
+                }}
+              >
                 Sold Outside
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
-          <Button
-            variant="ghost"
-            size="sm"
-            className="flex items-center gap-2 text-destructive"
+
+          <Button 
+            variant="outline" 
+            className="flex-1"
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              setCurrentDealId(deal.id);
+              setRepostDialogOpen(true);
+            }}
           >
-            <Trash2 className="h-4 w-4" /> Remove
+            Post Again
           </Button>
-        </CardFooter>
-      );
+        </div>
+
+        <div className="col-span-2 flex gap-2">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button 
+                variant="ghost" 
+                className="flex-1"
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                }}
+              >
+                <Share2 className="mr-2 h-4 w-4" />
+                
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="center" className="w-48">
+              <DropdownMenuItem onClick={(e) => handleShare(deal, "whatsapp", e)}>
+                <MessageSquare className="mr-2 h-4 w-4" />
+                WhatsApp
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={(e) => handleShare(deal, "facebook", e)}>
+                <Facebook className="mr-2 h-4 w-4" />
+                Facebook
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={(e) => handleShare(deal, "email", e)}>
+                <Mail className="mr-2 h-4 w-4" />
+                Email
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={(e) => handleShare(deal, "copy", e)}>
+                <Link className="mr-2 h-4 w-4" />
+                Copy Link
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+
+          <Button 
+            variant="ghost" 
+            className="flex-1 text-destructive hover:text-destructive hover:bg-destructive/10"
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              setCurrentDealId(deal.id);
+              setRemoveDialogOpen(true);
+            }}
+          >
+            <Trash2 className="mr-2 h-4 w-4" />
+            
+          </Button>
+        </div>
+      </CardFooter>
+    </Card>
+  );
+
   return (
     <div className="space-y-6">
+      <Dialog open={removeDialogOpen} onOpenChange={setRemoveDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Remove Deal</DialogTitle>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="absolute right-2 top-2"
+              onClick={() => setRemoveDialogOpen(false)}
+            >
+              {/* <X className="h-4 w-4" /> */}
+            </Button>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="repost"
+                  checked={understoodRepost}
+                  onCheckedChange={setUnderstoodRepost}
+                />
+                <label htmlFor="repost" className="text-sm">
+                  I understand that reposting will delete all product history
+                  including chats
+                </label>
+              </div>
+              <Button
+                onClick={handleRepost}
+                disabled={!understoodRepost}
+                className="w-full"
+              >
+                Repost Deal
+              </Button>
+            </div>
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <span className="w-full border-t" />
+              </div>
+              <div className="relative flex justify-center text-xs uppercase">
+                <span className="bg-background px-2 text-muted-foreground">
+                  Or
+                </span>
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Textarea
+                placeholder="Reason for removal"
+                value={removalReason}
+                onChange={(e) => setRemovalReason(e.target.value)}
+                className="min-h-[100px]"
+              />
+              <Button
+                onClick={handleRemove}
+                variant="destructive"
+                disabled={!removalReason}
+                className="w-full"
+              >
+                Remove Deal
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+      {/* Repost Dialog */}
+      <Dialog open={repostDialogOpen} onOpenChange={setRepostDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Post Again</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="flex items-center space-x-2">
+              <Checkbox
+                id="repost"
+                checked={understoodRepost}
+                onCheckedChange={setUnderstoodRepost}
+              />
+              <label htmlFor="repost" className="text-sm">
+                On posting the deal again it will delete current product history like chat related to the product, etc
+              </label>
+            </div>
+            <Button
+              onClick={handleRepost}
+              disabled={!understoodRepost}
+              className="w-full"
+            >
+              Post Again
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={soldDialogOpen} onOpenChange={setSoldDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>
+              {soldType === "platform"
+                ? "Mark as Sold on Platform"
+                : "Mark as Sold Outside"}
+            </DialogTitle>
+          </DialogHeader>
+          {renderSoldForm()}
+        </DialogContent>
+      </Dialog>
+
       <div className="flex justify-between items-center">
         <h2 className="text-2xl font-bold">My Deals</h2>
         <Button
@@ -483,70 +822,13 @@ const UserDeals = () => {
         </Card>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {deals.map((deal, index) => (
-            <Card
-              key={deal.id || `deal-${index}`}
-              className="hover:shadow-lg transition-shadow"
-            >
-              <CardHeader className="relative p-0">
-                {renderDealImage(deal)}
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="absolute top-2 right-2 bg-white/80 hover:bg-white/90"
-                  onClick={() => handleEditDeal(deal)}
-                >
-                  <Pencil className="h-4 w-4" />
-                </Button>
-              </CardHeader>
-              <CardContent className="space-y-2 pt-4">
-                <CardTitle>{deal.name}</CardTitle>
-                <p className="text-xl font-bold text-primary">
-                  {formatPrice(deal.price)}
-                </p>
-                <p className="text-sm text-muted-foreground line-clamp-2">
-                  {deal.description}
-                </p>
-                <div className="flex flex-wrap gap-2">
-                  <Badge variant="outline">{deal.category}</Badge>
-                  <Badge variant="outline">{deal.condition}</Badge>
-                </div>
-             </CardContent>
-              {/*<CardFooter className="justify-between">
-                <Button
-                  variant="secondary"
-                  size="sm"
-                  className="flex items-center gap-2"
-                  Mark as Sold
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="flex items-center gap-2 text-destructive"
-                  onClick={() => handleDeleteDeal(deal.id)}
-                >
-                  <Trash2 className="h-4 w-4" /> Remove
-                </Button>
-              </CardFooter> */} 
-              {renderCardFooter(deal)}
-            </Card>
+          {deals.map((deal) => (
+            <ProductCard key={deal.id} deal={deal} />
           ))}
         </div>
-        
       )}
+
       {error && <div className="text-red-500 text-center py-2">{error}</div>}
-      <Dialog open={soldDialogOpen} onOpenChange={setSoldDialogOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>
-              {soldType === "platform"
-                ? "Mark as Sold on Platform"
-                : "Mark as Sold Outside"}
-            </DialogTitle>
-          </DialogHeader>
-          {renderSoldForm()}
-        </DialogContent>
-      </Dialog>
 
       {isAddingDeal && (
         <PostADeal onClose={handleDealUpdate} editDeal={editingDeal} />
