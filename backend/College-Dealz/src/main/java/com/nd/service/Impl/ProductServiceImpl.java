@@ -2,16 +2,14 @@ package com.nd.service.Impl;
 
 import com.nd.dto.InterestedBuyerDto;
 import com.nd.dto.ShareProductDto;
+import com.nd.dto.SoldOutsideResponse;
 import com.nd.entities.*;
 import com.nd.dto.ProductDto;
 import com.nd.enums.Category;
 import com.nd.enums.ProductStatus;
 import com.nd.exceptions.ProductException;
 import com.nd.exceptions.ResourceNotFoundException;
-import com.nd.repositories.ImageRepo;
-import com.nd.repositories.ProductRepo;
-import com.nd.repositories.UniversityRepo;
-import com.nd.repositories.UserRepo;
+import com.nd.repositories.*;
 import com.nd.service.ImageService;
 import com.nd.service.JwtService;
 import com.nd.service.ProductService;
@@ -31,6 +29,9 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -57,6 +58,9 @@ public class ProductServiceImpl implements ProductService {
 
     @Autowired
     private JwtService jwtService;
+
+    @Autowired
+    private ArchivedProductsRepo archivedProductsRepo;
 
     @Autowired
     private ImageRepo imageRepo;
@@ -242,7 +246,7 @@ public class ProductServiceImpl implements ProductService {
 
 
     @Override
-    public ProductDto relistProduct(Integer productId) throws ProductException {
+    public boolean relistProduct(Integer productId) throws ProductException {
         // Find the old product; throw an exception if not found
         Product oldProduct = productRepo.findById(productId)
                 .orElseThrow(() -> new ProductException("Product not found with id: " + productId));
@@ -293,7 +297,7 @@ public class ProductServiceImpl implements ProductService {
 
         deleteProduct(productId);
 
-        return productDto;
+        return true;
     }
 
 
@@ -467,6 +471,104 @@ public class ProductServiceImpl implements ProductService {
 
         return shareProductDto;
 
+    }
+
+
+    @Override
+    public boolean removeProduct(Integer productId, String removalReason, boolean byUser) throws ProductException {
+        // Fetch the product; throw an exception if not found.
+        Product product = productRepo.findById(productId)
+                .orElseThrow(() -> new ProductException("Product not found with id: " + productId));
+
+        // Create an ArchivedProducts instance and copy required fields.
+        ArchivedProducts archived = new ArchivedProducts();
+        archived.setTitle(product.getName());
+        archived.setDescription(product.getDescription());
+        archived.setPrice(product.getPrice());
+        // Assuming ArchivedProducts.category is a String; if it's an enum, adjust accordingly.
+        archived.setCategory(product.getCategory());
+        archived.setSellerId(product.getSeller().getId());
+        // Listing date comes from product's createdAt field (converted to LocalDateTime)
+        LocalDateTime listingDate = LocalDateTime.ofInstant(product.getCreatedAt(), ZoneId.systemDefault());
+        archived.setListingDate(listingDate);
+        archived.setUniversityId(product.getUniversity().getId());
+
+        // Set removal-specific fields.
+        // Ensure ProductStatus.REMOVED_BY_USER exists in your enum, or use an equivalent value.
+
+        if(byUser)
+        archived.setStatus(ProductStatus.REMOVED_BY_USER);
+        else
+            archived.setStatus(ProductStatus.REMOVED_BY_ADMIN);
+
+        archived.setReasonForRemoval(removalReason);
+        archived.setStatusChangeDate(LocalDateTime.now());
+        // Calculate dealCompletionTime in days between product createdAt and now.
+        long daysBetween = ChronoUnit.DAYS.between(listingDate, LocalDateTime.now());
+        archived.setDealCompletionTime(daysBetween);
+
+        // Other fields are left as null or their default values (e.g. finalSoldPrice, buyerId, etc.)
+
+        // Save the archived product.
+        archivedProductsRepo.save(archived);
+
+        // Optionally remove the original product (or mark it inactive).
+        productRepo.delete(product);
+
+        return true;
+    }
+
+
+    @Override
+    public boolean soldOutsideProduct(Integer productId, SoldOutsideResponse soldOutsideResponse) throws ProductException {
+        // Fetch the product by ID; throw exception if not found.
+        Product product = productRepo.findById(productId)
+                .orElseThrow(() -> new ProductException("Product not found with id: " + productId));
+
+        // Create a new ArchivedProducts instance and copy product-related fields.
+        ArchivedProducts archived = new ArchivedProducts();
+        archived.setTitle(product.getName());
+        archived.setDescription(product.getDescription());
+        // Assuming category is an enum; convert to string if needed.
+        archived.setCategory(product.getCategory());
+        System.out.println("soldOutsideProduct : : "+ product.getPrice());
+
+        archived.setPrice(product.getPrice());
+        archived.setSellerId(product.getSeller().getId());
+        archived.setUniversityId(product.getUniversity().getId());
+
+        // Use product's createdAt as the listing date.
+        LocalDateTime listingDate = LocalDateTime.ofInstant(product.getCreatedAt(), ZoneId.systemDefault());
+        archived.setListingDate(listingDate);
+
+        // Set additional info from SoldOutsideResponse:
+        archived.setFinalSoldPrice(new BigDecimal(soldOutsideResponse.getSoldPrice()));
+        archived.setReasonForRemoval(soldOutsideResponse.getReason());  // repurposing this field for sold-outside reason
+
+        // Convert soldDate (java.util.Date) to LocalDateTime for statusChangeDate.
+        LocalDateTime soldDate = LocalDateTime.ofInstant(soldOutsideResponse.getSoldDate().toInstant(), ZoneId.systemDefault());
+        archived.setStatusChangeDate(soldDate);
+
+        // Calculate dealCompletionTime in days between listingDate and soldDate.
+        long daysBetween = ChronoUnit.DAYS.between(listingDate, soldDate);
+        archived.setDealCompletionTime(daysBetween);
+
+        // Set the SoldToCollegeStudent flag from the response.
+        archived.setSoldToCollegeStudent(soldOutsideResponse.isUniversityStudent());
+
+        // Set status to SOLD_OUTSIDE (ensure this exists in your ProductStatus enum)
+        archived.setStatus(ProductStatus.SOLD_OUTSIDE_PLATFORM);
+
+        // Optionally, set confirmationStatus to a specific value or leave as default.
+        // archived.setConfirmationStatus(ConfirmationStatus.PENDING);
+
+        // Save the archived product.
+        archivedProductsRepo.save(archived);
+
+        // Remove the original product (or mark it as inactive, as per your business logic).
+        productRepo.delete(product);
+
+        return true;
     }
 
 }

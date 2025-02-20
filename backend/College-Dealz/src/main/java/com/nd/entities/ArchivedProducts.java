@@ -1,11 +1,13 @@
 package com.nd.entities;
 
+import com.nd.enums.Category;
 import com.nd.enums.ConfirmationStatus;
 import com.nd.enums.ProductStatus;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.ColumnDefault;
+import org.hibernate.annotations.CreationTimestamp;
 
 import java.math.BigDecimal;
 import java.time.Instant;
@@ -27,7 +29,7 @@ public class ArchivedProducts {
     private String description;
 
     @Column(nullable = false)
-    private String category;
+    private Category category;
 
     @Column(nullable = false)
     private BigDecimal price;
@@ -58,7 +60,10 @@ public class ArchivedProducts {
     @Column(nullable = false)
     private ConfirmationStatus confirmationStatus=ConfirmationStatus.PENDING;
 
-    @Column(nullable = false)
+    @Column
+    private boolean SoldToCollegeStudent;
+
+    @Column
     private int interestedBuyers;
 
     @Column(nullable = false)
@@ -67,7 +72,7 @@ public class ArchivedProducts {
     @Column(nullable = false)
     private int universityId;
 
-    @ColumnDefault("CURRENT_TIMESTAMP")
+    @CreationTimestamp
     @Column(name = "created_at")
     private Instant createdAt;
 }
