@@ -1,8 +1,11 @@
 package com.nd.service;
 
+import com.nd.dto.InterestedBuyerDto;
 import com.nd.dto.ProductDto;
+import com.nd.dto.ShareProductDto;
 import com.nd.entities.Chat;
 import com.nd.entities.Product;
+import com.nd.exceptions.ProductException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -21,6 +24,7 @@ public interface ProductService {
     List<ProductDto> getProductsByCategory(String category);
     List<ProductDto> getProductsBySellerId(String authHeader);
 
+    ShareProductDto getsharedProduct(int id );
 
    Page<ProductDto> getProductsByUniversityId(
             int universityId,
@@ -36,4 +40,8 @@ public interface ProductService {
     List<ProductDto> getProductsByUniversityId(Integer universityId);
     void deleteProduct(Integer productId);
     ProductDto createProductWithImages(ProductDto productDto, String authHeader) throws IOException;
+
+    ProductDto relistProduct(Integer productId) throws ProductException;
+
+    List<InterestedBuyerDto> getInterestedBuyers(int productId);
 }

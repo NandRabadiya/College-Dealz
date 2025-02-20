@@ -18,4 +18,6 @@ public class Feedback {
 
     private String name;
     private String message;
+
+    private int star;
 }
