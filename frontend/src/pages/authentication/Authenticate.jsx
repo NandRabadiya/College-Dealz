@@ -34,6 +34,11 @@ const Authenticate = ({isOpen, onClose}) => {
   const handleAuthSuccess = (message) => {
     setSuccessMessage(message);
     setErrorMessage("");
+    const redirectProductId = sessionStorage.getItem('redirectProductId');
+  if (redirectProductId) {
+    sessionStorage.removeItem('redirectProductId'); // Clean up
+    navigate(`/product/${redirectProductId}`);
+  } 
     //navigate(from, { replace: true });
  };
 

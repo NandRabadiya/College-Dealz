@@ -1,14 +1,14 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { 
-  Share2, 
-  MessageCircle, 
+import {
+  Share2,
+  MessageCircle,
   Facebook,
   Mail,
   Link as LinkIcon,
   MessageSquare,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -39,7 +39,7 @@ const PublicProductDetails = () => {
       try {
         setLoading(true);
         const response = await fetch(
-          `${API_BASE_URL}/api/products/public/${productId}`
+          `${API_BASE_URL}/api/products/public/shared-product/${productId}`
         );
 
         if (!response.ok) {
@@ -47,19 +47,30 @@ const PublicProductDetails = () => {
         }
 
         let productData = await response.json();
-        
-        productData = {
-          ...productData,
-          images: productData.imageUrls?.length > 0
-            ? productData.imageUrls.map((url, index) => ({
-                id: `${productId}-${index}`,
-                url: url,
-                fileName: `image-${index}`,
-              }))
-            : [{ id: 'placeholder', url: placeholderImage, fileName: 'placeholder' }]
+
+        // Transform the API response to match component's expected format
+        const transformedProduct = {
+          id: productData.product_id,
+          name: productData.product_name,
+          description: productData.product_description,
+          price: productData.product_price,
+          images:
+            productData.image_urls?.length > 0
+              ? productData.image_urls.map((url, index) => ({
+                  id: `${productData.product_id}-${index}`,
+                  url: url,
+                  fileName: `image-${index}`,
+                }))
+              : [
+                  {
+                    id: "placeholder",
+                    url: placeholderImage,
+                    fileName: "placeholder",
+                  },
+                ],
         };
 
-        setProduct(productData);
+        setProduct(transformedProduct);
       } catch (err) {
         setError(err.message);
         console.error("Error loading product details:", err);
@@ -70,38 +81,58 @@ const PublicProductDetails = () => {
 
     fetchProductData();
   }, [productId, navigate]);
+  const handleLoginClick = () => {
+    // Store the product ID in session storage for redirect after login
+    sessionStorage.setItem("redirectProductId", productId);
+    navigate("/Authenticate");
+  };
 
   const handleShare = (platform, e) => {
     e.preventDefault();
-    
+
     const productUrl = window.location.href;
     const message = `Check out this product: ${product.name}`;
-    
+
     switch (platform) {
-      case 'whatsapp':
-        window.open(`https://wa.me/?text=${encodeURIComponent(message + ' ' + productUrl)}`, '_blank');
+      case "whatsapp":
+        window.open(
+          `https://wa.me/?text=${encodeURIComponent(
+            message + " " + productUrl
+          )}`,
+          "_blank"
+        );
         break;
-      case 'facebook':
-        window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(productUrl)}`, '_blank');
+      case "facebook":
+        window.open(
+          `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(
+            productUrl
+          )}`,
+          "_blank"
+        );
         break;
-      case 'email':
-        window.open(`mailto:?subject=${encodeURIComponent(product.name)}&body=${encodeURIComponent(message + '\n\n' + productUrl)}`, '_blank');
+      case "email":
+        window.open(
+          `mailto:?subject=${encodeURIComponent(
+            product.name
+          )}&body=${encodeURIComponent(message + "\n\n" + productUrl)}`,
+          "_blank"
+        );
         break;
-      case 'copy':
+      case "copy":
         navigator.clipboard.writeText(productUrl).then(() => {
-          alert('Link copied to clipboard!');
+          alert("Link copied to clipboard!");
         });
         break;
     }
   };
 
   const navigateImage = (direction) => {
-    if (direction === 'next') {
-      setCurrentImageIndex((prev) => 
+    if (direction === "next") {
+      setCurrentImageIndex((prev) =>
         prev === product.images.length - 1 ? 0 : prev + 1
       );
     } else {
-      setCurrentImageIndex((prev) => 
+      setCurrentImageIndex((prev) =>
         prev === 0 ? product.images.length - 1 : prev - 1
       );
     }
@@ -186,11 +217,9 @@ const PublicProductDetails = () => {
 
           {/* Action Buttons */}
           <div className="flex gap-4 pt-6">
-            <Button className="flex-1" asChild>
-              <a href="/login">
-                <MessageCircle className="mr-2 h-5 w-5" />
-                Log In to Chat
-              </a>
+            <Button className="flex-1" onClick={handleLoginClick}>
+              <MessageCircle className="mr-2 h-5 w-5" />
+              Log In to Chat
             </Button>
             
             <DropdownMenu>

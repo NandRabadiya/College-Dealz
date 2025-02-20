@@ -332,7 +332,7 @@ const ProductCard = ({
   const handleShare = (product, platform, e) => {
     e.stopPropagation();
 
-    const productUrl = `${window.location.origin}/product/${product.id}`;
+    const productUrl = `${window.location.origin}/product/public/${product.id}`;
     const message = `Check out this product: ${product.name}`;
 
     switch (platform) {

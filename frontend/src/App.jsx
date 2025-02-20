@@ -98,7 +98,7 @@ function App() {
             element={<Authenticate isOpen={true} />}
           />
           <Route path="/admin" element={<AdminDashboard />} />
-          <Route path="/product/public/pro" element={<PublicProductDetails />} />
+          <Route path="/product/public/:productId" element={<PublicProductDetails />} />
           {/* Protected Route */}
           <Route path="/oauth2/redirect" element={<OAuth2RedirectHandler />} />
           <Route
