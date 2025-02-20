@@ -5,6 +5,10 @@ import {
   MessageCircle,
   ChevronLeft,
   ChevronRight,
+  Facebook,
+  Mail,
+  Link,
+  MessageSquare,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -24,9 +28,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import debounce from "lodash/debounce";
 import FilterComponent from "./Filter";
-
 
 const ProductCard = ({
   searchQuery,
@@ -320,9 +329,46 @@ const ProductCard = ({
     }, e);
   };
 
-  const handleShare = (product, e) => {
+  const handleShare = (product, platform, e) => {
     e.stopPropagation();
-    console.log("Sharing product:", product);
+
+    const productUrl = `${window.location.origin}/product/${product.id}`;
+    const message = `Check out this product: ${product.name}`;
+
+    switch (platform) {
+      case "whatsapp":
+        window.open(
+          `https://wa.me/?text=${encodeURIComponent(
+            message + " " + productUrl
+          )}`,
+          "_blank"
+        );
+        break;
+      case "facebook":
+        window.open(
+          `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(
+            productUrl
+          )}`,
+          "_blank"
+        );
+        break;
+      case "email":
+        window.open(
+          `mailto:?subject=${encodeURIComponent(
+            product.name
+          )}&body=${encodeURIComponent(message + "\n\n" + productUrl)}`,
+          "_blank"
+        );
+        break;
+      case "copy":
+        navigator.clipboard.writeText(productUrl).then(() => {
+          // You might want to show a toast notification here
+          alert("Link copied to clipboard!");
+        });
+        break;
+      default:
+        break;
+    }
   };
 
   const handlePageChange = (newPage) => {
@@ -420,15 +466,49 @@ const ProductCard = ({
                           <MessageCircle className="mr-2 h-4 w-4 text-inherit" />
                           Chat
                         </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="flex-1 text-foreground hover:bg-muted"
-                          onClick={(e) => handleShare(product, e)}
-                        >
-                          <Share2 className="mr-2 h-4 w-4 text-inherit" />
-                          Share
-                        </Button>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="flex-1 text-foreground hover:bg-muted"
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              <Share2 className="mr-2 h-4 w-4 text-inherit" />
+                              Share
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end" className="w-48">
+                            <DropdownMenuItem
+                              onClick={(e) =>
+                                handleShare(product, "whatsapp", e)
+                              }
+                            >
+                              <MessageSquare className="mr-2 h-4 w-4" />
+                              WhatsApp
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              onClick={(e) =>
+                                handleShare(product, "facebook", e)
+                              }
+                            >
+                              <Facebook className="mr-2 h-4 w-4" />
+                              Facebook
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              onClick={(e) => handleShare(product, "email", e)}
+                            >
+                              <Mail className="mr-2 h-4 w-4" />
+                              Email
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              onClick={(e) => handleShare(product, "copy", e)}
+                            >
+                              <Link className="mr-2 h-4 w-4" />
+                              Copy Link
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
                       </div>
                     </div>
                   </div>
