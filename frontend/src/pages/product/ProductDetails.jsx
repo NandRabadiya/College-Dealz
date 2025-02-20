@@ -1,12 +1,265 @@
+// import React, { useState, useEffect } from "react";
+// import { useParams } from "react-router-dom";
+// import { Heart, Share2, MessageCircle, Facebook, Mail, Link, MessageSquare } from "lucide-react";
+// import { Button } from "@/components/ui/button";
+// import { Badge } from "@/components/ui/badge";
+// import ProductGallery from "./ProductGallery";
+// import { API_BASE_URL } from "../Api/api";
+// import { fetchProductWithImages } from "./fetch";
+// import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+// // ProductDetails Component
+// const ProductDetails = () => {
+//   const { productId } = useParams();
+//   const [product, setProduct] = useState(null);
+//   const [loading, setLoading] = useState(true);
+//   const [error, setError] = useState(null);
+
+//   useEffect(() => {
+//     const fetchProductData = async () => {
+//       try {
+//         console.log("Fetching product data...");
+//         setLoading(true);
+//         const token = localStorage.getItem("jwt");
+//         if (!token) {
+//           throw new Error("No authentication token found");
+//         }
+
+//         const response = await fetch(
+//           `${API_BASE_URL}/api/products/${productId}`,
+//           {
+//             headers: {
+//               Authorization: `Bearer ${token}`,
+//             },
+//           }
+//         );
+
+//         if (!response.ok) {
+//           throw new Error("Failed to fetch product");
+//         }
+
+//         let productData = await response.json();
+//         console.log("Initial product data:", productData); // Log initial data
+//         // Transform the product data to match your needs
+//         const transformedProduct = {
+//           id: productData.product_id,
+//           name: productData.product_name,
+//           description: productData.product_description,
+//           price: productData.product_price,
+//           condition: productData.condition || "Not specified",
+//           category: productData.category || "Uncategorized",
+//           monthsOld: productData.months_old,
+//           location: productData.location,
+//           seller: productData.seller,
+//           postDate: productData.created_at || new Date().toISOString(),
+//           images:
+//             productData.image_urls && productData.image_urls.length > 0
+//               ? productData.image_urls.map((url, index) => ({
+//                   id: `${productData.product_id}-${index}`,
+//                   url: url,
+//                   fileName: `image-${index}`,
+//                 }))
+//               : [
+//                   {
+//                     id: "placeholder",
+//                     url: "/api/placeholder/400/320",
+//                     fileName: "placeholder",
+//                   },
+//                 ],
+//         };
+
+//         console.log("Transformed product data:", transformedProduct);
+//         setProduct(transformedProduct);
+//       } catch (err) {
+//         setError(err.message);
+//         console.error("Error loading product details:", err);
+//       } finally {
+//         setLoading(false);
+//       }
+//     };
+
+//     if (productId) {
+//       fetchProductData();
+//     }
+//   }, [productId]);
+
+//   const handleChat = async () => {
+//     // Implement chat functionality
+//     console.log("Starting chat with seller");
+//   };
+
+//   const handleShare = (product, platform, e) => {
+//     e.stopPropagation();
+
+//     const productUrl = `${window.location.origin}/product/public/${product.id}`;
+//     const message = `Check out this product: ${product.name}`;
+
+//     switch (platform) {
+//       case "whatsapp":
+//         window.open(
+//           `https://wa.me/?text=${encodeURIComponent(
+//             message + " " + productUrl
+//           )}`,
+//           "_blank"
+//         );
+//         break;
+//       case "facebook":
+//         window.open(
+//           `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(
+//             productUrl
+//           )}`,
+//           "_blank"
+//         );
+//         break;
+//       case "email":
+//         window.open(
+//           `mailto:?subject=${encodeURIComponent(
+//             product.name
+//           )}&body=${encodeURIComponent(message + "\n\n" + productUrl)}`,
+//           "_blank"
+//         );
+//         break;
+//       case "copy":
+//         navigator.clipboard.writeText(productUrl).then(() => {
+//           // You might want to show a toast notification here
+//           alert("Link copied to clipboard!");
+//         });
+//         break;
+//       default:
+//         break;
+//     }
+//   };
+
+//   if (loading) {
+//     return <div className="container mx-auto p-4">Loading...</div>;
+//   }
+
+//   if (error || !product) {
+//     return <div className="container mx-auto p-4">Product not found</div>;
+//   }
+
+//   return (
+//     <div className="container mx-auto h-80% flex items-center justify-center p-4">
+//       <div className="grid gap-8 md:grid-cols-2 w-full max-w-5xl">
+//         {/* Image Gallery Section */}
+//         <div className="flex justify-center">
+//           <ProductGallery images={product?.images || []} />
+//         </div>
+
+//         {/* Product Info Section */}
+//         <div className="space-y-6">
+//           <div>
+//             <h1 className="text-3xl font-bold mb-2">{product.name}</h1>
+//             <div className="text-2xl font-bold text-primary">
+//               ₹{product.price}
+//             </div>
+//           </div>
+
+//           <div className="space-y-2">
+//             <div className="flex items-center gap-2">
+//               <Badge variant="secondary" className="font-normal">
+//                 {product.seller?.name || "Unknown Seller"}
+//               </Badge>
+//               <span className="text-xs">•</span>
+//               <span className="text-sm text-muted-foreground">
+//                 {new Date(product.postDate).toLocaleDateString()}
+//               </span>
+//             </div>
+//           </div>
+
+//           <div className="space-y-4">
+//             <div>
+//               <h3 className="text-lg font-semibold mb-2">Condition</h3>
+//               <Badge variant="outline">{product.condition}</Badge>
+//             </div>
+
+//             <div>
+//               <h3 className="text-lg font-semibold mb-2">Category</h3>
+//               <Badge variant="outline">{product.category}</Badge>
+//             </div>
+
+//             {product.monthsOld && (
+//               <div>
+//                 <h3 className="text-lg font-semibold mb-2">Age</h3>
+//                 <p className="text-muted-foreground">
+//                   {product.monthsOld} months old
+//                 </p>
+//               </div>
+//             )}
+
+//             <div>
+//               <h3 className="text-lg font-semibold mb-2">Description</h3>
+//               <p className="text-muted-foreground">{product.description}</p>
+//             </div>
+
+//             {product.location && (
+//               <div>
+//                 <h3 className="text-lg font-semibold mb-2">Location</h3>
+//                 <p className="text-muted-foreground">{product.location}</p>
+//               </div>
+//             )}
+//           </div>
+
+//           <div className="flex gap-4 pt-6">
+//             <Button className="flex-1" onClick={handleChat}>
+//               <MessageCircle className="mr-2 h-5 w-5" />
+//               Chat with Seller
+//             </Button>
+//             <DropdownMenu>
+//               <DropdownMenuTrigger asChild>
+//                 <Button
+//                   variant="ghost"
+//                   size="sm"
+//                   className="flex-1 text-foreground hover:bg-muted"
+//                   onClick={(e) => e.stopPropagation()}
+//                 >
+//                   <Share2 className="mr-2 h-4 w-4 text-inherit" />
+//                   Share
+//                 </Button>
+//               </DropdownMenuTrigger>
+//               <DropdownMenuContent align="end" className="w-48">
+//                 <DropdownMenuItem
+//                   onClick={(e) => handleShare(product, "whatsapp", e)}
+//                 >
+//                   <MessageSquare className="mr-2 h-4 w-4" />
+//                   WhatsApp
+//                 </DropdownMenuItem>
+//                 <DropdownMenuItem
+//                   onClick={(e) => handleShare(product, "facebook", e)}
+//                 >
+//                   <Facebook className="mr-2 h-4 w-4" />
+//                   Facebook
+//                 </DropdownMenuItem>
+//                 <DropdownMenuItem
+//                   onClick={(e) => handleShare(product, "email", e)}
+//                 >
+//                   <Mail className="mr-2 h-4 w-4" />
+//                   Email
+//                 </DropdownMenuItem>
+//                 <DropdownMenuItem
+//                   onClick={(e) => handleShare(product, "copy", e)}
+//                 >
+//                   <Link className="mr-2 h-4 w-4" />
+//                   Copy Link
+//                 </DropdownMenuItem>
+//               </DropdownMenuContent>
+//             </DropdownMenu>
+//           </div>
+//         </div>
+//       </div>
+//     </div>
+//   );
+// };
+
+// export default ProductDetails;
 import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
-import { Heart, Share2, MessageCircle } from "lucide-react";
+import { Share2, MessageCircle, Facebook, Mail, Link, MessageSquare } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import ProductGallery from "./ProductGallery";
 import { API_BASE_URL } from "../Api/api";
-import { fetchProductWithImages } from "./fetch";
-// ProductDetails Component
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+
 const ProductDetails = () => {
   const { productId } = useParams();
   const [product, setProduct] = useState(null);
@@ -14,10 +267,10 @@ const ProductDetails = () => {
   const [error, setError] = useState(null);
 
   useEffect(() => {
+    let isMounted = true;
+
     const fetchProductData = async () => {
       try {
-        console.log("Fetching product data...");
-        setLoading(true);
         const token = localStorage.getItem("jwt");
         if (!token) {
           throw new Error("No authentication token found");
@@ -36,136 +289,160 @@ const ProductDetails = () => {
           throw new Error("Failed to fetch product");
         }
 
-        let productData = await response.json();
-        console.log("Initial product data:", productData); // Log initial data
+        const productData = await response.json();
+        
+        if (!isMounted) return;
 
-        // Handle direct imageUrls if they exist
-        if (productData.imageUrls && productData.imageUrls.length > 0) {
-          console.log("Using direct imageUrls:", productData.imageUrls);
-          productData = {
-            ...productData,
-            images: productData.imageUrls.map((url, index) => ({
-              id: `${productId}-${index}`,
-              url: url,
-              fileName: `image-${index}`,
-            })),
+        // Transform the product data according to the new JSON structure
+        if (productData && productData.id) {
+          const transformedProduct = {
+            id: productData.id,
+            name: productData.name || "Unnamed Product",
+            description: productData.description || "No description available",
+            price: productData.price || 0,
+            condition: productData.condition || "Not specified",
+            category: productData.category || "Uncategorized",
+            monthsOld: productData.monthsOld,
+            sellerId: productData.sellerId,
+            universityId: productData.universityId,
+            // Handle empty image arrays or null images
+            images: productData.imageUrls && productData.imageUrls.length > 0
+              ? productData.imageUrls.map((url, index) => ({
+                  id: `${productData.id}-${index}`,
+                  url: url,
+                  fileName: `image-${index}`,
+                }))
+              : [{
+                  id: "placeholder",
+                  url: "/api/placeholder/400/320",
+                  fileName: "placeholder",
+                }],
           };
+          
+          setProduct(transformedProduct);
         } else {
-          // Fetch images from API
-          try {
-            console.log("Fetching images from API...");
-            const imagesResponse = await fetch(
-              `${API_BASE_URL}/api/images/product/${productId}`,
-              {
-                headers: {
-                  Authorization: `Bearer ${token}`,
-                },
-              }
-            );
-            if (imagesResponse.ok) {
-              const imagesData = await imagesResponse.json();
-              console.log("Fetched images data:", imagesData);
-              productData = {
-                ...productData,
-                images: imagesData
-                  .map((img) => {
-                    if (img.s3_url) {
-                      return {
-                        id: img.image_id,
-                        url: img.s3_url,
-                        fileName: img.file_name,
-                      };
-                    }
-                    console.log("Skipped image due to missing s3_url:", img);
-                    return null;
-                  })
-                  .filter(Boolean),
-              };
-            }
-          } catch (error) {
-            console.error(
-              `Error fetching images for product ${productId}:`,
-              error
-            );
-            productData = { ...productData, images: [] };
-          }
+          throw new Error("Invalid product data received");
         }
-        console.log('Final product data with images:', productData); // Log final processed data
-        setProduct(productData);
       } catch (err) {
-        setError(err.message);
-        console.error("Error loading product details:", err);
+        if (isMounted) {
+          setError(err.message);
+          console.error("Error loading product details:", err);
+        }
       } finally {
-        setLoading(false);
+        if (isMounted) {
+          setLoading(false);
+        }
       }
     };
 
     if (productId) {
       fetchProductData();
     }
-    console.log("Product ID:", productId);
-    console.log("Product:", product);
+
+    return () => {
+      isMounted = false;
+    };
   }, [productId]);
 
   const handleChat = async () => {
-    // Implement chat functionality
-    console.log("Starting chat with seller");
+    // Implement chat functionality using sellerId
+    console.log("Starting chat with seller:", product.sellerId);
   };
 
-  const handleShare = () => {
-    // Implement share functionality
-    console.log("Sharing product");
+  const handleShare = (product, platform, e) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    const productUrl = `${window.location.origin}/product/public/${product.id}`;
+    const message = `Check out this product: ${product.name}`;
+
+    switch (platform) {
+      case "whatsapp":
+        window.open(
+          `https://wa.me/?text=${encodeURIComponent(message + " " + productUrl)}`,
+          "_blank"
+        );
+        break;
+      case "facebook":
+        window.open(
+          `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(productUrl)}`,
+          "_blank"
+        );
+        break;
+      case "email":
+        window.open(
+          `mailto:?subject=${encodeURIComponent(product.name)}&body=${encodeURIComponent(message + "\n\n" + productUrl)}`,
+          "_blank"
+        );
+        break;
+      case "copy":
+        navigator.clipboard.writeText(productUrl).then(() => {
+          alert("Link copied to clipboard!");
+        });
+        break;
+      default:
+        break;
+    }
   };
 
   if (loading) {
-    return <div className="container mx-auto p-4">Loading...</div>;
+    return (
+      <div className="container mx-auto p-4 flex items-center justify-center min-h-[400px]">
+        <div className="text-lg">Loading...</div>
+      </div>
+    );
   }
 
   if (error || !product) {
-    return <div className="container mx-auto p-4">Product not found</div>;
+    return (
+      <div className="container mx-auto p-4 flex items-center justify-center min-h-[400px]">
+        <div className="text-center">
+          <h2 className="text-xl font-semibold mb-2">Product not found</h2>
+          <p className="text-muted-foreground">{error}</p>
+        </div>
+      </div>
+    );
   }
 
+  // Format the condition and category for display
+  const formatString = (str) => {
+    return str.toLowerCase()
+      .split('_')
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(' ');
+  };
+
   return (
-    <div className="container mx-auto h-80% flex items-center justify-center p-4">
+    <div className="container mx-auto min-h-[80vh] flex items-start justify-center p-4">
       <div className="grid gap-8 md:grid-cols-2 w-full max-w-5xl">
-        {/* Image Gallery Section */}
         <div className="flex justify-center">
-          <ProductGallery images={product?.images || []} />
+          <ProductGallery images={product.images} />
         </div>
 
-        {/* Product Info Section */}
         <div className="space-y-6">
           <div>
             <h1 className="text-3xl font-bold mb-2">{product.name}</h1>
             <div className="text-2xl font-bold text-primary">
-              ₹{product.price}
-            </div>
-          </div>
-
-          <div className="space-y-2">
-            <div className="flex items-center gap-2">
-              <Badge variant="secondary" className="font-normal">
-                {product.seller?.name || "Unknown Seller"}
-              </Badge>
-              <span className="text-xs">•</span>
-              <span className="text-sm text-muted-foreground">
-                {new Date(product.postDate).toLocaleDateString()}
-              </span>
+              ₹{product.price.toFixed(2)}
             </div>
           </div>
 
           <div className="space-y-4">
             <div>
               <h3 className="text-lg font-semibold mb-2">Condition</h3>
-              <Badge variant="outline">{product.condition}</Badge>
+              <Badge variant="outline">
+                {formatString(product.condition)}
+              </Badge>
             </div>
 
             <div>
               <h3 className="text-lg font-semibold mb-2">Category</h3>
-              <Badge variant="outline">{product.category}</Badge>
+              <Badge variant="outline">
+                {formatString(product.category)}
+              </Badge>
             </div>
 
-            {product.monthsOld && (
+            {product.monthsOld != null && (
               <div>
                 <h3 className="text-lg font-semibold mb-2">Age</h3>
                 <p className="text-muted-foreground">
@@ -178,13 +455,6 @@ const ProductDetails = () => {
               <h3 className="text-lg font-semibold mb-2">Description</h3>
               <p className="text-muted-foreground">{product.description}</p>
             </div>
-
-            {product.location && (
-              <div>
-                <h3 className="text-lg font-semibold mb-2">Location</h3>
-                <p className="text-muted-foreground">{product.location}</p>
-              </div>
-            )}
           </div>
 
           <div className="flex gap-4 pt-6">
@@ -192,10 +462,44 @@ const ProductDetails = () => {
               <MessageCircle className="mr-2 h-5 w-5" />
               Chat with Seller
             </Button>
-            <Button variant="outline" className="flex-1" onClick={handleShare}>
-              <Share2 className="mr-2 h-5 w-5" />
-              Share
-            </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="flex-1 text-foreground hover:bg-muted"
+                >
+                  <Share2 className="mr-2 h-4 w-4 text-inherit" />
+                  Share
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-48">
+                <DropdownMenuItem
+                  onClick={(e) => handleShare(product, "whatsapp", e)}
+                >
+                  <MessageSquare className="mr-2 h-4 w-4" />
+                  WhatsApp
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={(e) => handleShare(product, "facebook", e)}
+                >
+                  <Facebook className="mr-2 h-4 w-4" />
+                  Facebook
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={(e) => handleShare(product, "email", e)}
+                >
+                  <Mail className="mr-2 h-4 w-4" />
+                  Email
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={(e) => handleShare(product, "copy", e)}
+                >
+                  <Link className="mr-2 h-4 w-4" />
+                  Copy Link
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </div>
       </div>
