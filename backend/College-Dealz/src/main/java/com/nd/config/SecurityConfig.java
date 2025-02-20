@@ -9,15 +9,11 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authorization.AuthorizationDecision;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
-import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -30,6 +26,7 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import java.util.Collection;
 import java.util.Arrays;
+import java.util.List;
 
 @Configuration
 @EnableWebSecurity
@@ -54,17 +51,28 @@ public class SecurityConfig {
 
     }
 
+    List<String> publicUrls = List.of(
+            "/login/**",
+            "/register/**",
+            "/refresh_token/**",
+            "/socket.io/**",
+            "/api/universities/public**",
+            "/api/products/public/university/**",
+            "/send-otp**",
+            "/verify**",
+            "/resend-otp**",
+            "/api/products/public/shared-product/**"
+    );
+
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
          http
                  .cors(cors->cors.configurationSource(corsConfigurationSource()))
                 .csrf(AbstractHttpConfigurer::disable)
-                .authorizeHttpRequests(
-                        req->req.requestMatchers("/login/**","/register/**", "/refresh_token/**","/socket.io/**","/api/universities/public**",  // Allow public access to universities endpoint
-                                        "/api/products/public/university/**" , "/send-otp**","/verify**","/resend-otp**" )
-                                .permitAll()
-                                .requestMatchers("/api/admin_only/**")
+                 .authorizeHttpRequests(req ->
+                         req.requestMatchers(publicUrls.toArray(String[]::new))
+                                 .permitAll().requestMatchers("/api/admin_only/**")
                                .hasAuthority("ADMIN")
                                 .anyRequest()
                                 .authenticated()
@@ -135,78 +143,3 @@ public class SecurityConfig {
     }
 
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//import com.nd.entities.User;
-//import org.springframework.beans.factory.annotation.Autowired;
-//import org.springframework.context.annotation.Bean;
-//import org.springframework.context.annotation.Configuration;
-//import org.springframework.security.authentication.AuthenticationProvider;
-//import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
-//import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-//import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-//import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
-//import org.springframework.security.core.userdetails.UserDetails;
-//import org.springframework.security.core.userdetails.UserDetailsService;
-//import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-//import org.springframework.security.crypto.password.PasswordEncoder;
-//import org.springframework.security.provisioning.InMemoryUserDetailsManager;
-//import org.springframework.security.web.SecurityFilterChain;
-//import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
-//
-//@Configuration
-//@EnableWebSecurity
-//public class SecurityConfig {
-//
-//
-//    @Bean
-//    public PasswordEncoder passwordEncoder() {
-//        return new BCryptPasswordEncoder();
-//    }
-//
-////    @Bean
-////    public AuthenticationProvider authenticationProvider() {
-////        DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
-////        provider.setUserDetailsService(userDetailsService);
-////        provider.setPasswordEncoder(passwordEncoder());
-////        return provider;
-////    }
-//
-//    @Autowired
-//    private OAuthAuthenticationSuccessHandler handler;
-//
-//
-//        @Bean
-//        public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-//            http
-//                    .csrf(csrf -> csrf.disable()) // Disable CSRF (optional)
-//                    .authorizeHttpRequests(auth -> auth
-//                            .anyRequest().permitAll() // Require authentication for all requests
-//                    );
-////                    return http.build();
-//            http.oauth2Login(oauth -> {
-//                oauth.successHandler(handler);
-//            });
-//
-//            http.logout(logoutForm -> {
-//                logoutForm.logoutUrl("/do-logout");
-//                logoutForm.logoutSuccessUrl("/login?logout=true");
-//            });
-//
-//            return http.build();
-//        }
-//
-//    }

@@ -3,6 +3,7 @@ package com.nd.entities;
 import com.nd.dto.WishlistDto;
 import com.nd.enums.Category;
 import com.nd.enums.Condition;
+import com.nd.enums.ProductStatus;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -62,14 +63,13 @@ public class Product {
     private List<Wishlist> wishlists;
 
 
-//    @OneToOne(mappedBy = "product", cascade = CascadeType.ALL)
-//    private Chat chat;
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Chat> chats = new ArrayList<>();
 
-    @Size(max = 255)
-    @Column(name = "location")
-    private String location;
+    @NotNull
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status", nullable = false)
+    private ProductStatus status=ProductStatus.AVAILABLE;
 
     @NotNull
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
