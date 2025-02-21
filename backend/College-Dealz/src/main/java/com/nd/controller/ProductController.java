@@ -1,9 +1,7 @@
 package com.nd.controller;
 
-import com.nd.dto.InterestedBuyerDto;
-import com.nd.dto.ProductDto;
-import com.nd.dto.ProductSortFilterRequest;
-import com.nd.dto.ShareProductDto;
+import com.nd.dto.*;
+import com.nd.entities.ArchivedProducts;
 import com.nd.exceptions.ProductException;
 import com.nd.service.JwtService;
 import com.nd.service.ProductService;
@@ -77,9 +75,11 @@ public class ProductController {
 
 
     @PostMapping("/{productId}/relist")
-    public ResponseEntity<ProductDto> relistProduct(@PathVariable Integer productId) throws ProductException {
-        ProductDto newProduct = productService.relistProduct(productId);
-        return ResponseEntity.ok(newProduct);
+    public ResponseEntity<String> relistProduct(@PathVariable Integer productId) throws ProductException {
+        boolean newProduct = productService.relistProduct(productId);
+        if (newProduct)
+            return ResponseEntity.ok("Product Mark as Sold and Removed Successfully");
+        else return ResponseEntity.status(404).body("Something went wrong while marking !!");
     }
 
     @PostMapping("/university")
@@ -197,6 +197,34 @@ public class ProductController {
         ShareProductDto shareProductDto=productService.getsharedProduct(productId);
 
         return ResponseEntity.ok(shareProductDto);
+    }
+
+    @DeleteMapping("/remove-by-user/{productId}")
+    public ResponseEntity<String> removeProductbyUser(@PathVariable Integer productId,
+                                                      @RequestParam String reason ) throws ProductException {
+
+
+        boolean archived = productService.removeProduct(productId, reason , true);//remove by user then true
+       if (archived)
+        return ResponseEntity.ok("Product Removed Successfully");
+       else return ResponseEntity.status(404).body("Something went wrong while removing!!");
+    }
+    @DeleteMapping("/remove-by-admin/{productId}")
+    public ResponseEntity<String> removeProductbyAdmin(@PathVariable Integer productId,
+                                                @RequestParam String reason ) throws ProductException {
+        boolean archived = productService.removeProduct(productId, reason , false);//remove by admin then false
+        if (archived)
+            return ResponseEntity.ok("Product Removed Successfully");
+        else return ResponseEntity.status(404).body("Something went wrong while removing!!");
+    }
+
+    @PostMapping("/sold-outside/{productId}")
+    public ResponseEntity<String> soldOutsideProduct(@PathVariable Integer productId,
+                                                               @RequestBody SoldOutsideResponse soldOutsideResponse) throws ProductException {
+        boolean archived = productService.soldOutsideProduct(productId, soldOutsideResponse);
+        if (archived)
+            return ResponseEntity.ok("Product Mark as Sold and Removed Successfully");
+        else return ResponseEntity.status(404).body("Something went wrong while marking !!");
     }
 
 }

@@ -16,6 +16,7 @@ public class Feedback {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
+    private String email;
     private String name;
     private String message;
 

@@ -3,6 +3,7 @@ package com.nd.service;
 import com.nd.dto.InterestedBuyerDto;
 import com.nd.dto.ProductDto;
 import com.nd.dto.ShareProductDto;
+import com.nd.dto.SoldOutsideResponse;
 import com.nd.entities.Chat;
 import com.nd.entities.Product;
 import com.nd.exceptions.ProductException;
@@ -41,7 +42,11 @@ public interface ProductService {
     void deleteProduct(Integer productId);
     ProductDto createProductWithImages(ProductDto productDto, String authHeader) throws IOException;
 
-    ProductDto relistProduct(Integer productId) throws ProductException;
+    boolean relistProduct(Integer productId) throws ProductException;
 
     List<InterestedBuyerDto> getInterestedBuyers(int productId);
+
+    boolean removeProduct(Integer productId, String removalReason, boolean byUser) throws ProductException;
+
+    boolean soldOutsideProduct(Integer productId, SoldOutsideResponse soldOutsideResponse) throws ProductException;
 }
