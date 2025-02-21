@@ -175,13 +175,7 @@ const UserDeals = () => {
     try {
       const token = localStorage.getItem("jwt");
       const response = await fetch(
-        `${API_BASE_URL}/api/interested-buyers/${dealId}`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+        `${API_BASE_URL}/api/products/${dealId}/interested-buyers`);
       if (response.ok) {
         const buyers = await response.json();
         setInterestedBuyers(buyers);
@@ -433,14 +427,33 @@ const UserDeals = () => {
 
   const handleSoldFormSubmit = async (e) => {
     e.preventDefault();
+    if (isSubmitting) return;
+  
+    setIsSubmitting(true);
+    setFeedback({ type: '', message: '' });
+  
     const formData = {
       productId: selectedDeal.id,
-      soldType,
-      ...soldFormData,
+      ...(soldType === "platform" ? {
+        buyerId: selectedBuyer,
+        soldPrice: soldFormData.soldPrice,
+        soldDate: soldFormData.soldDate,
+        buyerEmail: soldFormData.buyerEmail
+      } : {
+        soldToUniversityStudent: soldFormData.soldToUniversityStudent === "yes",
+        sellingReason: soldFormData.sellingReason,
+        soldPrice: soldFormData.soldPrice,
+        soldDate: soldFormData.soldDate
+      })
     };
+  
     try {
       const token = localStorage.getItem("jwt");
-      const response = await fetch(`${API_BASE_URL}/api/products/mark-sold`, {
+      const endpoint = soldType === "platform" 
+        ? `${API_BASE_URL}/api/products/sold-platform/${selectedDeal.id}`
+        : `${API_BASE_URL}/api/products/sold-outside/${selectedDeal.id}`;
+  
+      const response = await fetch(endpoint, {
         method: "POST",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -448,35 +461,53 @@ const UserDeals = () => {
         },
         body: JSON.stringify(formData),
       });
-
+  
       if (response.ok) {
-        await fetchUserDeals();
-        setSoldDialogOpen(false);
-        setSoldType(null);
-        setSelectedDeal(null);
-        setSoldFormData({
-          buyerEmail: "",
-          soldPrice: "",
-          soldDate: "",
-          soldToUniversityStudent: "no",
-          sellingReason: "",
+        setFeedback({
+          type: 'success',
+          message: 'Deal marked as sold successfully!'
         });
+        
+        // Refresh deals list and reset form after 3 seconds
+        setTimeout(async () => {
+          await fetchUserDeals();
+          setSoldDialogOpen(false);
+          setSoldType(null);
+          setSelectedDeal(null);
+          setSoldFormData({
+            buyerEmail: "",
+            soldPrice: "",
+            soldDate: "",
+            soldToUniversityStudent: "no",
+            sellingReason: "",
+          });
+          setSelectedBuyer(null);
+          setFeedback({ type: '', message: '' });
+        }, 3000);
+      } else {
+        throw new Error('Failed to mark deal as sold');
       }
     } catch (error) {
       console.error("Error marking deal as sold:", error);
+      setFeedback({
+        type: 'error',
+        message: 'Failed to mark deal as sold. Please try again.'
+      });
+    } finally {
+      setIsSubmitting(false);
     }
   };
-
+  
   const renderSoldForm = () => {
     if (soldType === "platform") {
       return (
         <form onSubmit={handleSoldFormSubmit} className="space-y-4">
+          <FeedbackAlert type={feedback.type} message={feedback.message} />
           <div>
             <Label htmlFor="buyerSelect">Select Buyer</Label>
             <Select
               value={selectedBuyer}
               onValueChange={setSelectedBuyer}
-              required
             >
               <SelectTrigger>
                 <SelectValue placeholder="Select a buyer" />
@@ -525,16 +556,21 @@ const UserDeals = () => {
               required
             />
           </div>
-          <Button type="submit" className="w-full">
-            Submit
+          <Button 
+            type="submit" 
+            className="w-full"
+            disabled={isSubmitting || (!selectedBuyer && !soldFormData.buyerEmail)}
+          >
+            {isSubmitting ? 'Processing...' : 'Submit'}
           </Button>
         </form>
       );
     }
-
+  
     if (soldType === "outside") {
       return (
         <form onSubmit={handleSoldFormSubmit} className="space-y-4">
+          <FeedbackAlert type={feedback.type} message={feedback.message} />
           <div>
             <Label>Sold to University Student?</Label>
             <RadioGroup
@@ -595,13 +631,17 @@ const UserDeals = () => {
               required
             />
           </div>
-          <Button type="submit" className="w-full">
-            Submit
+          <Button 
+            type="submit" 
+            className="w-full"
+            disabled={isSubmitting}
+          >
+            {isSubmitting ? 'Processing...' : 'Submit'}
           </Button>
         </form>
       );
     }
-
+  
     return null;
   };
 
