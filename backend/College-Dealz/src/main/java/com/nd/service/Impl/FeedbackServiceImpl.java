@@ -44,8 +44,8 @@ public class FeedbackServiceImpl implements FeedbackService {
 
     private void sendFeedbackEmail(Feedback feedback ,String sender_email) {
         SimpleMailMessage mailMessage = new SimpleMailMessage();
-       mailMessage.setTo("nandrabadiyagcp@gmail.com");
-       // mailMessage.setTo("venupatel004@gmail.com");// Change this to the email that receives feedback
+       //mailMessage.setTo("nandrabadiyagcp@gmail.com");
+        mailMessage.setTo("venupatel004@gmail.com");// Change this to the email that receives feedback
         mailMessage.setSubject("New FeedBack from " + feedback.getName());
         mailMessage.setText("Sender Name: " + feedback.getName() + "\nSender Email: " + sender_email +
                 "\n\nFeedback:\n" + feedback.getMessage());

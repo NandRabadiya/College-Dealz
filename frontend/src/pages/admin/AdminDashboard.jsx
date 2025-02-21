@@ -80,12 +80,12 @@ function AdminDashboard() {
   };
 
   // Report handlers
-  const handleReportUser = async (userId) => {
+  const handleReportUser = async (userId, reason) => {
     try {
       setIsSubmitting(true);
       await axios.post(
         `${API_BASE_URL}/api/reports/user/${userId}`,
-        { reason: reportReason },
+        {"message": reason},
         {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("jwt")}`,
@@ -103,12 +103,12 @@ function AdminDashboard() {
   };
 
 
-  const handleReportProduct = async (productId) => {
+  const handleReportProduct = async (productId,reason) => {
     try {
       setIsSubmitting(true);
       await axios.post(
         `${API_BASE_URL}/api/reports/product/${productId}`,
-        { reason: reportReason },
+        {"message": reason},
         {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("jwt")}`,
@@ -126,103 +126,84 @@ function AdminDashboard() {
   };
 
   // Report Dialog Component
-  // Modified Report Dialog Component
-  const ReportDialog = ({ type, id, onReport }) => {
-    const [isOpen, setIsOpen] = useState(false);
-    const [reason, setReason] = useState("");
-    const [isSubmitting, setIsSubmitting] = useState(false);
+   const ReportDialog = ({ type, id, onReport }) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const [reason, setReason] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-    const handleSubmit = async () => {
-      if (!reason.trim()) {
-        alert("Please enter a reason for the warning");
-        return;
+  const handleSubmit = async () => {
+    if (!reason.trim()) {
+      alert("Please enter a reason for the warning");
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      if (type === "User") {
+        await onReport(id, reason);
+      } else {
+        await onReport(id, reason);
       }
-
-      setIsSubmitting(true);
-      try {
-        if (type === "User") {
-          await axios.post(
-            `${API_BASE_URL}/api/reports/user/${id}`,
-            { reason },
-            {
-              headers: {
-                Authorization: `Bearer ${localStorage.getItem("jwt")}`,
-              },
-            }
-          );
-        } else {
-          await axios.post(
-            `${API_BASE_URL}/api/reports/product/${id}`,
-            { reason },
-            {
-              headers: {
-                Authorization: `Bearer ${localStorage.getItem("jwt")}`,
-              },
-            }
-          );
-        }
-        alert(`${type} warned successfully`);
-        setIsOpen(false);
-        setReason("");
-      } catch (error) {
-        console.error(`Error warning ${type.toLowerCase()}:`, error);
-        alert("Failed to send warning");
-      } finally {
-        setIsSubmitting(false);
-      }
-    };
-
-    return (
-      <>
-        <Button variant="ghost" size="icon" onClick={() => setIsOpen(true)}>
-          <AlertTriangle className="h-5 w-5 text-red-500" />
-        </Button>
-
-        <Dialog open={isOpen} onOpenChange={setIsOpen}>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Warn {type}</DialogTitle>
-            </DialogHeader>
-            <div className="py-4">
-              <label className="block text-sm font-medium mb-2">
-                Reason for warning
-              </label>
-              <Textarea
-                value={reason}
-                onChange={(e) => setReason(e.target.value)}
-                placeholder={`Enter reason for warning this ${type.toLowerCase()}...`}
-                className="w-full"
-                disabled={isSubmitting}
-              />
-            </div>
-            <DialogFooter>
-              <Button 
-                variant="outline" 
-                onClick={() => {
-                  setIsOpen(false);
-                  setReason("");
-                }}
-                disabled={isSubmitting}
-              >
-                Cancel
-              </Button>
-              <Button 
-                onClick={handleSubmit}
-                disabled={isSubmitting || !reason.trim()}
-              >
-                {isSubmitting ? "Sending..." : "Send Warning"}
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
-      </>
-    );
+      setIsOpen(false);
+      setReason("");
+    } catch (error) {
+      console.error(`Error warning ${type.toLowerCase()}:`, error);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
+
+  return (
+    <>
+      <Button variant="ghost" size="icon" onClick={() => setIsOpen(true)}>
+        <AlertTriangle className="h-5 w-5 text-red-500" />
+      </Button>
+
+      <Dialog open={isOpen} onOpenChange={setIsOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Warn {type}</DialogTitle>
+          </DialogHeader>
+          <div className="py-4">
+            <label className="block text-sm font-medium mb-2">
+              Reason for warning
+            </label>
+            <Textarea
+              value={reason}
+              onChange={(e) => setReason(e.target.value)}
+              placeholder={`Enter reason for warning this ${type.toLowerCase()}...`}
+              className="w-full"
+              disabled={isSubmitting}
+            />
+          </div>
+          <DialogFooter>
+            <Button 
+              variant="outline" 
+              onClick={() => {
+                setIsOpen(false);
+                setReason("");
+              }}
+              disabled={isSubmitting}
+            >
+              Cancel
+            </Button>
+            <Button 
+              onClick={handleSubmit}
+              disabled={isSubmitting || !reason.trim()}
+            >
+              {isSubmitting ? "Sending..." : "Send Warning"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </>
+  );
+}; 
   // Fetch functions
   // Fetch functions with proper error handling
   const fetchUniversities = async () => {
     try {
-      const response = await axios.get(`${API_BASE_URL}/api/universities`, {
+      const response = await axios.get(`${API_BASE_URL}/api/universities/public`, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("jwt")}`,
         },
@@ -895,40 +876,88 @@ function AdminDashboard() {
         )}
         {/* Feedback Tab Content */}
         {activeTab === "feedback" && (
-          <div>
-            <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-6">
-              User Feedback
-            </h2>
-            <div className="grid gap-6">
-              {feedback.map((item) => (
-                <div
-                  key={item.id}
-                  className="bg-white dark:bg-gray-800 rounded-lg shadow p-6"
-                >
-                  <div className="flex items-start justify-between mb-4">
-                    <div>
-                      <h3 className="text-lg font-medium text-gray-900 dark:text-white">
-                        {item.userName}
-                      </h3>
-                      <p className="text-sm text-gray-500 dark:text-gray-400">
-                        {new Date(item.createdAt).toLocaleDateString()}
-                      </p>
-                    </div>
-                    <div className="flex items-center">
-                      <ThumbsUp className="h-5 w-5 text-blue-500 mr-2" />
-                      <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                        {item.rating}/5
+      <div>
+        <div className="flex justify-between items-center mb-6">
+          <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
+            User Feedback
+          </h2>
+          <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
+            <span>Total Feedback: {feedback.length}</span>
+            <span>|</span>
+            <span>Average Rating: {
+              (feedback.reduce((acc, item) => acc + item.star, 0) / feedback.length || 0).toFixed(1)
+            }/5</span>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {feedback.map((item) => (
+            <div
+              key={item.id}
+              className="bg-white dark:bg-gray-800 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300 overflow-hidden"
+            >
+              <div className="p-6">
+                <div className="flex items-start justify-between mb-4">
+                  <div className="flex items-center space-x-3">
+                    <div className="h-10 w-10 rounded-full bg-blue-100 dark:bg-blue-900 flex items-center justify-center">
+                      <span className="text-blue-600 dark:text-blue-300 font-semibold text-lg">
+                        {item.name.charAt(0).toUpperCase()}
                       </span>
                     </div>
+                    <div>
+                      <h3 className="text-lg font-medium text-gray-900 dark:text-white">
+                        {item.name}
+                      </h3>
+                      <p className="text-sm text-gray-500 dark:text-gray-400">
+                        ID: {item.id}
+                      </p>
+                    </div>
                   </div>
-                  <p className="text-gray-700 dark:text-gray-300">
-                    {item.comment}
+                  <div className="flex items-center bg-gray-100 dark:bg-gray-700 rounded-full px-3 py-1">
+                    <ThumbsUp 
+                      className={`h-4 w-4 mr-1 ${
+                        item.star > 0 
+                          ? "text-yellow-500" 
+                          : "text-gray-400 dark:text-gray-500"
+                      }`} 
+                    />
+                    <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                      {item.star}/5
+                    </span>
+                  </div>
+                </div>
+                <div className="relative">
+                  <MessageSquare className="absolute top-0 left-0 h-4 w-4 text-gray-300 dark:text-gray-600" />
+                  <p className="pl-6 text-gray-700 dark:text-gray-300 text-sm leading-relaxed">
+                    {item.message}
                   </p>
                 </div>
-              ))}
+              </div>
+              <div className="px-6 py-3 bg-gray-50 dark:bg-gray-700/50 border-t border-gray-100 dark:border-gray-700">
+                <div className="flex justify-between items-center">
+                  <Button 
+                    variant="ghost" 
+                    size="sm"
+                    className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300"
+                  >
+                    <Mail className="h-4 w-4 mr-2" />
+                    Contact User
+                  </Button>
+                  <Button 
+                    variant="ghost" 
+                    size="sm"
+                    className="text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300"
+                  >
+                    <Trash2 className="h-4 w-4 mr-2" />
+                    Delete
+                  </Button>
+                </div>
+              </div>
             </div>
-          </div>
-        )}
+          ))}
+        </div>
+      </div>
+    )}
       </main>
     </div>
   );

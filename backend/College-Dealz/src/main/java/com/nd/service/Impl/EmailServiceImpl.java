@@ -50,7 +50,7 @@ public class EmailServiceImpl implements EmailService {
     @Override
     public void sendUserReportEmail(ReportEmailRequest reportEmailRequest, int id ) {
         SimpleMailMessage message = new SimpleMailMessage();
-
+        System.out.println("\n\nWARNING MESSAGE: "+reportEmailRequest.getMessage());
         String email=userRepo.findById(id).get()
                 .getEmail();
         message.setTo(email);
@@ -59,8 +59,8 @@ public class EmailServiceImpl implements EmailService {
         );
         message.setText(reportEmailRequest.getMessage());
         // Optionally, set the sender email and reply-to if needed:
-        message.setFrom("22ituos003@ddu.ac.in");
-
+        //message.setFrom("22ituos003@ddu.ac.in");
+        message.setFrom("collegedealzz@gmail.com");
         mailSender.send(message);
     }
 

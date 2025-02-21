@@ -16,6 +16,7 @@ public class ReportController {
     @PostMapping("/user/{id}")
     public ResponseEntity<String> sendUserReportEmail(@RequestBody ReportEmailRequest reportEmailRequest, @PathVariable Integer id) {
 
+        System.out.println("\n\nWARNING MESSAGE: "+reportEmailRequest.getMessage());
         emailService.sendUserReportEmail(reportEmailRequest, id);
         return ResponseEntity.ok("Report email sent successfully.");
     }
