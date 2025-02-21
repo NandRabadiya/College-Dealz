@@ -38,6 +38,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import {
   Select,
   SelectContent,
@@ -49,6 +50,7 @@ import { Badge } from "@/components/ui/badge";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import PostADeal from ".././product/PostADeal";
 import { API_BASE_URL } from "../../pages/Api/api";
+import { set } from "lodash";
 
 const UserDeals = () => {
   const [deals, setDeals] = useState([]);
@@ -74,6 +76,8 @@ const UserDeals = () => {
   const [removalReason, setRemovalReason] = useState("");
   const [understoodRepost, setUnderstoodRepost] = useState(false);
   const [currentDealId, setCurrentDealId] = useState(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [feedback, setFeedback] = useState({ type: '', message: '' });
 
   useEffect(() => {
     fetchUserDeals();
@@ -188,7 +192,8 @@ const UserDeals = () => {
   };
 
   const handleRepost = async () => {
-    if (!understoodRepost) return;
+    if (!understoodRepost || isSubmitting) return;
+    setIsSubmitting(true);
 
     try {
       const token = localStorage.getItem("jwt");
@@ -203,39 +208,83 @@ const UserDeals = () => {
       );
 
       if (response.ok) {
-        console.log(response.json());
-        await fetchUserDeals();
-        setRepostDialogOpen(false);
-        setUnderstoodRepost(false);
+        setFeedback({
+          type: 'success',
+          message: 'Deal reposted successfully! The page will refresh in a moment.'
+        });
+        setTimeout(async () => {
+          await fetchUserDeals();
+          setRepostDialogOpen(false);
+          setUnderstoodRepost(false);
+          setFeedback({ type: '', message: '' });
+        }, 2000);
+      } else {
+        throw new Error('Failed to repost deal');
       }
     } catch (error) {
-      console.error("Error reposting deal:", error);
+      setFeedback({
+        type: 'error',
+        message: 'Failed to repost deal. Please try again.'
+      });
+      setTimeout(() => {
+        setFeedback({ type: '', message: '' });
+      }, 3000);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   const handleRemove = async () => {
+    if (!removalReason || isSubmitting) return;
+
+    setIsSubmitting(true);
     try {
       const token = localStorage.getItem("jwt");
       const response = await fetch(
-        `${API_BASE_URL}/api/products/remove/${currentDealId}`,
+        `${API_BASE_URL}/api/products/remove-by-user/${currentDealId}?reason=${encodeURIComponent(removalReason)}`,
         {
-          method: "POST",
+          method: "DELETE",
           headers: {
             Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
           },
-          body: JSON.stringify({ reason: removalReason }),
         }
       );
 
       if (response.ok) {
-        setDeals(deals.filter((deal) => deal.id !== currentDealId));
-        setRemoveDialogOpen(false);
-        setRemovalReason("");
+        setFeedback({
+          type: 'success',
+          message: 'Deal removed successfully! The page will refresh in a moment.'
+        });
+        setTimeout(() => {
+          setDeals(deals.filter((deal) => deal.id !== currentDealId));
+          setRemoveDialogOpen(false);
+          setRemovalReason("");
+          setFeedback({ type: '', message: '' });
+        }, 2000);
+      } else {
+        throw new Error('Failed to remove deal');
       }
     } catch (error) {
-      console.error("Error removing deal:", error);
+      setFeedback({
+        type: 'error',
+        message: 'Failed to remove deal. Please try again.'
+      });
+      setTimeout(() => {
+        setFeedback({ type: '', message: '' });
+      }, 3000);
+    } finally {
+      setIsSubmitting(false);
     }
+  };
+
+  const FeedbackAlert = ({ type, message }) => {
+    if (!message) return null;
+    
+    return (
+      <Alert className={`mb-4 ${type === 'success' ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'}`}>
+        <AlertDescription>{message}</AlertDescription>
+      </Alert>
+    );
   };
 
   const handleShare = (deal, platform, e) => {
@@ -686,25 +735,28 @@ const UserDeals = () => {
       </CardFooter>
     </Card>
   );
-
   return (
     <div className="space-y-6">
       <Dialog open={removeDialogOpen} onOpenChange={setRemoveDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Remove Deal</DialogTitle>
-            <Button
-              variant="ghost"
-              size="sm"
-              className="absolute right-2 top-2"
-              onClick={() => setRemoveDialogOpen(false)}
-            >
-              {/* <X className="h-4 w-4" /> */}
-            </Button>
+            <DialogTitle>Deal Options</DialogTitle>
           </DialogHeader>
-          <div className="space-y-4">
-            <div className="space-y-2">
-              
+          <div className="space-y-6">
+            <FeedbackAlert type={feedback.type} message={feedback.message} />
+            
+            {/* Post Again Section */}
+            <div className="space-y-4 border-b pb-4">
+              <h3 className="font-semibold">Post Again</h3>
+              <div className="text-sm text-muted-foreground space-y-2">
+                <p>Benefits of reposting:</p>
+                <ul className="list-disc pl-4 space-y-1">
+                  <li>Appears at the top of search results</li>
+                  <li>Reaches new potential buyers</li>
+                  <li>Updates the posting date</li>
+                </ul>
+                <p className="text-yellow-600 mt-2">Note: Reposting will reset all deal history including chats and notifications</p>
+              </div>
               <div className="flex items-center space-x-2">
                 <Checkbox
                   id="repost"
@@ -712,54 +764,70 @@ const UserDeals = () => {
                   onCheckedChange={setUnderstoodRepost}
                 />
                 <label htmlFor="repost" className="text-sm">
-                  I understand that reposting will delete all product history
-                  including chats
+                  I understand that reposting will reset all deal history
                 </label>
               </div>
               <Button
                 onClick={handleRepost}
-                disabled={!understoodRepost}
+                disabled={!understoodRepost || isSubmitting}
                 className="w-full"
               >
-                Repost Deal
+                {isSubmitting ? 'Reposting...' : 'Post Again'}
               </Button>
             </div>
-            <div className="relative">
-              <div className="absolute inset-0 flex items-center">
-                <span className="w-full border-t" />
+
+            {/* Remove Section */}
+            <div className="space-y-4">
+              <h3 className="font-semibold">Remove Deal</h3>
+              <div className="text-sm text-muted-foreground">
+                <p>Removing this deal will permanently delete:</p>
+                <ul className="list-disc pl-4 space-y-1 mt-2">
+                  <li>All chat conversations</li>
+                  <li>Deal statistics and analytics</li>
+                  <li>All associated data and history</li>
+                </ul>
               </div>
-              <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-background px-2 text-muted-foreground">
-                  Or
-                </span>
-              </div>
-            </div>
-            <div className="space-y-2">
               <Textarea
-                placeholder="Reason for removal"
+                placeholder="Please provide a reason for removal"
                 value={removalReason}
                 onChange={(e) => setRemovalReason(e.target.value)}
-                className="min-h-[100px]"
+                className="min-h-[80px]"
               />
               <Button
                 onClick={handleRemove}
                 variant="destructive"
-                disabled={!removalReason}
+                disabled={!removalReason || isSubmitting}
                 className="w-full"
               >
-                Remove Deal
+                {isSubmitting ? 'Removing...' : 'Remove Deal'}
               </Button>
             </div>
           </div>
         </DialogContent>
       </Dialog>
-      {/* Repost Dialog */}
       <Dialog open={repostDialogOpen} onOpenChange={setRepostDialogOpen}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Post Again</DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
+            <FeedbackAlert type={feedback.type} message={feedback.message} />
+            
+            <div className="text-sm text-muted-foreground space-y-2 mb-4">
+              <p>Reposting your deal can help:</p>
+              <ul className="list-disc pl-4 space-y-1">
+                <li>Improve visibility by appearing at the top of search results</li>
+                <li>Reach new potential buyers</li>
+                <li>Update the posting date to current</li>
+              </ul>
+              <p className="font-medium mt-4">Important: Reposting will reset your deal's history, including:</p>
+              <ul className="list-disc pl-4 space-y-1 text-yellow-600">
+                <li>All chat conversations</li>
+                <li>Interested buyer notifications</li>
+                <li>View and interaction statistics</li>
+              </ul>
+            </div>
+
             <div className="flex items-center space-x-2">
               <Checkbox
                 id="repost"
@@ -767,20 +835,20 @@ const UserDeals = () => {
                 onCheckedChange={setUnderstoodRepost}
               />
               <label htmlFor="repost" className="text-sm">
-                On posting the deal again it will delete current product history like chat related to the product, etc
+                I understand that reposting will reset all deal history
               </label>
             </div>
+            
             <Button
               onClick={handleRepost}
-              disabled={!understoodRepost}
+              disabled={!understoodRepost || isSubmitting}
               className="w-full"
             >
-              Post Again
+              {isSubmitting ? 'Reposting...' : 'Post Again'}
             </Button>
           </div>
         </DialogContent>
       </Dialog>
-
       <Dialog open={soldDialogOpen} onOpenChange={setSoldDialogOpen}>
         <DialogContent>
           <DialogHeader>
