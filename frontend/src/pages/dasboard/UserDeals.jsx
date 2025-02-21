@@ -193,7 +193,7 @@ const UserDeals = () => {
     try {
       const token = localStorage.getItem("jwt");
       const response = await fetch(
-        `${API_BASE_URL}/api/products/repost/${currentDealId}`,
+        `${API_BASE_URL}/api/products/${currentDealId}/relist`,
         {
           method: "POST",
           headers: {
@@ -203,6 +203,7 @@ const UserDeals = () => {
       );
 
       if (response.ok) {
+        console.log(response.json());
         await fetchUserDeals();
         setRepostDialogOpen(false);
         setUnderstoodRepost(false);
