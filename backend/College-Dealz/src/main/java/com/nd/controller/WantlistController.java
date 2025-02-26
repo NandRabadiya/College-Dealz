@@ -45,7 +45,7 @@ public class WantlistController {
     }
 
     @GetMapping("/{product_id}")
-    public ResponseEntity<WantlistDto> getProductById(@PathVariable Integer product_id) {
+    public ResponseEntity<WantlistDto> getWantlistProductById(@PathVariable Integer product_id) {
 
         WantlistDto wantlistDto = wantlistService.getWantlistById(product_id);
 
