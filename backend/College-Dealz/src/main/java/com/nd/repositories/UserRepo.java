@@ -2,6 +2,7 @@ package com.nd.repositories;
 
 import com.nd.dto.UserDto;
 import com.nd.entities.Role;
+import com.nd.entities.University;
 import com.nd.entities.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -27,6 +28,8 @@ int countByRolesContaining(Role role);
     @Override
     Optional<User> findById(Integer integer);
 
+
+
    // int getUserByEmail(String email);
 
     @Query("SELECT u.id FROM User u WHERE u.email = :email")
@@ -34,5 +37,7 @@ int countByRolesContaining(Role role);
 
 
    List<User> findByRolesContaining(Role role);
+
+    List<User> findAllByUniversity(University university);
 }
 

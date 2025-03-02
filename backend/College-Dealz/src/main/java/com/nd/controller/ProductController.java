@@ -2,8 +2,11 @@ package com.nd.controller;
 
 import com.nd.dto.*;
 import com.nd.entities.ArchivedProducts;
+import com.nd.enums.NotificationType;
+import com.nd.enums.ReferenceType;
 import com.nd.exceptions.ProductException;
 import com.nd.service.JwtService;
+import com.nd.service.NotificationService;
 import com.nd.service.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -27,6 +30,9 @@ public class ProductController {
     @Autowired
     private JwtService  jwtService;
 
+    @Autowired
+    private NotificationService notificationService;
+
     @GetMapping("/{productId}")
     public ResponseEntity<ProductDto> getProductById(@PathVariable Integer productId) {
         ProductDto productDto = productService.getProductById(productId);
@@ -47,6 +53,28 @@ public class ProductController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error: " + ex.getMessage());
         }
     }
+
+    @PostMapping("/create-from-wantlist")
+    public ResponseEntity<?> createProductFromWantlist(
+            @Validated @ModelAttribute ProductDto productDto,
+            @RequestHeader("Authorization") String authHeader,
+            @RequestParam("BuyerId") int buyerId) {
+        try {
+            ProductDto createdProduct = productService.createProductWithImages(productDto, authHeader);
+
+           // int sellerId = jwtService.getUserIdFromToken(authHeader);
+            notificationService.createNotificationForUser(buyerId,"Prouct Matching your wantlist is listed","See the product , is it maatching your need ?",
+                    NotificationType.ITEM_INTEREST, ReferenceType.PRODUCT_ITEM,createdProduct.getId());
+
+            return ResponseEntity.ok(createdProduct);
+        } catch (IllegalArgumentException ex) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
+        } catch (Exception ex) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error: " + ex.getMessage());
+        }
+    }
+
+
 
     @PostMapping("/")
     public ResponseEntity<ProductDto> createProduct(

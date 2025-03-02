@@ -41,6 +41,8 @@ public class User implements UserDetails {
     @Column(nullable = false, unique = true)
     private String email;
 
+    @ManyToMany(mappedBy = "users")
+    private Set<Notification> notifications = new HashSet<>();
 
     @Column
     private String password;
