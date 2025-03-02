@@ -27,6 +27,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogFooter,
+  DialogDescription,
 } from "@/components/ui/dialog";
 import {
   DropdownMenu,
@@ -77,7 +78,9 @@ const UserDeals = () => {
   const [understoodRepost, setUnderstoodRepost] = useState(false);
   const [currentDealId, setCurrentDealId] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [feedback, setFeedback] = useState({ type: '', message: '' });
+  const [feedback, setFeedback] = useState({ type: "", message: "" });
+  const [confirmSoldDialogOpen, setConfirmSoldDialogOpen] = useState(false);
+  const [tempSoldType, setTempSoldType] = useState(null);
 
   useEffect(() => {
     fetchUserDeals();
@@ -175,7 +178,8 @@ const UserDeals = () => {
     try {
       const token = localStorage.getItem("jwt");
       const response = await fetch(
-        `${API_BASE_URL}/api/products/${dealId}/interested-buyers`);
+        `${API_BASE_URL}/api/products/${dealId}/interested-buyers`
+      );
       if (response.ok) {
         const buyers = await response.json();
         setInterestedBuyers(buyers);
@@ -203,25 +207,26 @@ const UserDeals = () => {
 
       if (response.ok) {
         setFeedback({
-          type: 'success',
-          message: 'Deal reposted successfully! The page will refresh in a moment.'
+          type: "success",
+          message:
+            "Deal reposted successfully! The page will refresh in a moment.",
         });
         setTimeout(async () => {
           await fetchUserDeals();
           setRepostDialogOpen(false);
           setUnderstoodRepost(false);
-          setFeedback({ type: '', message: '' });
+          setFeedback({ type: "", message: "" });
         }, 2000);
       } else {
-        throw new Error('Failed to repost deal');
+        throw new Error("Failed to repost deal");
       }
     } catch (error) {
       setFeedback({
-        type: 'error',
-        message: 'Failed to repost deal. Please try again.'
+        type: "error",
+        message: "Failed to repost deal. Please try again.",
       });
       setTimeout(() => {
-        setFeedback({ type: '', message: '' });
+        setFeedback({ type: "", message: "" });
       }, 3000);
     } finally {
       setIsSubmitting(false);
@@ -235,7 +240,9 @@ const UserDeals = () => {
     try {
       const token = localStorage.getItem("jwt");
       const response = await fetch(
-        `${API_BASE_URL}/api/products/remove-by-user/${currentDealId}?reason=${encodeURIComponent(removalReason)}`,
+        `${API_BASE_URL}/api/products/remove-by-user/${currentDealId}?reason=${encodeURIComponent(
+          removalReason
+        )}`,
         {
           method: "DELETE",
           headers: {
@@ -246,25 +253,26 @@ const UserDeals = () => {
 
       if (response.ok) {
         setFeedback({
-          type: 'success',
-          message: 'Deal removed successfully! The page will refresh in a moment.'
+          type: "success",
+          message:
+            "Deal removed successfully! The page will refresh in a moment.",
         });
         setTimeout(() => {
           setDeals(deals.filter((deal) => deal.id !== currentDealId));
           setRemoveDialogOpen(false);
           setRemovalReason("");
-          setFeedback({ type: '', message: '' });
+          setFeedback({ type: "", message: "" });
         }, 2000);
       } else {
-        throw new Error('Failed to remove deal');
+        throw new Error("Failed to remove deal");
       }
     } catch (error) {
       setFeedback({
-        type: 'error',
-        message: 'Failed to remove deal. Please try again.'
+        type: "error",
+        message: "Failed to remove deal. Please try again.",
       });
       setTimeout(() => {
-        setFeedback({ type: '', message: '' });
+        setFeedback({ type: "", message: "" });
       }, 3000);
     } finally {
       setIsSubmitting(false);
@@ -273,9 +281,15 @@ const UserDeals = () => {
 
   const FeedbackAlert = ({ type, message }) => {
     if (!message) return null;
-    
+
     return (
-      <Alert className={`mb-4 ${type === 'success' ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'}`}>
+      <Alert
+        className={`mb-4 ${
+          type === "success"
+            ? "bg-green-50 text-green-700"
+            : "bg-red-50 text-red-700"
+        }`}
+      >
         <AlertDescription>{message}</AlertDescription>
       </Alert>
     );
@@ -291,7 +305,9 @@ const UserDeals = () => {
     switch (platform) {
       case "whatsapp":
         window.open(
-          `https://wa.me/?text=${encodeURIComponent(message + " " + productUrl)}`,
+          `https://wa.me/?text=${encodeURIComponent(
+            message + " " + productUrl
+          )}`,
           "_blank"
         );
         break;
@@ -341,10 +357,88 @@ const UserDeals = () => {
   const handleSoldTypeSelect = (type, e) => {
     e.preventDefault();
     e.stopPropagation();
-    setSoldType(type);
-    setSoldDialogOpen(true);
+    setTempSoldType(type);
+    setConfirmSoldDialogOpen(true);
+  };
+  const handleConfirmShareDetails = (confirmed) => {
+    if (confirmed) {
+      // User wants to share details
+      setConfirmSoldDialogOpen(false);
+      setSoldType(tempSoldType);
+      setSoldDialogOpen(true);
+    } else {
+      // User doesn't want to share details - implement quick mark as sold
+      handleQuickMarkAsSold();
+    }
   };
 
+  const handleQuickMarkAsSold = async () => {
+    if (!selectedDeal || isSubmitting) return;
+
+    setIsSubmitting(true);
+    setFeedback({ type: "", message: "" });
+
+    try {
+      const token = localStorage.getItem("jwt");
+      const endpoint =
+        tempSoldType === "platform"
+          ? `${API_BASE_URL}/api/products/sold-platform/${selectedDeal.id}`
+          : `${API_BASE_URL}/api/products/sold-outside/${selectedDeal.id}`;
+
+      const defaultData =
+        tempSoldType === "platform"
+          ? {
+              productId: selectedDeal.id,
+              soldPrice: selectedDeal.price,
+              soldDate: new Date().toISOString(),
+              buyerEmail: "Not specified",
+            }
+          : {
+              productId: selectedDeal.id,
+              soldToUniversityStudent: false,
+              soldPrice: selectedDeal.price,
+              soldDate: new Date().toISOString(),
+              sellingReason: "Not specified",
+            };
+
+      const response = await fetch(endpoint, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(defaultData),
+      });
+
+      if (response.ok) {
+        // Show success message briefly
+        setFeedback({
+          type: "success",
+          message: "Deal marked as sold successfully!",
+        });
+
+        // Reset and refresh data
+        setTimeout(async () => {
+          await fetchUserDeals();
+          setSoldDialogOpen(false);
+          setConfirmSoldDialogOpen(false);
+          setTempSoldType(null);
+          setSelectedDeal(null);
+          setFeedback({ type: "", message: "" });
+        }, 2000);
+      } else {
+        throw new Error("Failed to mark deal as sold");
+      }
+    } catch (error) {
+      console.error("Error marking deal as sold:", error);
+      setFeedback({
+        type: "error",
+        message: "Failed to mark deal as sold. Please try again.",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
   const handleDealUpdate = async (success = false) => {
     if (success) {
       await fetchUserDeals();
@@ -428,31 +522,35 @@ const UserDeals = () => {
   const handleSoldFormSubmit = async (e) => {
     e.preventDefault();
     if (isSubmitting) return;
-  
+
     setIsSubmitting(true);
-    setFeedback({ type: '', message: '' });
-  
+    setFeedback({ type: "", message: "" });
+
     const formData = {
       productId: selectedDeal.id,
-      ...(soldType === "platform" ? {
-        buyerId: selectedBuyer,
-        soldPrice: soldFormData.soldPrice,
-        soldDate: soldFormData.soldDate,
-        buyerEmail: soldFormData.buyerEmail
-      } : {
-        soldToUniversityStudent: soldFormData.soldToUniversityStudent === "yes",
-        sellingReason: soldFormData.sellingReason,
-        soldPrice: soldFormData.soldPrice,
-        soldDate: soldFormData.soldDate
-      })
+      ...(soldType === "platform"
+        ? {
+            buyerId: selectedBuyer,
+            soldPrice: soldFormData.soldPrice,
+            soldDate: soldFormData.soldDate,
+            buyerEmail: soldFormData.buyerEmail,
+          }
+        : {
+            soldToUniversityStudent:
+              soldFormData.soldToUniversityStudent === "yes",
+            sellingReason: soldFormData.sellingReason,
+            soldPrice: soldFormData.soldPrice,
+            soldDate: soldFormData.soldDate,
+          }),
     };
-  
+
     try {
       const token = localStorage.getItem("jwt");
-      const endpoint = soldType === "platform" 
-        ? `${API_BASE_URL}/api/products/sold-platform/${selectedDeal.id}`
-        : `${API_BASE_URL}/api/products/sold-outside/${selectedDeal.id}`;
-  
+      const endpoint =
+        soldType === "platform"
+          ? `${API_BASE_URL}/api/products/sold-platform/${selectedDeal.id}`
+          : `${API_BASE_URL}/api/products/sold-outside/${selectedDeal.id}`;
+
       const response = await fetch(endpoint, {
         method: "POST",
         headers: {
@@ -461,13 +559,13 @@ const UserDeals = () => {
         },
         body: JSON.stringify(formData),
       });
-  
+
       if (response.ok) {
         setFeedback({
-          type: 'success',
-          message: 'Deal marked as sold successfully!'
+          type: "success",
+          message: "Deal marked as sold successfully!",
         });
-        
+
         // Refresh deals list and reset form after 3 seconds
         setTimeout(async () => {
           await fetchUserDeals();
@@ -482,22 +580,22 @@ const UserDeals = () => {
             sellingReason: "",
           });
           setSelectedBuyer(null);
-          setFeedback({ type: '', message: '' });
-        }, 3000);
+          setFeedback({ type: "", message: "" });
+        }, 2000);
       } else {
-        throw new Error('Failed to mark deal as sold');
+        throw new Error("Failed to mark deal as sold");
       }
     } catch (error) {
       console.error("Error marking deal as sold:", error);
       setFeedback({
-        type: 'error',
-        message: 'Failed to mark deal as sold. Please try again.'
+        type: "error",
+        message: "Failed to mark deal as sold. Please try again.",
       });
     } finally {
       setIsSubmitting(false);
     }
   };
-  
+
   const renderSoldForm = () => {
     if (soldType === "platform") {
       return (
@@ -505,10 +603,7 @@ const UserDeals = () => {
           <FeedbackAlert type={feedback.type} message={feedback.message} />
           <div>
             <Label htmlFor="buyerSelect">Select Buyer</Label>
-            <Select
-              value={selectedBuyer}
-              onValueChange={setSelectedBuyer}
-            >
+            <Select value={selectedBuyer} onValueChange={setSelectedBuyer}>
               <SelectTrigger>
                 <SelectValue placeholder="Select a buyer" />
               </SelectTrigger>
@@ -556,17 +651,19 @@ const UserDeals = () => {
               required
             />
           </div>
-          <Button 
-            type="submit" 
+          <Button
+            type="submit"
             className="w-full"
-            disabled={isSubmitting || (!selectedBuyer && !soldFormData.buyerEmail)}
+            disabled={
+              isSubmitting || (!selectedBuyer && !soldFormData.buyerEmail)
+            }
           >
-            {isSubmitting ? 'Processing...' : 'Submit'}
+            {isSubmitting ? "Processing..." : "Submit"}
           </Button>
         </form>
       );
     }
-  
+
     if (soldType === "outside") {
       return (
         <form onSubmit={handleSoldFormSubmit} className="space-y-4">
@@ -631,17 +728,13 @@ const UserDeals = () => {
               required
             />
           </div>
-          <Button 
-            type="submit" 
-            className="w-full"
-            disabled={isSubmitting}
-          >
-            {isSubmitting ? 'Processing...' : 'Submit'}
+          <Button type="submit" className="w-full" disabled={isSubmitting}>
+            {isSubmitting ? "Processing..." : "Submit"}
           </Button>
         </form>
       );
     }
-  
+
     return null;
   };
 
@@ -677,8 +770,8 @@ const UserDeals = () => {
         <div className="col-span-3 flex gap-2">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button 
-                variant="secondary" 
+              <Button
+                variant="secondary"
                 className="flex-1"
                 onClick={(e) => {
                   e.preventDefault();
@@ -689,19 +782,21 @@ const UserDeals = () => {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="center" className="w-48">
-              <DropdownMenuItem 
+              <DropdownMenuItem
                 onClick={(e) => {
                   handleSoldButtonClick(deal, e);
                   fetchInterestedBuyers(deal.id);
-                  handleSoldTypeSelect("platform", e);
+                  setTempSoldType("platform");
+                  setConfirmSoldDialogOpen(true);
                 }}
               >
                 Sold on Platform
               </DropdownMenuItem>
-              <DropdownMenuItem 
+              <DropdownMenuItem
                 onClick={(e) => {
                   handleSoldButtonClick(deal, e);
-                  handleSoldTypeSelect("outside", e);
+                  setTempSoldType("outside");
+                  setConfirmSoldDialogOpen(true);
                 }}
               >
                 Sold Outside
@@ -709,8 +804,8 @@ const UserDeals = () => {
             </DropdownMenuContent>
           </DropdownMenu>
 
-          <Button 
-            variant="outline" 
+          <Button
+            variant="outline"
             className="flex-1"
             onClick={(e) => {
               e.preventDefault();
@@ -726,8 +821,8 @@ const UserDeals = () => {
         <div className="col-span-2 flex gap-2">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button 
-                variant="ghost" 
+              <Button
+                variant="ghost"
                 className="flex-1"
                 onClick={(e) => {
                   e.preventDefault();
@@ -735,15 +830,18 @@ const UserDeals = () => {
                 }}
               >
                 <Share2 className="mr-2 h-4 w-4" />
-                
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="center" className="w-48">
-              <DropdownMenuItem onClick={(e) => handleShare(deal, "whatsapp", e)}>
+              <DropdownMenuItem
+                onClick={(e) => handleShare(deal, "whatsapp", e)}
+              >
                 <MessageSquare className="mr-2 h-4 w-4" />
                 WhatsApp
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={(e) => handleShare(deal, "facebook", e)}>
+              <DropdownMenuItem
+                onClick={(e) => handleShare(deal, "facebook", e)}
+              >
                 <Facebook className="mr-2 h-4 w-4" />
                 Facebook
               </DropdownMenuItem>
@@ -758,8 +856,8 @@ const UserDeals = () => {
             </DropdownMenuContent>
           </DropdownMenu>
 
-          <Button 
-            variant="ghost" 
+          <Button
+            variant="ghost"
             className="flex-1 text-destructive hover:text-destructive hover:bg-destructive/10"
             onClick={(e) => {
               e.preventDefault();
@@ -769,7 +867,6 @@ const UserDeals = () => {
             }}
           >
             <Trash2 className="mr-2 h-4 w-4" />
-            
           </Button>
         </div>
       </CardFooter>
@@ -777,6 +874,54 @@ const UserDeals = () => {
   );
   return (
     <div className="space-y-6">
+      {/* New Confirmation Dialog */}
+      <Dialog
+        open={confirmSoldDialogOpen}
+        onOpenChange={setConfirmSoldDialogOpen}
+      >
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>
+              {tempSoldType === "platform"
+                ? "Sold on Platform"
+                : "Sold Outside Platform"}
+            </DialogTitle>
+            {/* Add the feedback alert */}
+            <FeedbackAlert type={feedback.type} message={feedback.message} />
+            <DialogDescription>
+              Would you like to share more details about this sale?
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="flex flex-col space-y-2 mt-4">
+            <p className="text-sm text-muted-foreground">
+              Sharing details helps us improve our platform and your selling
+              experience.
+            </p>
+          </div>
+
+          <DialogFooter className="flex flex-col sm:flex-row gap-2 sm:gap-0 mt-6">
+            <Button
+              type="button"
+              variant="outline"
+              disabled={isSubmitting || feedback.type !== ""}
+              onClick={() => handleConfirmShareDetails(false)}
+              className="sm:w-full"
+            >
+              Just Mark as Sold
+            </Button>
+            <Button
+              type="button"
+              disabled={isSubmitting || feedback.type !== ""}
+              onClick={() => handleConfirmShareDetails(true)}
+              className="sm:w-full"
+            >
+              Share Details
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
       <Dialog open={removeDialogOpen} onOpenChange={setRemoveDialogOpen}>
         <DialogContent>
           <DialogHeader>
@@ -784,7 +929,7 @@ const UserDeals = () => {
           </DialogHeader>
           <div className="space-y-6">
             <FeedbackAlert type={feedback.type} message={feedback.message} />
-            
+
             {/* Post Again Section */}
             <div className="space-y-4 border-b pb-4">
               <h3 className="font-semibold">Post Again</h3>
@@ -795,7 +940,10 @@ const UserDeals = () => {
                   <li>Reaches new potential buyers</li>
                   <li>Updates the posting date</li>
                 </ul>
-                <p className="text-yellow-600 mt-2">Note: Reposting will reset all deal history including chats and notifications</p>
+                <p className="text-yellow-600 mt-2">
+                  Note: Reposting will reset all deal history including chats
+                  and notifications
+                </p>
               </div>
               <div className="flex items-center space-x-2">
                 <Checkbox
@@ -812,7 +960,7 @@ const UserDeals = () => {
                 disabled={!understoodRepost || isSubmitting}
                 className="w-full"
               >
-                {isSubmitting ? 'Reposting...' : 'Post Again'}
+                {isSubmitting ? "Reposting..." : "Post Again"}
               </Button>
             </div>
 
@@ -839,7 +987,7 @@ const UserDeals = () => {
                 disabled={!removalReason || isSubmitting}
                 className="w-full"
               >
-                {isSubmitting ? 'Removing...' : 'Remove Deal'}
+                {isSubmitting ? "Removing..." : "Remove Deal"}
               </Button>
             </div>
           </div>
@@ -852,15 +1000,19 @@ const UserDeals = () => {
           </DialogHeader>
           <div className="space-y-4">
             <FeedbackAlert type={feedback.type} message={feedback.message} />
-            
+
             <div className="text-sm text-muted-foreground space-y-2 mb-4">
               <p>Reposting your deal can help:</p>
               <ul className="list-disc pl-4 space-y-1">
-                <li>Improve visibility by appearing at the top of search results</li>
+                <li>
+                  Improve visibility by appearing at the top of search results
+                </li>
                 <li>Reach new potential buyers</li>
                 <li>Update the posting date to current</li>
               </ul>
-              <p className="font-medium mt-4">Important: Reposting will reset your deal's history, including:</p>
+              <p className="font-medium mt-4">
+                Important: Reposting will reset your deal's history, including:
+              </p>
               <ul className="list-disc pl-4 space-y-1 text-yellow-600">
                 <li>All chat conversations</li>
                 <li>Interested buyer notifications</li>
@@ -878,13 +1030,13 @@ const UserDeals = () => {
                 I understand that reposting will reset all deal history
               </label>
             </div>
-            
+
             <Button
               onClick={handleRepost}
               disabled={!understoodRepost || isSubmitting}
               className="w-full"
             >
-              {isSubmitting ? 'Reposting...' : 'Post Again'}
+              {isSubmitting ? "Reposting..." : "Post Again"}
             </Button>
           </div>
         </DialogContent>
