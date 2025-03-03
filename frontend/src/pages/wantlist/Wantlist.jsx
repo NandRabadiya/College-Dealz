@@ -7,20 +7,28 @@ function Wantlist() {
   const [showForm, setShowForm] = useState(false);
   const [editingItem, setEditingItem] = useState(null);
   const [wantlist, setWantlist] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     fetchWantlist();
   }, []);
 
   const fetchWantlist = async () => {
-    const response = await fetch(`${API_BASE_URL}/api/wantlist/all`, {
-      method: 'GET',
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem('jwt')}`,
-      },
-    });
-    const data = await response.json();
-    setWantlist(data);
+    setLoading(true);
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/wantlist/all`, {
+        method: 'GET',
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('jwt')}`,
+        },
+      });
+      const data = await response.json();
+      setWantlist(data);
+    } catch (error) {
+      console.error("Error fetching wantlist:", error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleSubmit = async (data) => {
@@ -97,6 +105,17 @@ function Wantlist() {
           </button>
         </div>
 
+        {loading ? (
+        <div className="flex justify-center items-center py-12">
+          <Aperture className="animate-spin h-8 w-8 text-blue-600" />
+          <span className="ml-2 text-gray-600">Loading your wantlist...</span>
+        </div>
+      ) : wantlist.length === 0 ? (
+        <div className="bg-white rounded-lg shadow p-8 text-center">
+          <h3 className="text-xl font-medium text-gray-900 mb-2">Your wantlist is empty</h3>
+          <p className="text-gray-600 mb-4">Start adding items you're looking for by clicking the "Add Item" button.</p>
+        </div>
+      ) : (
         <div className="space-y-4">
           {wantlist.map((item) => (
             <div
@@ -152,6 +171,7 @@ function Wantlist() {
             </div>
           ))}
         </div>
+      )}
 
         {showForm && (
           <WantlistForm

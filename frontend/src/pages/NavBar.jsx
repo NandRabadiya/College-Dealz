@@ -9,6 +9,7 @@ import {
   Sun,
   Moon,
   Bell,
+  ClipboardPen,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -122,6 +123,13 @@ const [currentSearch, setCurrentSearch] = useState("");
     });
   };
 
+  const handleWantlist = () => {
+    handleProtectedAction("/wantlist", () => {
+      console.log("Navigating to wantlist");
+      navigate("/wantlist");
+      // Add navigation logic here
+    });
+  };
   const handleChat = () => {
     handleProtectedAction("", () => {
       console.log("Navigating to chat");
@@ -286,9 +294,18 @@ const AuthSection = ({ isMobile = false }) => (
         <Heart className="h-5 w-5" />
         {isMobile && <span className="ml-2">Wishlist</span>}
       </Button>
+      <Button
+        variant="ghost"
+        size="icon"
+        className={isMobile ? "w-full flex justify-start" : ""}
+        onClick={handleWantlist}
+      >
+        <ClipboardPen className="h-6 w-6" />
+        {isMobile && <span className="ml-2">Wantlist</span>}
+      </Button>
       <NotificationBell>
         <div className="relative cursor-pointer">
-          <Bell className="w-6 h-6" />
+          <Bell className="w-4 h-4" />
         </div>
       </NotificationBell>
       <ThemeToggle isMobile={isMobile} />

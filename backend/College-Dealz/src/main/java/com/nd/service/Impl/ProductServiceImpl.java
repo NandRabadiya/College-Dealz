@@ -313,7 +313,7 @@ public class ProductServiceImpl implements ProductService {
             BigDecimal minPrice,
             BigDecimal maxPrice) {
          int pageNumber = (page != null && page >= 0) ? page : 0;
-        int pageSize = (size != null && size > 0) ? size : 2;
+        int pageSize = (size != null && size > 0) ? size : 10;
         String sortBy = (sortField != null && !sortField.isEmpty()) ? sortField : "price";
         Sort.Direction direction = (sortDir != null && sortDir.equalsIgnoreCase("desc")) ? Sort.Direction.DESC : Sort.Direction.ASC;
         Pageable sortedPageable = PageRequest.of(pageNumber, pageSize, Sort.by(direction, sortBy));
