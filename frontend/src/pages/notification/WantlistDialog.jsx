@@ -7,16 +7,16 @@ import {
   DialogFooter
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { useRouter } from "next/router";
+import { useNavigate } from "react-router-dom";
 
 const WantlistDialog = ({ isOpen, onClose, wantlistData }) => {
-  const router = useRouter();
+  const navigate = useNavigate();
   
   if (!wantlistData) return null;
   
   const handlePostDeal = () => {
     // Logic to navigate to post a deal page with wantlist data
-    router.push(`/post-deal?wantlistId=${wantlistData.id}`);
+    navigate(`/post-deal?wantlistId=${wantlistData.id}`);
     onClose();
   };
   

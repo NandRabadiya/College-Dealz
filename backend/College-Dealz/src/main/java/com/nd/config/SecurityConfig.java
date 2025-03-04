@@ -61,6 +61,7 @@ public class SecurityConfig {
             "/send-otp**",
             "/verify**",
             "/resend-otp**",
+            "/favicon.ico",
             "/api/products/public/shared-product/**"
     );
 

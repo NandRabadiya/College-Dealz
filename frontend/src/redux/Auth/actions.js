@@ -166,8 +166,17 @@ export const sendOtp = (email) => async (dispatch) => {
     const params = new URLSearchParams({ email });
     const response = await axios.post(`${API_BASE_URL}/send-otp?${params}`);
     console.log("OTP sent:", response.data);
-    dispatch(sendOtpSuccess(response.data.message));
+    const responseMessage = response.data.response || response.data.message || "OTP sent successfully";
+
+    // If the response indicates the email is already registered, trigger failure action
+    if (responseMessage === "Your Email is already registered Try Login") {
+        dispatch(sendOtpFailure(responseMessage));
+        return { type: "SEND_OTP_FAILURE", payload: { message: responseMessage } };
+    }
+    
+    dispatch(sendOtpSuccess(responseMessage));
     return { type: "SEND_OTP_SUCCESS", payload: response.data };
+    
   } catch (error) {
     console.error('OTP Error details:', {
       status: error.response?.status,
@@ -187,7 +196,7 @@ export const resendOtp = (email) => async (dispatch) => {
     const response = await axios.post(`${API_BASE_URL}/resend-otp`, null, {
       params: { email }
     });
-    dispatch(sendOtpSuccess(response.data));
+    dispatch(sendOtpSuccess(response.data.message || "OTP resent successfully"));
     return { type: "SEND_OTP_SUCCESS", payload: response.data };
   } catch (error) {
     const errorMessage = error.response?.data?.message || "Failed to resend OTP";
@@ -207,7 +216,7 @@ export const verifyOtp = (email, otp) => async (dispatch) => {
     const response = await axios.post(`${API_BASE_URL}/verify`, null, {
       params: { email, otp }
     });
-    dispatch(verifyOtpSuccess(response.data));
+    dispatch(verifyOtpSuccess(response.data.message || "OTP verified successfully"));
     return { type: "VERIFY_OTP_SUCCESS", payload: response.data };
   } catch (error) {
     const errorMessage = error.response?.data?.message || "Failed to verify OTP";

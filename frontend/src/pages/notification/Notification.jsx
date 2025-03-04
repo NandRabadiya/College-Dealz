@@ -8,7 +8,13 @@ import {
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { API_BASE_URL } from "../Api/api";
 import WantlistDialog from "./WantlistDialog";
-import { useRouter } from "next/router";
+import { useNavigate } from "react-router-dom";
+
+// Enum constants for reference types
+const REFERENCE_TYPES = {
+  WANTLIST: 0,
+  PRODUCT: 1
+};
 
 // Separate component for notification content
 const NotificationContent = ({ notifications, error, onNotificationClick }) => {
@@ -75,7 +81,7 @@ const NotificationBell = ({ children }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [wantlistData, setWantlistData] = useState(null);
   const [showWantlistDialog, setShowWantlistDialog] = useState(false);
-  const router = useRouter();
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchNotifications = async () => {
@@ -162,16 +168,16 @@ const NotificationBell = ({ children }) => {
     // Close the popover
     setIsOpen(false);
     
-    // Handle different reference types
-    if (notification.referenceType === "WANTLIST") {
+    // Handle different reference types based on enum values
+    if (notification.referenceType === REFERENCE_TYPES.WANTLIST) {
       const data = await fetchWantlistData(notification.referenceId);
       if (data) {
         setWantlistData(data);
         setShowWantlistDialog(true);
       }
-    } else if (notification.referenceType === "PRODUCT") {
+    } else if (notification.referenceType === REFERENCE_TYPES.PRODUCT) {
       // Redirect to product page
-      router.push(`/product/${notification.referenceId}`);
+      navigate(`/product/${notification.referenceId}`);
     }
   };
 
