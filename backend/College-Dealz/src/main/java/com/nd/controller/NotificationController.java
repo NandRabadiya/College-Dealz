@@ -24,6 +24,8 @@ public class NotificationController {
     public List<NotificationDto> getUserNotifications(@RequestHeader("Authorization") String authHeader) {
         // Extract userId from JWT token
         int userId = jwtService.getUserIdFromToken(authHeader);
+
+        System.out.println(userId+"\n\n\n");
         return notificationService.getUserNotifications(userId);
     }
 

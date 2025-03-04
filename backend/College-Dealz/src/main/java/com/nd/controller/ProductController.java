@@ -8,6 +8,7 @@ import com.nd.exceptions.ProductException;
 import com.nd.service.JwtService;
 import com.nd.service.NotificationService;
 import com.nd.service.ProductService;
+import com.nd.service.WantlistService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -29,6 +30,9 @@ public class ProductController {
 
     @Autowired
     private JwtService  jwtService;
+
+    @Autowired
+    private WantlistService wantlistService;
 
     @Autowired
     private NotificationService notificationService;
@@ -58,11 +62,14 @@ public class ProductController {
     public ResponseEntity<?> createProductFromWantlist(
             @Validated @ModelAttribute ProductDto productDto,
             @RequestHeader("Authorization") String authHeader,
-            @RequestParam("BuyerId") int buyerId) {
+            @RequestParam("WantlistId") int wantlistId) {
         try {
             ProductDto createdProduct = productService.createProductWithImages(productDto, authHeader);
 
            // int sellerId = jwtService.getUserIdFromToken(authHeader);
+
+            int buyerId = wantlistService.getWantlistById(wantlistId).getUserId();
+
             notificationService.createNotificationForUser(buyerId,"Prouct Matching your wantlist is listed","See the product , is it maatching your need ?",
                     NotificationType.ITEM_INTEREST, ReferenceType.PRODUCT_ITEM,createdProduct.getId());
 

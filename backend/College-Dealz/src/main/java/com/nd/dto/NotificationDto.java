@@ -40,4 +40,8 @@ public class NotificationDto {
 
     @Size(max = 50, message = "Reference type must not exceed 50 characters")
     private String referenceType;
+
+
+
+
 }
