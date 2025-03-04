@@ -22,6 +22,7 @@ import OAuth2RedirectHandler from "./redux/Auth/OAuth2RedirectHandler";
 import Messages from "./pages/chat/Messages";
 import UniversitySelector from "./pages/UniversitySelector";
 import PublicProductDetails from "./pages/product/PublicProductDetails";
+import ErrorPage from "./pages/ErrorPage";
 
 // PrivateRoute component
 const PrivateRoute = ({ element, isLoggedIn, redirectTo }) => {
@@ -142,7 +143,9 @@ function App() {
             }
           />
           {/* 404 Route */}
-          <Route path="*" element={<h1>404 Not Found</h1>} />
+          {/* <Route path="*" element={<h1>404 Not Found</h1>} /> */}
+          <Route path="*" element={<ErrorPage />} />
+
         </Routes>
       </Router>
     </>
