@@ -15,7 +15,6 @@ import java.time.Instant;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 @Service
 public class NotificationServiceImpl implements NotificationService {
@@ -57,7 +56,7 @@ public class NotificationServiceImpl implements NotificationService {
         notification.setIsRead(false);
         notification.setCreatedAt(Instant.now());
         notification.setReferenceId(itemId);
-        notification.setReferenceType(ReferenceType.WISHLIST_ITEM);
+        notification.setReferenceType(ReferenceType.WANTLIST_ITEM);
 
         // ✅ Set all users at once (instead of looping)
         notification.setUsers(new HashSet<>(allUsers));

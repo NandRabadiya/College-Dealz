@@ -13,12 +13,14 @@ import { useNavigate } from "react-router-dom";
 // Enum constants for reference types
 const REFERENCE_TYPES = {
   WANTLIST: 0,
-  PRODUCT: 1
+  PRODUCT: 1,
+  WISHLIST_ITEM: 2 // Added WISHLIST_ITEM type
 };
 
 // Separate component for notification content
 const NotificationContent = ({ notifications, error, onNotificationClick }) => {
   const getNotificationIcon = (type) => {
+    console.log('Getting notification icon for:', type);
     switch (type) {
       case "CHAT":
         return <MessageCircle className="w-4 h-4 text-blue-500" />;
@@ -33,8 +35,10 @@ const NotificationContent = ({ notifications, error, onNotificationClick }) => {
     }
   };
 
+  console.log('Rendering NotificationContent with notifications:', notifications);
+
   return (
-    <PopoverContent className="w-80 p-0">
+    <PopoverContent className="w-80 p-0 md:w-80 lg:w-80 xl:w-80">
       <div className="flex items-center justify-between p-4 border-b">
         <h2 className="font-semibold">Notifications</h2>
         <span className="text-xs text-gray-500">
@@ -58,7 +62,7 @@ const NotificationContent = ({ notifications, error, onNotificationClick }) => {
               >
                 <div className="flex gap-3">
                   <div className="mt-1">
-                    {getNotificationIcon(notification.notificationType)}
+                    {getNotificationIcon(notification.type)}
                   </div>
                   <div className="flex-1">
                     <p className="text-sm font-medium">{notification.title}</p>
@@ -84,10 +88,13 @@ const NotificationBell = ({ children }) => {
   const navigate = useNavigate();
 
   useEffect(() => {
+    console.log('Running useEffect to fetch notifications');
     const fetchNotifications = async () => {
       try {
+        console.log('Fetching notifications...');
         const token = localStorage.getItem('jwt');
         if (!token) {
+          console.error('No authentication token found');
           throw new Error("No authentication token found");
         }
 
@@ -99,13 +106,16 @@ const NotificationBell = ({ children }) => {
         });
 
         if (!response.ok) {
+          console.error('Failed to fetch notifications');
           throw new Error("Failed to fetch notifications");
         }
 
         const data = await response.json();
+        console.log('Received notifications:', data);
         setNotifications(data);
         setError(null);
       } catch (err) {
+        console.error('Error fetching notifications:', err);
         setError(err.message);
       }
     };
@@ -114,11 +124,16 @@ const NotificationBell = ({ children }) => {
 
     // Poll for new notifications
     const pollInterval = setInterval(fetchNotifications, 300000); // 5 minutes
+    console.log('Set interval for polling notifications');
 
-    return () => clearInterval(pollInterval);
+    return () => {
+      console.log('Clearing interval for polling notifications');
+      clearInterval(pollInterval);
+    };
   }, []);
 
   const markAsRead = async (notificationId) => {
+    console.log('Marking notification as read:', notificationId);
     try {
       const token = localStorage.getItem('jwt');
       await fetch(`${API_BASE_URL}/api/notifications/mark-as-read/${notificationId}`, {
@@ -139,6 +154,7 @@ const NotificationBell = ({ children }) => {
   };
 
   const fetchWantlistData = async (referenceId) => {
+    console.log('Fetching wantlist data for reference ID:', referenceId);
     try {
       const token = localStorage.getItem('jwt');
       const response = await fetch(`${API_BASE_URL}/api/wantlist/${referenceId}`, {
@@ -149,10 +165,12 @@ const NotificationBell = ({ children }) => {
       });
 
       if (!response.ok) {
+        console.error('Failed to fetch wantlist data');
         throw new Error("Failed to fetch wantlist data");
       }
 
       const data = await response.json();
+      console.log('Received wantlist data:', data);
       return data;
     } catch (err) {
       console.error('Error fetching wantlist:', err);
@@ -162,14 +180,16 @@ const NotificationBell = ({ children }) => {
   };
 
   const handleNotificationClick = async (notification) => {
+    console.log('Handling notification click:', notification);
     // Mark notification as read
-    await markAsRead(notification.id);
+   // await markAsRead(notification.id);
     
     // Close the popover
     setIsOpen(false);
     
     // Handle different reference types based on enum values
-    if (notification.referenceType === REFERENCE_TYPES.WANTLIST) {
+    if (notification.referenceType === "WANTLIST_ITEM") {
+      console.log('Opening wantlist dialog for WANTLIST');
       const data = await fetchWantlistData(notification.referenceId);
       if (data) {
         setWantlistData(data);
@@ -177,9 +197,12 @@ const NotificationBell = ({ children }) => {
       }
     } else if (notification.referenceType === REFERENCE_TYPES.PRODUCT) {
       // Redirect to product page
-      navigate(`/product/${notification.referenceId}`);
-    }
+      console.log('Redirecting to product page');
+      navigate(`$/product/${notification.referenceId}`);}
+    
   };
+
+  console.log('Rendering NotificationBell with notifications:', notifications);
 
   return (
     <>

@@ -1,6 +1,6 @@
 package com.nd.enums;
 
 public enum ReferenceType {
-    WISHLIST_ITEM,
+    WANTLIST_ITEM,
     PRODUCT_ITEM
 }
