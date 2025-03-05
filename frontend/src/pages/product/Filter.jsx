@@ -36,7 +36,7 @@ const CustomSlider = React.forwardRef(({ className, ...props }, ref) => (
 
 CustomSlider.displayName = "CustomSlider";
 
-const FilterComponent = ({ onFilterChange,currentFilters, className = "" }) => {
+const FilterComponent = ({ onFilterChange, currentFilters, isFilterOpen, setIsFilterOpen, className = "" }) => {
   const [priceRange, setPriceRange] = useState([0, 5000]);
   const [minInputValue, setMinInputValue] = useState("0");
   const [maxInputValue, setMaxInputValue] = useState("5000");

@@ -10,6 +10,7 @@ import {
   Moon,
   Bell,
   ClipboardPen,
+  Filter,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -20,25 +21,39 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import {
+  Sheet,
+  SheetContent,
+  SheetTrigger,
+  SheetClose,
+} from "@/components/ui/sheet";
 import logo from "../assets/photo/logo.png";
 import { Label } from "@/components/ui/label";
 import { useLocation, useNavigate } from "react-router-dom";
 import NotificationBell from "./notification/Notification";
 import { ProductSearch, ProductSort } from "./SearchSortComponents";
+import FilterComponent from "./product/Filter";
 
-
-export const AUTH_STATE_CHANGE_EVENT = 'authStateChanged';
+export const AUTH_STATE_CHANGE_EVENT = "authStateChanged";
 
 const NavBar = ({ onSearch, onSort }) => {
   const [showMobileSearch, setShowMobileSearch] = useState(false);
+  const [showMobileFilter, setShowMobileFilter] = useState(false);
   const [theme, setTheme] = useState("light");
   const [isAuthenticated, setIsAuthenticated] = useState(
     Boolean(localStorage.getItem("jwt"))
   );
   const [isLoading, setIsLoading] = useState(false);
-const [currentSort, setCurrentSort] = useState("postDate-desc");
-const [currentSearch, setCurrentSearch] = useState("");
+  const [currentSort, setCurrentSort] = useState("postDate-desc");
+  const [currentSearch, setCurrentSearch] = useState("");
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const [currentFilters, setCurrentFilters] = useState({
+    minPrice: 0,
+    maxPrice: 5000,
+    categories: "",
+  });
+
   useEffect(() => {
     const checkAuth = () => {
       const token = localStorage.getItem("jwt");
@@ -75,16 +90,22 @@ const [currentSearch, setCurrentSearch] = useState("");
       setIsLoading(false);
     }
   };
-  
+
   const handleSort = async (value) => {
     setIsLoading(true);
     try {
-      const [field, dir] = value.split('-');
+      const [field, dir] = value.split("-");
       await onSort(field, dir);
       setCurrentSort(value);
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleFilterChange = (newFilters) => {
+    setCurrentFilters(newFilters);
+    onFilterChange(newFilters);
+    setShowMobileFilter(false);
   };
   const navigate = useNavigate();
   const location = useLocation();
@@ -96,6 +117,7 @@ const [currentSearch, setCurrentSearch] = useState("");
     } else {
       action();
     }
+    setIsSidebarOpen(false);
   };
   // Add notification handler
   const handleNotifications = () => {
@@ -147,12 +169,14 @@ const [currentSearch, setCurrentSearch] = useState("");
 
   // Handle logo click
   const handleLogoClick = () => {
-    navigate('/');
+    navigate("/");
+    setIsSidebarOpen(false);
   };
 
   // Handle login/signup
   const handleAuthClick = () => {
-    navigate('/Authenticate', { state: { from: '/' } });
+    navigate("/Authenticate", { state: { from: "/" } });
+    setIsSidebarOpen(false);
   };
 
   // Initialize theme from system preference or localStorage
@@ -200,118 +224,210 @@ const [currentSearch, setCurrentSearch] = useState("");
       )}
     </Button>
   );
- // Shared components
- const LogoSection = ({ className = "" }) => (
-  <img 
-    src="/logo.png" 
-    alt="Logo" 
-    className={`h-8 cursor-pointer ${className}`}
-    onClick={handleLogoClick}
-  />
-);
-
-const AuthSection = ({ isMobile = false }) => (
-  <div className={`flex items-center ${isMobile ? "w-full" : "space-x-4"}`}>
-    {!isAuthenticated ? (
-      <Button 
-        variant="outline" 
-        onClick={handleAuthClick}
-        className={isMobile ? "w-full" : ""}
-      >
-        Login/Signup
-      </Button>
-    ) : (
-      <Button 
-        variant="ghost" 
-        onClick={handleProfile}
-        className={`${isMobile ? "w-full flex items-center justify-start gap-2" : "p-2"}`}
-      >
-        <Avatar className="h-8 w-8">
-          <AvatarImage src="/api/placeholder/32/32" />
-          <AvatarFallback>UN</AvatarFallback>
-        </Avatar>
-        {isMobile && <span>Profile</span>}
-      </Button>
-    )}
-  </div>
-);
-
-  const NavigationItems = ({ isMobile = false }) => (
-    <div
-      className={`flex ${
-        isMobile ? "flex-col space-y-4" : "items-center space-x-4"
-      }`}
-    >
-      <div
-        className={`${isMobile ? "w-full" : "w-[180px]"} 
-        border border-gray-200 dark:border-gray-800 rounded-lg px-2 py-2.5 flex items-center justify-center`}
-      >
-        <Label>College</Label>
-      </div>
-      <ProductSort 
-      onSort={handleSort} 
-      currentSort={currentSort}
-      isLoading={isLoading}
+  // Shared components
+  const LogoSection = ({ className = "" }) => (
+    <img
+      src="/logo.png"
+      alt="Logo"
+      className={`h-8 cursor-pointer ${className}`}
+      onClick={handleLogoClick}
     />
-    <ProductSearch 
-      onSearch={handleSearch} 
-      isAuthenticated={isAuthenticated}
-      isLoading={isLoading}
-      currentSearch={currentSearch}
-    /></div>
   );
 
-  const ActionButtons = ({ isMobile = false }) => (
-    <div
-      className={`flex ${
-        isMobile ? "flex-col space-y-4" : "items-center space-x-4"
-      }`}
-    >
-      <Button
-        variant="ghost"
-        size="icon"
-        className={isMobile ? "w-full flex justify-start" : ""}
-        onClick={handleChat}
+  // Modify components to accept onItemClick prop
+  function NavigationItems({ isMobile = false, onItemClick }) {
+    return (
+      <div
+        className={`flex ${
+          isMobile ? "flex-col space-y-4" : "items-center space-x-4"
+        }`}
       >
-        <MessageCircle className="h-5 w-5" />
-        {isMobile && <span className="ml-2">Messages</span>}
-      </Button>
-      <Button
-        variant="ghost"
-        size="icon"
-        className={isMobile ? "w-full flex justify-start" : ""}
-        onClick={handlePostDeal}
+      
+        <ProductSort
+          onSort={(value) => {
+            handleSort(value);
+            onItemClick && onItemClick();
+          }}
+          currentSort={currentSort}
+          isLoading={isLoading}
+        />
+        <ProductSearch
+          onSearch={(query) => {
+            handleSearch(query);
+            onItemClick && onItemClick();
+          }}
+          isAuthenticated={isAuthenticated}
+          isLoading={isLoading}
+          currentSearch={currentSearch}
+        />
+      </div>
+    );
+  }
+
+  function ActionButtons({ isMobile = false, onItemClick }) {
+    return (
+      <div
+        className={`flex ${
+          isMobile ? "flex-col space-y-4" : "items-center space-x-4"
+        }`}
       >
-        <Plus className="h-5 w-5" />
-        {isMobile && <span className="ml-2">Post a Deal</span>}
-      </Button>
-      <Button
-        variant="ghost"
-        size="icon"
-        className={isMobile ? "w-full flex justify-start" : ""}
-        onClick={handleWishlist}
-      >
-        <Heart className="h-5 w-5" />
-        {isMobile && <span className="ml-2">Wishlist</span>}
-      </Button>
-      <Button
-        variant="ghost"
-        size="icon"
-        className={isMobile ? "w-full flex justify-start" : ""}
-        onClick={handleWantlist}
-      >
-        <ClipboardPen className="h-6 w-6" />
-        {isMobile && <span className="ml-2">Wantlist</span>}
-      </Button>
-      <NotificationBell>
-        <div className="relative cursor-pointer">
-          <Bell className="w-4 h-4" />
+        <Button
+          variant="ghost"
+          size="icon"
+          className={isMobile ? "w-full flex justify-start" : ""}
+          onClick={() => {
+            handleChat();
+            onItemClick && onItemClick();
+          }}
+        >
+          <MessageCircle className="h-5 w-5" />
+          {isMobile && <span className="ml-2">Messages</span>}
+        </Button>
+        <Button
+          variant="ghost"
+          size="icon"
+          className={isMobile ? "w-full flex justify-start" : ""}
+          onClick={() => {
+            handlePostDeal();
+            onItemClick && onItemClick();
+          }}
+        >
+          <Plus className="h-5 w-5" />
+          {isMobile && <span className="ml-2">Post a Deal</span>}
+        </Button>
+        <Button
+          variant="ghost"
+          size="icon"
+          className={isMobile ? "w-full flex justify-start" : ""}
+          onClick={() => {
+            handleWishlist();
+            onItemClick && onItemClick();
+          }}
+        >
+          <Heart className="h-5 w-5" />
+          {isMobile && <span className="ml-2">Wishlist</span>}
+        </Button>
+        <Button
+          variant="ghost"
+          size="icon"
+          className={isMobile ? "w-full flex justify-start" : ""}
+          onClick={() => {
+            handleWantlist();
+            onItemClick && onItemClick();
+          }}
+        >
+          <ClipboardPen className="h-6 w-6" />
+          {isMobile && <span className="ml-2">Wantlist</span>}
+        </Button>
+        <NotificationBell>
+          <div className="relative cursor-pointer">
+            <Bell className="w-4 h-4" />
+          </div>
+        </NotificationBell>
+        <ThemeToggle isMobile={isMobile} />
+      </div>
+    );
+  }
+
+  function AuthSection({ isMobile = false, onItemClick }) {
+    return (
+      <div className={`flex items-center ${isMobile ? "w-full" : "space-x-4"}`}>
+        {!isAuthenticated ? (
+          <Button
+            variant="outline"
+            onClick={() => {
+              handleAuthClick();
+              onItemClick && onItemClick();
+            }}
+            className={isMobile ? "w-full" : ""}
+          >
+            Login/Signup
+          </Button>
+        ) : (
+          <Button
+            variant="ghost"
+            onClick={() => {
+              handleProfile();
+              onItemClick && onItemClick();
+            }}
+            className={`${
+              isMobile ? "w-full flex items-center justify-start gap-2" : "p-2"
+            }`}
+          >
+            <Avatar className="h-8 w-8">
+              <AvatarImage src="/api/placeholder/32/32" />
+              <AvatarFallback>UN</AvatarFallback>
+            </Avatar>
+            {isMobile && <span>Profile</span>}
+          </Button>
+        )}
+      </div>
+    );
+  }
+  // Mobile Search and Filter Section
+
+  const MobileSearchAndFilter = () => (
+    <div className="lg:hidden bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b">
+      <div className="container mx-auto px-4 py-2">
+        <div className="flex items-center space-x-2">
+          <div className="flex-1 relative">
+            <ProductSearch
+              onSearch={handleSearch}
+              isAuthenticated={isAuthenticated}
+              isLoading={isLoading}
+              currentSearch={currentSearch}
+              className="w-full"
+              placeholder="Search products..."
+            />
+          </div>
+          <div className="flex space-x-2">
+            <Button
+              variant="outline"
+              size="icon"
+              className="flex-shrink-0"
+              onClick={() => setIsFilterOpen(true)}
+            >
+              <Filter className="h-4 w-4" />
+            </Button>
+  
+            <Sheet open={isFilterOpen} onOpenChange={setIsFilterOpen}>
+              <SheetContent
+                side="right"
+                className="w-[90%] sm:w-[500px] p-0 overflow-y-auto"
+              >
+                <div className="p-6">
+                  <div className="flex justify-between items-center mb-6">
+                    <h2 className="text-xl font-semibold">Filter Products</h2>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => setIsFilterOpen(false)}
+                    >
+                      <X className="h-5 w-5" />
+                    </Button>
+                  </div>
+                  <FilterComponent
+                    onFilterChange={handleFilterChange}
+                    currentFilters={currentFilters}
+                    isFilterOpen={isFilterOpen}
+                    setIsFilterOpen={setIsFilterOpen}
+                  />
+                </div>
+              </SheetContent>
+            </Sheet>
+  
+            <ProductSort
+              onSort={handleSort}
+              currentSort={currentSort}
+              isLoading={isLoading}
+              triggerClassName="w-auto"
+            />
+          </div>
         </div>
-      </NotificationBell>
-      <ThemeToggle isMobile={isMobile} />
+      </div>
     </div>
   );
-
+  
   // const SearchBar = ({ className = "" }) => (
   //   <div className={`relative ${className}`}>
   //     <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
@@ -320,49 +436,62 @@ const AuthSection = ({ isMobile = false }) => (
   // );
 
   return (
-    <nav className="w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50">
-      <div className="max-w-7xl mx-auto px-4">
-        <div className="lg:hidden">
-          <div className="flex items-center justify-between h-16">
-            <Sheet>
-              <SheetTrigger asChild>
-                <Button variant="ghost" size="icon">
-                  <Menu className="h-5 w-5" />
-                </Button>
-              </SheetTrigger>
-              <SheetContent side="left" className="w-[300px] sm:w-[400px]">
-                <div className="flex flex-col space-y-6 mt-6">
-                  <img src={logo} alt="Logo" className="h-16 mx-auto" />
-                  <NavigationItems isMobile />
-                  <ActionButtons isMobile />
-                  
-                </div>
-              </SheetContent>
-            </Sheet>
-            <LogoSection className="flex-shrink-0" />
-            <div className="flex items-center space-x-4">
-              <ThemeToggle />
+    <>
+      <nav className="w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50">
+        <div className="max-w-7xl mx-auto px-4">
+          <div className="lg:hidden">
+            <div className="flex items-center justify-between h-16">
+              <Sheet open={isSidebarOpen} onOpenChange={setIsSidebarOpen}>
+                <SheetTrigger asChild>
+                  <Button variant="ghost" size="icon">
+                    <Menu className="h-5 w-5" />
+                  </Button>
+                </SheetTrigger>
+                <SheetContent side="left" className="w-[300px] sm:w-[400px]">
+                  <div className="flex flex-col space-y-6 mt-6">
+                    <img
+                      src={logo}
+                      alt="Logo"
+                      className="h-16 mx-auto cursor-pointer"
+                      onClick={handleLogoClick}
+                    />
+                    <NavigationItems
+                      isMobile
+                      onItemClick={() => setIsSidebarOpen(false)}
+                    />
+                    <ActionButtons
+                      isMobile
+                      onItemClick={() => setIsSidebarOpen(false)}
+                    />
+                  </div>
+                </SheetContent>
+              </Sheet>
+              <LogoSection className="flex-shrink-0" />
+              <div className="flex items-center space-x-4">
+                <ThemeToggle />
+                <AuthSection />
+              </div>
+            </div>
+
+            {showMobileSearch && (
+              <div className="pb-4 px-2">
+                <SearchBar className="w-full" />
+              </div>
+            )}
+          </div>
+
+          <div className="hidden lg:flex flex-col items-center py-2 space-y-4">
+            <LogoSection />
+            <div className="w-full flex items-center justify-between space-x-6">
+              <NavigationItems />
+              <ActionButtons />
               <AuthSection />
             </div>
           </div>
-
-          {showMobileSearch && (
-            <div className="pb-4 px-2">
-              <SearchBar className="w-full" />
-            </div>
-          )}
         </div>
-
-        <div className="hidden lg:flex flex-col items-center py-2 space-y-4">
-          <LogoSection />
-          <div className="w-full flex items-center justify-between space-x-6">
-            <NavigationItems />
-            <ActionButtons />
-            <AuthSection />
-          </div>
-        </div>
-      </div>
-    </nav>
+      </nav>
+      <MobileSearchAndFilter />
+    </>
   );
 };
 
