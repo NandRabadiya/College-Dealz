@@ -1,12 +1,24 @@
 // export default ProductDetails;
 import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
-import { Share2, MessageCircle, Facebook, Mail, Link, MessageSquare } from "lucide-react";
+import {
+  Share2,
+  MessageCircle,
+  Facebook,
+  Mail,
+  Link,
+  MessageSquare,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import ProductGallery from "./ProductGallery";
 import { API_BASE_URL } from "../Api/api";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 const ProductDetails = () => {
   const { productId } = useParams();
@@ -38,7 +50,7 @@ const ProductDetails = () => {
         }
 
         const productData = await response.json();
-        
+
         if (!isMounted) return;
 
         // Transform the product data according to the new JSON structure
@@ -54,19 +66,22 @@ const ProductDetails = () => {
             sellerId: productData.sellerId,
             universityId: productData.universityId,
             // Handle empty image arrays or null images
-            images: productData.imageUrls && productData.imageUrls.length > 0
-              ? productData.imageUrls.map((url, index) => ({
-                  id: `${productData.id}-${index}`,
-                  url: url,
-                  fileName: `image-${index}`,
-                }))
-              : [{
-                  id: "placeholder",
-                  url: "/api/placeholder/400/320",
-                  fileName: "placeholder",
-                }],
+            images:
+              productData.imageUrls && productData.imageUrls.length > 0
+                ? productData.imageUrls.map((url, index) => ({
+                    id: `${productData.id}-${index}`,
+                    url: url,
+                    fileName: `image-${index}`,
+                  }))
+                : [
+                    {
+                      id: "placeholder",
+                      url: "/api/placeholder/400/320",
+                      fileName: "placeholder",
+                    },
+                  ],
           };
-          
+
           setProduct(transformedProduct);
         } else {
           throw new Error("Invalid product data received");
@@ -107,19 +122,25 @@ const ProductDetails = () => {
     switch (platform) {
       case "whatsapp":
         window.open(
-          `https://wa.me/?text=${encodeURIComponent(message + " " + productUrl)}`,
+          `https://wa.me/?text=${encodeURIComponent(
+            message + " " + productUrl
+          )}`,
           "_blank"
         );
         break;
       case "facebook":
         window.open(
-          `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(productUrl)}`,
+          `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(
+            productUrl
+          )}`,
           "_blank"
         );
         break;
       case "email":
         window.open(
-          `mailto:?subject=${encodeURIComponent(product.name)}&body=${encodeURIComponent(message + "\n\n" + productUrl)}`,
+          `mailto:?subject=${encodeURIComponent(
+            product.name
+          )}&body=${encodeURIComponent(message + "\n\n" + productUrl)}`,
           "_blank"
         );
         break;
@@ -154,10 +175,11 @@ const ProductDetails = () => {
 
   // Format the condition and category for display
   const formatString = (str) => {
-    return str.toLowerCase()
-      .split('_')
-      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-      .join(' ');
+    return str
+      .toLowerCase()
+      .split("_")
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(" ");
   };
 
   return (
@@ -170,24 +192,24 @@ const ProductDetails = () => {
         <div className="space-y-6">
           <div>
             <h1 className="text-3xl font-bold mb-2">{product.name}</h1>
-            <div className="text-2xl font-bold text-primary">
-              ₹{product.price.toFixed(2)}
+            <div
+              className={`text-2xl font-bold ${
+                product.price === 0 ? "text-green-600" : "text-primary"
+              }`}
+            >
+              {product.price === 0 ? "Free" : `₹${product.price.toFixed(2)}`}
             </div>
           </div>
 
           <div className="space-y-4">
             <div>
               <h3 className="text-lg font-semibold mb-2">Condition</h3>
-              <Badge variant="outline">
-                {formatString(product.condition)}
-              </Badge>
+              <Badge variant="outline">{formatString(product.condition)}</Badge>
             </div>
 
             <div>
               <h3 className="text-lg font-semibold mb-2">Category</h3>
-              <Badge variant="outline">
-                {formatString(product.category)}
-              </Badge>
+              <Badge variant="outline">{formatString(product.category)}</Badge>
             </div>
 
             {product.monthsOld != null && (

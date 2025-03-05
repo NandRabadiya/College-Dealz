@@ -439,8 +439,14 @@ const ProductCard = ({
                         <h3 className="font-semibold leading-tight text-foreground text-xl line-clamp-2">
                           {product.name}
                         </h3>
-                        <div className="text-xl font-bold text-primary whitespace-nowrap">
-                          ₹{product.price}
+                        <div
+                          className={`text-xl font-bold whitespace-nowrap ${
+                            product.price === 0
+                              ? "text-green-500"
+                              : "text-primary"
+                          }`}
+                        >
+                          {product.price === 0 ? "Free" : `₹${product.price}`}
                         </div>
                       </div>
 

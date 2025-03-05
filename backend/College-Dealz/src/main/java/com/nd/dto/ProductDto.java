@@ -23,9 +23,10 @@ public class ProductDto {
     private String description;
 
     @NotNull(message = "Price cannot be null")
-    @DecimalMin(value = "0.0", inclusive = false, message = "Price must be greater than 0")
+    @DecimalMin(value = "0.0", inclusive = true, message = "Price must be at least 0")
     @Digits(integer = 10, fraction = 2, message = "Price must have at most 10 digits and 2 decimal places")
     private BigDecimal price;
+
 
     @NotNull(message = "Condition cannot be null")
     private Condition condition;

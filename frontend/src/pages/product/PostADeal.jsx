@@ -55,7 +55,7 @@ const PostADeal = ({ onClose, editDeal }) => {
           preview: url,
           existingUrl: url,
         })),
-        id: editDeal.id // Explicitly store the ID
+        id: editDeal.id, // Explicitly store the ID
       });
     }
   }, [editDeal]);
@@ -68,7 +68,7 @@ const PostADeal = ({ onClose, editDeal }) => {
     category: "",
     monthsOld: "",
     images: [],
-    id: null
+    id: null,
   });
   const [errors, setErrors] = useState({});
   const [submitError, setSubmitError] = useState("");
@@ -78,8 +78,8 @@ const PostADeal = ({ onClose, editDeal }) => {
   const validate = () => {
     const newErrors = {};
     if (!formData.name.trim()) newErrors.name = "Name is required.";
-    if (!formData.price || formData.price <= 0)
-      newErrors.price = "Price must be greater than ₹0.";
+    if (formData.price === "" || formData.price < 0)
+      newErrors.price = "Price cannot be negative.";
     if (!formData.monthsOld) newErrors.monthsOld = "Age in months is required.";
     if (!formData.category) newErrors.category = "Category is required.";
     if (!formData.condition) newErrors.condition = "Condition is required.";
@@ -91,8 +91,7 @@ const PostADeal = ({ onClose, editDeal }) => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    const sanitizedValue =
-      name === "price" || name === "monthsOld" ? Math.max(0, value) : value;
+    const sanitizedValue = name === "monthsOld" ? Math.max(0, value) : value;
 
     setFormData((prevData) => ({
       ...prevData,
@@ -214,11 +213,13 @@ const PostADeal = ({ onClose, editDeal }) => {
         .map((img) => img.existingUrl);
 
       formDataToSend.append("existingImages", JSON.stringify(existingImages));
-     
-       // Construct URL based on mode
-       const baseUrl = `${API_BASE_URL}/api/products`;
-       const url = formData.id ? `${baseUrl}/${formData.id}` : `${baseUrl}/create`;
-       const method = formData.id ? "PUT" : "POST";
+
+      // Construct URL based on mode
+      const baseUrl = `${API_BASE_URL}/api/products`;
+      const url = formData.id
+        ? `${baseUrl}/${formData.id}`
+        : `${baseUrl}/create`;
+      const method = formData.id ? "PUT" : "POST";
 
       console.log("Making request to:", url);
       console.log("Method:", method);
@@ -230,7 +231,6 @@ const PostADeal = ({ onClose, editDeal }) => {
           Authorization: `Bearer ${token}`,
         },
         body: formDataToSend,
-        
       });
       // Try to parse JSON response, but handle non-JSON responses gracefully
 
@@ -244,7 +244,7 @@ const PostADeal = ({ onClose, editDeal }) => {
         }
         throw new Error(errorMessage);
       }
-      
+
       // If we get here, the request was successful
       // Clean up any object URLs we created
       formData.images.forEach((image) => {
