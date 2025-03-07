@@ -112,7 +112,7 @@ const Authenticate = ({isOpen, onClose}) => {
           </div>
 
           <GoogleLoginButton onSuccess={handleAuthSuccess} onError={handleAuthError} />
-        </CardContent>
+          </CardContent>
       </Card>
     </div>
   );

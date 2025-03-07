@@ -51,6 +51,9 @@ public class SecurityConfig {
     }
 
     List<String> publicUrls = List.of(
+            "/static/favicon.ico",
+            "/favicon.ico",
+//            "/oauth-callback**",
             "/login/**",
             "/register/**",
             "/refresh_token/**",
@@ -60,7 +63,6 @@ public class SecurityConfig {
             "/send-otp**",
             "/verify**",
             "/resend-otp**",
-            "/static/favicon.ico",
             "/api/products/public/shared-product/**"
     );
 
@@ -100,7 +102,7 @@ public class SecurityConfig {
 //                            response.getWriter().write("{\"message\": \"Login successful!\"}");
                             handler.onAuthenticationSuccess(request, response, authentication);
 
-                            response.sendRedirect("https://college-dealz.vercel.app/");
+                            //response.sendRedirect("https://college-dealz.vercel.app/");
                         })
                         .failureHandler((request, response, exception) -> {
                             response.setStatus(HttpStatus.UNAUTHORIZED.value());

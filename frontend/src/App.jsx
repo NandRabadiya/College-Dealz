@@ -18,11 +18,11 @@ import { getUser } from "./redux/Auth/actions";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import WishList from "./pages/wishlist/WishList";
 import Wantlist from "./pages/wantlist/Wantlist";
-import OAuth2RedirectHandler from "./redux/Auth/OAuth2RedirectHandler";
 import Messages from "./pages/chat/Messages";
 import UniversitySelector from "./pages/UniversitySelector";
 import PublicProductDetails from "./pages/product/PublicProductDetails";
 import ErrorPage from "./pages/ErrorPage";
+import OAuthCallback from "./pages/authentication/OAuthCallback";
 
 // PrivateRoute component
 const PrivateRoute = ({ element, isLoggedIn, redirectTo }) => {
@@ -81,6 +81,7 @@ function App() {
         />
         <Routes>
           {/* Public Route */}
+      
           <Route
             path="/"
             element={
@@ -94,14 +95,15 @@ function App() {
           />{" "}
           <Route path="/messages" element={<Messages />} />
           {/* Login/Register Route */}
+          <Route path="/oauth-callback" element={<OAuthCallback/>} />
           <Route
             path="/Authenticate"
             element={<Authenticate isOpen={true} />}
           />
+
           <Route path="/admin" element={<AdminDashboard />} />
           <Route path="/product/public/:productId" element={<PublicProductDetails />} />
           {/* Protected Route */}
-          <Route path="/oauth2/redirect" element={<OAuth2RedirectHandler />} />
           <Route
             path="/dashboard"
             element={

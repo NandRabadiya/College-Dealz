@@ -175,7 +175,8 @@ logger.info("OAuthAuthenicationSuccessHandler: Google New user check before user
             response.setContentType("application/json");
             response.setStatus(HttpServletResponse.SC_OK);
             response.getWriter().write(jsonResponse);
-
+             final String frontendRedirectUrl = "http://localhost:5173/oauth-callback";
+            response.sendRedirect(frontendRedirectUrl + "?token=" + accessToken);
         }
 
        }
