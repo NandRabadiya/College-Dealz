@@ -98,8 +98,13 @@ public class OAuthAuthenticationSuccessHandler implements AuthenticationSuccessH
         // Check if domain exists in University table
         boolean isValidDomain = universityRepo.existsByDomain(domain);
 
+//        if (!isValidDomain) {
+//            throw new RuntimeException("Try using your college email ID.");
+//        }
+
         if (!isValidDomain) {
-            throw new RuntimeException("Try using your college email ID.");
+            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Try using your college email ID.");
+            return;
         }
 
         logger.info(" Succefull login User Email: {}", email);
@@ -161,6 +166,10 @@ logger.info("OAuthAuthenicationSuccessHandler: Google New user check before user
             // Convert the AuthResponse object to JSON
             ObjectMapper objectMapper = new ObjectMapper();
             String jsonResponse = objectMapper.writeValueAsString(authResponse);
+
+//            request.getSession().setAttribute("JWT_ACCESS_TOKEN", accessToken);
+//            request.getSession().setAttribute("JWT_REFRESH_TOKEN", refreshToken);
+
 
             // Write the JSON response
             response.setContentType("application/json");
