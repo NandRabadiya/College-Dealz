@@ -74,9 +74,6 @@ public class User implements UserDetails {
     @Column(name = "provider_user_id")
     private String providerUserId;
 
-    @Column(name = "email_token")
-    private String emailToken;
-
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
             name = "user_roles",

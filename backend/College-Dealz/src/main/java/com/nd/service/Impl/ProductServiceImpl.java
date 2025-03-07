@@ -424,6 +424,8 @@ public class ProductServiceImpl implements ProductService {
         productDto.setSellerId(product.getSeller().getId());
         productDto.setUniversityId(product.getUniversity().getId());
 
+        productDto.setSellerName(product.getSeller().getName());
+        productDto.setPostDate(product.getPostDate());
 
         // Map associated images to URLs or base64-encoded data
         List<String> imageUrls = product.getImages().stream()
