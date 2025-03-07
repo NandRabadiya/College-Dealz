@@ -24,7 +24,6 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
-import java.util.Collection;
 import java.util.Arrays;
 import java.util.List;
 
@@ -61,7 +60,7 @@ public class SecurityConfig {
             "/send-otp**",
             "/verify**",
             "/resend-otp**",
-            "/favicon.ico",
+            "/static/favicon.ico",
             "/api/products/public/shared-product/**"
     );
 
@@ -100,6 +99,8 @@ public class SecurityConfig {
 //                            response.setContentType("application/json");
 //                            response.getWriter().write("{\"message\": \"Login successful!\"}");
                             handler.onAuthenticationSuccess(request, response, authentication);
+
+                            response.sendRedirect("https://college-dealz.vercel.app/");
                         })
                         .failureHandler((request, response, exception) -> {
                             response.setStatus(HttpStatus.UNAUTHORIZED.value());

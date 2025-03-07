@@ -8,6 +8,7 @@ import lombok.Data;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.math.BigDecimal;
+import java.time.Instant;
 import java.util.List;
 
 @Data
@@ -42,6 +43,10 @@ public class ProductDto {
 
     //@NotNull(message = "University ID cannot be null")
     private Integer universityId; // Referencing university by ID
+
+    private String sellerName;
+
+    private Instant postDate;
 
     private Chat chat;
 
