@@ -453,7 +453,7 @@ const ProductCard = ({
                       <div className="mb-3 text-sm text-muted-foreground">
                         <div className="flex items-center gap-2">
                           <Badge variant="secondary" className="font-normal">
-                            {product.seller?.name || "Unknown Seller"}
+                            {product.sellerName || "Unknown Seller"}
                           </Badge>
                           <span className="text-xs">•</span>
                           <span className="text-xs">
