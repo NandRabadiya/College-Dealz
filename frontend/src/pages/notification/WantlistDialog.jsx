@@ -16,7 +16,7 @@ const WantlistDialog = ({ isOpen, onClose, wantlistData }) => {
   
   const handlePostDeal = () => {
     // Logic to navigate to post a deal page with wantlist data
-    navigate(`/post-deal?wantlistId=${wantlistData.id}`);
+    navigate(`/post-a-deal?wantlistId=${wantlistData.id}`);
     onClose();
   };
   

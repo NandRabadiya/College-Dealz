@@ -195,10 +195,10 @@ const NotificationBell = ({ children }) => {
         setWantlistData(data);
         setShowWantlistDialog(true);
       }
-    } else if (notification.referenceType === REFERENCE_TYPES.PRODUCT) {
+    } else if (notification.referenceType === "PRODUCT_ITEM") {
       // Redirect to product page
       console.log('Redirecting to product page');
-      navigate(`$/product/${notification.referenceId}`);}
+      navigate(`/product/${notification.referenceId}`);}
     
   };
 
