@@ -176,10 +176,14 @@ logger.info("OAuthAuthenicationSuccessHandler: Google New user check before user
             response.setStatus(HttpServletResponse.SC_OK);
             response.getWriter().write(jsonResponse);
              final String frontendRedirectUrl = "http://localhost:5173/oauth-callback";
+       //      final String frontendRedirectUrl = "https://college-dealz.vercel.app/oauth-callback";
             response.sendRedirect(frontendRedirectUrl + "?token=" + accessToken);
         }
 
        }
+
+
+
     }
 
     public static String generateRandomPassword() {
