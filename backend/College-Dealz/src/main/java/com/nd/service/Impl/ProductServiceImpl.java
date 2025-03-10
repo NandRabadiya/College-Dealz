@@ -78,6 +78,7 @@ public class ProductServiceImpl implements ProductService {
         // Map ProductDto to Product entity
         Product product = mapToEntity(productDto);
 
+        product.setPostDate(Instant.now());
         product.setCreatedAt(Instant.now());
         product.setUpdatedAt(Instant.now());
 
@@ -98,6 +99,7 @@ public class ProductServiceImpl implements ProductService {
 
         productDto.setSellerId(sellerId);
         productDto.setUniversityId(universityId);
+        productDto.setPostDate(Instant.now());
 
         // Step 2: Use the existing createProduct method to save the product
         ProductDto savedProductDto = createProduct(productDto, authHeader);
@@ -455,7 +457,7 @@ public class ProductServiceImpl implements ProductService {
         productDto.setMonthsOld(product.getMonthsOld());
         productDto.setSellerId(product.getSeller().getId());
         productDto.setUniversityId(product.getUniversity().getId());
-
+        productDto.setPostDate(product.getPostDate());
         return productDto;
     }
 
