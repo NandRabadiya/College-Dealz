@@ -70,7 +70,8 @@ public class ProductController {
 
             int buyerId = wantlistService.getWantlistById(wantlistId).getUserId();
 
-            notificationService.createNotificationForUser(buyerId,"Prouct Matching your wantlist is listed","See the product , is it maatching your need ?",
+            notificationService.createNotificationForUser(buyerId,"A New Product Matches Your Wantlist!",
+                    "A product that fits your preferences has just been listed. Check it out and see if it's what you need!",
                     NotificationType.ITEM_INTEREST, ReferenceType.PRODUCT_ITEM,createdProduct.getId());
 
             return ResponseEntity.ok(createdProduct);
@@ -113,8 +114,8 @@ public class ProductController {
     public ResponseEntity<String> relistProduct(@PathVariable Integer productId) throws ProductException {
         boolean newProduct = productService.relistProduct(productId);
         if (newProduct)
-            return ResponseEntity.ok("Product Mark as Sold and Removed Successfully");
-        else return ResponseEntity.status(404).body("Something went wrong while marking !!");
+            return ResponseEntity.ok("Product successfully marked as sold and removed.");
+        else return ResponseEntity.status(404).body("Unable to mark the product as sold. Please try again.");
     }
 
     @PostMapping("/university")
@@ -242,7 +243,7 @@ public class ProductController {
         boolean archived = productService.removeProduct(productId, reason , true);//remove by user then true
        if (archived)
         return ResponseEntity.ok("Product Removed Successfully");
-       else return ResponseEntity.status(404).body("Something went wrong while removing!!");
+       else return ResponseEntity.status(404).body("Failed to remove the product. Please try again.");
     }
     @DeleteMapping("/remove-by-admin/{productId}")
     public ResponseEntity<String> removeProductbyAdmin(@PathVariable Integer productId,
@@ -250,7 +251,7 @@ public class ProductController {
         boolean archived = productService.removeProduct(productId, reason , false);//remove by admin then false
         if (archived)
             return ResponseEntity.ok("Product Removed Successfully");
-        else return ResponseEntity.status(404).body("Something went wrong while removing!!");
+        else return ResponseEntity.status(404).body("Failed to remove the product. Please try again.");
     }
 
     @PostMapping("/sold-outside/{productId}")
@@ -258,8 +259,8 @@ public class ProductController {
                                                                @RequestBody SoldOutsideResponse soldOutsideResponse) throws ProductException {
         boolean archived = productService.soldOutsideProduct(productId, soldOutsideResponse);
         if (archived)
-            return ResponseEntity.ok("Product Mark as Sold and Removed Successfully");
-        else return ResponseEntity.status(404).body("Something went wrong while marking !!");
+            return ResponseEntity.ok("Product marked as sold and removed successfully.");
+        else return ResponseEntity.status(404).body("Failed to mark the product as sold. Please try again.");
     }
 
 }

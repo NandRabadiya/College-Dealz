@@ -18,14 +18,14 @@ public class ReportController {
 
         System.out.println("\n\nWARNING MESSAGE: "+reportEmailRequest.getMessage());
         emailService.sendUserReportEmail(reportEmailRequest, id);
-        return ResponseEntity.ok("Report email sent successfully.");
+        return ResponseEntity.ok("User report email sent successfully");
     }
 
     @PostMapping("/product/{id}")
     public ResponseEntity<String> sendProductReportEmail(@RequestBody ReportEmailRequest reportEmailRequest, @PathVariable Integer id) {
 
         emailService.sendProductReportEmail(reportEmailRequest, id);
-        return ResponseEntity.ok("Report email sent successfully.");
+        return ResponseEntity.ok("Product report email sent successfully.");
     }
 
 }

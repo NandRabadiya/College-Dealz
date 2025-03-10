@@ -24,7 +24,7 @@ const WantlistDialog = ({ isOpen, onClose, wantlistData }) => {
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Matching Wantlist</DialogTitle>
+          <DialogTitle>Sell Your Matching Item</DialogTitle>
         </DialogHeader>
         
         <div className="space-y-4 py-4">
@@ -58,13 +58,16 @@ const WantlistDialog = ({ isOpen, onClose, wantlistData }) => {
           </div>
           
           <div className="text-sm bg-blue-50 p-3 rounded-md">
-            To notify buyer about your product, post it from below button. If not posted from here, buyer might not get the notification of your product that matches his wantlist.
+            <ul>
+              <li>To notify buyer about your product, post it from below button. </li>
+            <li>If not posted from here, buyer might not get the notification 
+            of your product that matches his wantlist.</li>
+            </ul>
           </div>
         </div>
         
         <DialogFooter>
-          <Button variant="outline" onClick={onClose}>Close</Button>
-          <Button onClick={handlePostDeal}>Post a Deal</Button>
+          <Button onClick={handlePostDeal}>Post Deal</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

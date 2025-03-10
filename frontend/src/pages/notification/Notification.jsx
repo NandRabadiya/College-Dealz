@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { MessageCircle, RefreshCw, Heart, ShoppingCart, Bell } from "lucide-react";
+import { MessageCircle, RefreshCw, Heart, ShoppingCart, Bell, ClipboardCheck, ClipboardEdit, ClipboardListIcon } from "lucide-react";
 import {
   Popover,
   PopoverContent,
@@ -26,10 +26,10 @@ const NotificationContent = ({ notifications, error, onNotificationClick }) => {
         return <MessageCircle className="w-4 h-4 text-blue-500" />;
       case "UPDATE":
         return <RefreshCw className="w-4 h-4 text-green-500" />;
-      case "WANTLIST":
-        return <Heart className="w-4 h-4 text-red-500" />;
-      case "PRODUCT":
-        return <ShoppingCart className="w-4 h-4 text-purple-500" />;
+      case "WANTLIST_ITEM":
+        return <ClipboardListIcon className="w-4 h-4 text-red-500" />;
+      case "PRODUCT_ITEM":
+        return <ClipboardCheck className="w-4 h-4 text-purple-500" />;
       default:
         return <Bell className="w-4 h-4 text-gray-500" />;
     }
@@ -62,7 +62,7 @@ const NotificationContent = ({ notifications, error, onNotificationClick }) => {
               >
                 <div className="flex gap-3">
                   <div className="mt-1">
-                    {getNotificationIcon(notification.type)}
+                    {getNotificationIcon(notification.referenceType)}
                   </div>
                   <div className="flex-1">
                     <p className="text-sm font-medium">{notification.title}</p>

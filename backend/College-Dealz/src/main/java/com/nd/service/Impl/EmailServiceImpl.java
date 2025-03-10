@@ -39,27 +39,31 @@ public class EmailServiceImpl implements EmailService {
         message.setTo(email);
 
         String productName=productRepo.getProductById(id).getName();
-        message.setSubject("Your Product "+productName+" is  Reported ");
-        message.setText(reportEmailRequest.getMessage());
-        // Optionally, set the sender email and reply-to if needed:
-         message.setFrom("22ituos003@ddu.ac.in");
+        message.setSubject("Warning: Your product \"" + productName + "\" violates our policies");
+        message.setText("Dear user,\n\nOur team has identified an issue with your product listing: \"" + productName + "\".\n\n" +
+                "Reason: " + reportEmailRequest.getMessage() + "\n\n" +
+                "Please review and update your listing to comply with our guidelines. Failure to do so may result in removal of the product.\n\n" +
+                "If you believe this warning was issued in error, feel free to contact our support team.\n\n" +
+                "Regards,\nCollege Dealz Team");
 
+        message.setFrom("collegedealzz@gmail.com");
         mailSender.send(message);
     }
 
     @Override
     public void sendUserReportEmail(ReportEmailRequest reportEmailRequest, int id ) {
         SimpleMailMessage message = new SimpleMailMessage();
-        System.out.println("\n\nWARNING MESSAGE: "+reportEmailRequest.getMessage());
-        String email=userRepo.findById(id).get()
-                .getEmail();
+        System.out.println("\n\nWARNING MESSAGE: " + reportEmailRequest.getMessage());
+        String email = userRepo.findById(id).get().getEmail();
+
         message.setTo(email);
-        message.setSubject(
-                "You Are Reported "
-        );
-        message.setText(reportEmailRequest.getMessage());
-        // Optionally, set the sender email and reply-to if needed:
-        //message.setFrom("22ituos003@ddu.ac.in");
+        message.setSubject("Warning: Policy Violation Detected on Your Account");
+        message.setText("Dear user,\n\nWe have noticed an issue associated with your account:\n\n" +
+                "Warning: " + reportEmailRequest.getMessage() + "\n\n" +
+                "Please ensure that your activities comply with our platform's policies. Repeated violations may result in account suspension.\n\n" +
+                "If you believe this warning was issued in error, feel free to contact our support team.\n\n" +
+                "Regards,\nCollege Dealz Team");
+
         message.setFrom("collegedealzz@gmail.com");
         mailSender.send(message);
     }

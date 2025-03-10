@@ -43,7 +43,7 @@ public class AdminServiceImpl implements AdminService {
 
             // Fetch the user
             User user = userRepository.findById(userId)
-                    .orElseThrow(() -> new EntityNotFoundException("User not found with id: " + userId));
+                    .orElseThrow(() -> new EntityNotFoundException("User with ID " + userId + " not found."));
 
             // Fetch the ADMIN role
             Role adminRole = roleRepository.findByName("ADMIN")

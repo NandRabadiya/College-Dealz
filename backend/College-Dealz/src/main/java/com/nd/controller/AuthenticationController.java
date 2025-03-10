@@ -62,9 +62,9 @@ public class AuthenticationController {
     @PostMapping("/resend-otp")
     public ResponseEntity<String> resendOtp(@RequestParam String email) {
         if (emailService.resendOtp(email)) {
-            return ResponseEntity.ok("New OTP sent successfully.");
+            return ResponseEntity.ok("A new OTP has been sent to your email.");
         }
-        return ResponseEntity.badRequest().body("Please wait before resending OTP.");
+        return ResponseEntity.badRequest().body("Please wait a moment before requesting a new OTP.");
     }
 
     @PostMapping("/verify")
@@ -72,7 +72,7 @@ public class AuthenticationController {
         if (emailService.verifyOtp(email, otp)) {
             return ResponseEntity.ok("OTP verified successfully.");
         }
-        return ResponseEntity.badRequest().body("Invalid OTP.");
+        return ResponseEntity.badRequest().body("Invalid OTP. Please try again.");
     }
 
     @PostMapping("/refresh_token")
