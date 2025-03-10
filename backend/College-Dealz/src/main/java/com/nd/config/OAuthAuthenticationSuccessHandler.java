@@ -200,8 +200,8 @@ logger.info("OAuthAuthenicationSuccessHandler: Google New user check before user
             authenticationService.saveUserToken(accessToken, refreshToken, user);
         }
 
-        response.sendRedirect(frontendRedirectUrl + "?token=" + accessToken);
-//        response.sendRedirect(vercelRedirectUrl + "?token=" + accessToken);
+   //     response.sendRedirect(frontendRedirectUrl + "?token=" + accessToken);
+     response.sendRedirect(vercelRedirectUrl + "?token=" + accessToken);
 
 
     }
