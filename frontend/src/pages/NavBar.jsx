@@ -319,11 +319,15 @@ const NavBar = ({ onSearch, onSort }) => {
           <ClipboardPen className="h-6 w-6" />
           {isMobile && <span className="ml-2">Wantlist</span>}
         </Button>
+        {isMobile ? (
+        <NotificationBell isMobile={true} />
+      ) : (
         <NotificationBell>
           <div className="relative cursor-pointer">
             <Bell className="w-4 h-4" />
           </div>
         </NotificationBell>
+      )}
         <ThemeToggle isMobile={isMobile} />
       </div>
     );

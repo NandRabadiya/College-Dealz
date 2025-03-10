@@ -57,11 +57,10 @@ const WantlistDialog = ({ isOpen, onClose, wantlistData }) => {
             </div>
           </div>
           
-          <div className="text-sm bg-blue-50 p-3 rounded-md">
-            <ul>
-              <li>To notify buyer about your product, post it from below button. </li>
-            <li>If not posted from here, buyer might not get the notification 
-            of your product that matches his wantlist.</li>
+          <div className="text-xs bg-blue-50 p-3 rounded-md">
+            <ul className="list-disc pl-3">
+              <li>Post your product using the button below to notify the buyer.</li>
+              <li>If not posted here, the buyer might not get notified about your product.</li>
             </ul>
           </div>
         </div>

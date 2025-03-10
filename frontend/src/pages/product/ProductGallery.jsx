@@ -24,10 +24,7 @@ const ProductGallery = ({ images }) => {
           src={imageList[selectedIndex]?.url}
           alt={`Product image ${selectedIndex + 1}`}
           className="h-full w-full object-cover rounded-lg"
-          onError={(e) => {
-            e.target.onerror = null;
-            e.target.src = "/api/placeholder/400/320";
-          }}
+         
         />
         
         {/* Navigation arrows - only show if there are multiple images */}
