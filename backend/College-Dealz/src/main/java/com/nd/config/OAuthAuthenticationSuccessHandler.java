@@ -10,6 +10,7 @@ import com.nd.repositories.RoleRepo;
 import com.nd.repositories.TokenRepository;
 import com.nd.repositories.UniversityRepo;
 import com.nd.repositories.UserRepo;
+import com.nd.service.AuthenticationService;
 import com.nd.service.JwtService;
 import jakarta.persistence.EntityManager;
 import jakarta.servlet.ServletException;
@@ -20,6 +21,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -45,6 +48,7 @@ public class OAuthAuthenticationSuccessHandler implements AuthenticationSuccessH
 
     private static final String CHARACTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()_+-=[]{}|;:,.<>?";
     private static final SecureRandom RANDOM = new SecureRandom();
+    private static final String frontendRedirectUrl = "https://college-dealz.vercel.app/oauth-callback";
 
     @Autowired
     private UserRepo userRepo;
@@ -58,12 +62,16 @@ public class OAuthAuthenticationSuccessHandler implements AuthenticationSuccessH
     private final JwtService jwtService;
 
     @Autowired
+    private final AuthenticationService authenticationService;
+
+    @Autowired
     private UniversityRepo universityRepo;
 
-    public OAuthAuthenticationSuccessHandler(TokenRepository tokenRepository, PasswordEncoder passwordEncoder, JwtService jwtService) {
+    public OAuthAuthenticationSuccessHandler(TokenRepository tokenRepository, PasswordEncoder passwordEncoder, JwtService jwtService, AuthenticationService authenticationService) {
         this.passwordEncoder = passwordEncoder;
 
         this.jwtService = jwtService;
+        this.authenticationService = authenticationService;
     }
 
 
@@ -72,6 +80,11 @@ public class OAuthAuthenticationSuccessHandler implements AuthenticationSuccessH
             HttpServletRequest request,
             HttpServletResponse response,
             Authentication authentication) throws IOException, ServletException {
+
+        String refreshToken, accessToken = "";
+        final String frontendRedirectUrl = "http://localhost:5173/oauth-callback";
+
+        final String vercelRedirectUrl = "https://college-dealz.vercel.app/oauth-callback";
 
         logger.info("OAuthAuthenicationSuccessHandler");
 
@@ -113,7 +126,9 @@ public class OAuthAuthenticationSuccessHandler implements AuthenticationSuccessH
             logger.info(key + " : " + value);
         });
 
-        if (!userRepo.existsByEmail(oauthUser.getAttribute("email").toString())) {
+        String useremail=oauthUser.getAttribute("email").toString();
+
+        if (!userRepo.existsByEmail(useremail)) {
             User user = new User();
             user.setEmailVerified(true);
             user.setEnabled(true);
@@ -155,33 +170,38 @@ logger.info("OAuthAuthenicationSuccessHandler: Google New user check before user
             user1 = userRepo.findById(user1.getId()).orElseThrow();
 
             logger.info("OAuth check after user save" );
-            String accessToken = jwtService.generateAccessToken(user1);
-            String refreshToken = jwtService.generateRefreshToken(user1);
+            accessToken = jwtService.generateAccessToken(user1);
+            refreshToken = jwtService.generateRefreshToken(user1);
 
 
            jwtService. saveUserToken(accessToken, refreshToken, user1);
 
-            AuthResponse authResponse = new AuthResponse(accessToken, refreshToken, "User login was successful");
+            AuthResponse authResponse = new AuthResponse(accessToken, refreshToken, "User signup was successful");
 
             // Convert the AuthResponse object to JSON
             ObjectMapper objectMapper = new ObjectMapper();
             String jsonResponse = objectMapper.writeValueAsString(authResponse);
 
-//            request.getSession().setAttribute("JWT_ACCESS_TOKEN", accessToken);
-//            request.getSession().setAttribute("JWT_REFRESH_TOKEN", refreshToken);
-
-
             // Write the JSON response
             response.setContentType("application/json");
             response.setStatus(HttpServletResponse.SC_OK);
             response.getWriter().write(jsonResponse);
-          //   final String frontendRedirectUrl = "http://localhost:5173/oauth-callback";
-         final String frontendRedirectUrl = "https://college-dealz.vercel.app/oauth-callback";
-            response.sendRedirect(frontendRedirectUrl + "?token=" + accessToken);
+            
         }
 
-       }
+        }
+        else {
 
+            User user = userRepo.findByEmail(useremail).orElseThrow();
+            accessToken = jwtService.generateAccessToken(user);
+            refreshToken = jwtService.generateRefreshToken(user);
+
+            authenticationService.revokeAllTokenByUser(user);
+            authenticationService.saveUserToken(accessToken, refreshToken, user);
+        }
+
+        response.sendRedirect(frontendRedirectUrl + "?token=" + accessToken);
+//        response.sendRedirect(vercelRedirectUrl + "?token=" + accessToken);
 
 
     }

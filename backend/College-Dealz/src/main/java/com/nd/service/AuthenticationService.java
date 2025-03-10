@@ -111,7 +111,7 @@ public class AuthenticationService {
         return new AuthResponse(accessToken, refreshToken, "User login was successful");
     }
 
-    private void revokeAllTokenByUser(User user) {
+    public void revokeAllTokenByUser(User user) {
         List<Token> validTokens = tokenRepository.findAllAccessTokensByUser(user.getId());
         if (validTokens.isEmpty()) {
             return;
@@ -121,7 +121,7 @@ public class AuthenticationService {
         tokenRepository.saveAll(validTokens);
     }
 
-    private void saveUserToken(String accessToken, String refreshToken, User user) {
+    public void saveUserToken(String accessToken, String refreshToken, User user) {
         Token token = new Token();
         token.setAccessToken(accessToken);
         token.setRefreshToken(refreshToken);
