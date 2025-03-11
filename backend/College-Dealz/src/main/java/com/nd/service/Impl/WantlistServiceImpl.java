@@ -76,11 +76,18 @@ public class WantlistServiceImpl implements WantlistService {
         archivedWantlist.setRemovedAt(Instant.now());
 
         // Calculate how long the wantlist was active
-        long activeDuration = Instant.now().getEpochSecond() - wantlist.getCreatedAt().getEpochSecond();
-        archivedWantlist.setActiveDurationDays(activeDuration / (24 * 60 * 60)); // Convert seconds to days
+        if (wantlist.getCreatedAt() != null) {
+            long activeDuration = Instant.now().getEpochSecond() - wantlist.getCreatedAt().getEpochSecond();
+            archivedWantlist.setActiveDurationDays(activeDuration / (24 * 60 * 60)); // Convert seconds to days
+        } else {
+            archivedWantlist.setActiveDurationDays(0L); // Default to 0 if createdAt is missing
+        }
 
         // Set the reason for removal
-        archivedWantlist.setWantlistRemovalReason(WantlistRemovalReason.valueOf(reason));
+        archivedWantlist.setWantlistRemovalReason(WantlistRemovalReason.valueOf(
+                reason.toUpperCase()
+
+        ));
 
         // Save to archived wantlist
         archivedWantlistRepository.save(archivedWantlist);
