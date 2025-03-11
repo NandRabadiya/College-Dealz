@@ -15,7 +15,7 @@ public interface WantlistService {
      * @param userId      The ID of the user (extracted from the token).
      * @param wantlistId  The ID of the wantlist item to remove.
      */
-    void removeProductFromWantlist(Integer userId, Integer wantlistId);
+    void removeProductFromWantlist(Integer userId, Integer wantlistId , String reason);
 
     List<WantlistDto> getAllWantlist();
 

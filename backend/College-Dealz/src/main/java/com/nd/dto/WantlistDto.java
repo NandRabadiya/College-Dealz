@@ -6,6 +6,8 @@ import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.time.Instant;
+
 @Getter
 @Setter
 public class WantlistDto {
@@ -29,5 +31,5 @@ public class WantlistDto {
 
     private Integer monthsOldMax; // Maximum months old for the product
 
-    // Omitting timestamps and direct `User` references
+    private Instant updatedAt;
 }

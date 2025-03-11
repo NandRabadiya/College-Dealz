@@ -1,16 +1,22 @@
 package com.nd.service.Impl;
 
 import com.nd.dto.WantlistDto;
+import com.nd.entities.ArchivedWantlist;
 import com.nd.entities.User;
 import com.nd.entities.Wantlist;
+import com.nd.enums.WantlistRemovalReason;
+import com.nd.exceptions.ResourceNotFoundException;
+import com.nd.repositories.ArchivedWantlistRepo;
 import com.nd.repositories.UserRepo;
 import com.nd.repositories.WantlistRepo;
 import com.nd.service.NotificationService;
 import com.nd.service.WantlistService;
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -21,6 +27,8 @@ public class WantlistServiceImpl implements WantlistService {
     private final WantlistRepo wantlistRepository;
     private final UserRepo userRepository;
     private final NotificationService notificationService;
+
+    private final ArchivedWantlistRepo archivedWantlistRepository;
 
     @Override
     public WantlistDto addProductToWantlist(Integer userId, WantlistDto wantlistDto) {
@@ -46,12 +54,41 @@ public class WantlistServiceImpl implements WantlistService {
     }
 
     @Override
-    public void removeProductFromWantlist(Integer userId, Integer wantlistId) {
-        if (!wantlistRepository.existsById(wantlistId)) {
-            throw new EntityNotFoundException("Wantlist item not found with ID: " + wantlistId);
-        }
+    @Transactional
+    public void removeProductFromWantlist(Integer userId, Integer wantlistId, String reason) {
+        Wantlist wantlist = wantlistRepository.findById(wantlistId)
+                .orElseThrow(() -> new EntityNotFoundException("Wantlist item not found with ID: " + wantlistId));
+
+        // Ensure that only the user who owns the wantlist can delete it
+//        if (!wantlist.getUser().getId().equals(userId)) {
+//            throw new ResourceNotFoundException("User is not authorized to remove this product");
+//                    //new UnauthorizedAccessException("User is not authorized to remove this wantlist item.");
+//        }
+
+        // Create ArchivedWantlist object
+        ArchivedWantlist archivedWantlist = new ArchivedWantlist();
+        archivedWantlist.setUserId(wantlist.getUser().getId());
+        archivedWantlist.setProductName(wantlist.getProductName());
+        archivedWantlist.setCategory(wantlist.getCategory());
+        archivedWantlist.setDescription(wantlist.getDescription());
+        archivedWantlist.setPriceMax(wantlist.getPriceMax());
+        archivedWantlist.setMonthsOldMax(wantlist.getMonthsOldMax());
+        archivedWantlist.setRemovedAt(Instant.now());
+
+        // Calculate how long the wantlist was active
+        long activeDuration = Instant.now().getEpochSecond() - wantlist.getCreatedAt().getEpochSecond();
+        archivedWantlist.setActiveDurationDays(activeDuration / (24 * 60 * 60)); // Convert seconds to days
+
+        // Set the reason for removal
+        archivedWantlist.setWantlistRemovalReason(WantlistRemovalReason.valueOf(reason));
+
+        // Save to archived wantlist
+        archivedWantlistRepository.save(archivedWantlist);
+
+        // Delete from active wantlist
         wantlistRepository.deleteById(wantlistId);
     }
+
 
     @Override
     public List<WantlistDto> getAllWantlist(){
@@ -90,6 +127,7 @@ public class WantlistServiceImpl implements WantlistService {
         dto.setPriceMin(wantlist.getPriceMin());
         dto.setPriceMax(wantlist.getPriceMax());
         dto.setMonthsOldMax(wantlist.getMonthsOldMax());
+        dto.setUpdatedAt(wantlist.getUpdatedAt());
         return dto;
     }
 }
