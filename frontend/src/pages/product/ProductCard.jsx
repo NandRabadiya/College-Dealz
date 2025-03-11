@@ -415,109 +415,230 @@ const ProductCard = ({
                     className="group relative overflow-hidden rounded-lg border bg-card transition-all hover:shadow-md cursor-pointer"
                     onClick={() => handleProductClick(product.id)}
                   >
-                    <div className="relative h-64 overflow-hidden">
-                      <img
-                        src={product.images?.[0]?.url}
-                        alt={product.name}
-                        className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
-                      />
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="absolute right-2 top-2 bg-background/80 backdrop-blur-sm hover:bg-background/90 z-10"
-                        onClick={(e) => handleWishlist(product.id, e)}
-                      >
-                        <Heart
-                          className={`h-6 w-6 transition-colors duration-200 ${
-                            wishlistedItems.has(product.id)
-                              ? "fill-primary text-primary"
-                              : "text-primary hover:fill-primary/20"
-                          }`}
-                        />
-                      </Button>
+                    
+                    {/* Mobile view: horizontal card layout */}
+                    <div className="block sm:hidden">
+                      <div className="flex flex-row">
+                        {/* Left side: Image */}
+                        <div className="relative w-32 h-32">
+                          <img
+                            src={product.images?.[0]?.url}
+                            alt={product.name}
+                            className="h-full w-full object-cover"
+                          />
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="absolute right-1 top-1 bg-background/80 backdrop-blur-sm hover:bg-background/90 z-10 h-6 w-6 p-1"
+                            onClick={(e) => handleWishlist(product.id, e)}
+                          >
+                            <Heart
+                              className={`h-4 w-4 transition-colors duration-200 ${
+                                wishlistedItems.has(product.id)
+                                  ? "fill-primary text-primary"
+                                  : "text-primary hover:fill-primary/20"
+                              }`}
+                            />
+                          </Button>
+                        </div>
+                        
+                        {/* Right side: Content */}
+                        <div className="flex-1 p-3">
+                          <div className="flex flex-col h-full justify-between">
+                            <div>
+                              <div className="flex items-start justify-between gap-2 mb-1">
+                                <h3 className="font-semibold leading-tight text-foreground text-base line-clamp-2">
+                                  {product.name}
+                                </h3>
+                                <div
+                                  className={`text-base font-bold whitespace-nowrap ${
+                                    product.price === 0
+                                      ? "text-green-500"
+                                      : "text-primary"
+                                  }`}
+                                >
+                                  {product.price === 0 ? "Free" : `₹${product.price}`}
+                                </div>
+                              </div>
+                              
+                              <div className="text-xs text-muted-foreground mb-2">
+                                <div className="flex items-center gap-1 flex-wrap">
+                                  <Badge variant="secondary" className="font-normal text-xs">
+                                    {product.sellerName || "Unknown Seller"}
+                                  </Badge>
+                                  <span className="text-xs">•</span>
+                                  <span className="text-xs">
+                                    {new Date(product.postDate).toLocaleDateString()}
+                                  </span>
+                                </div>
+                              </div>
+                            </div>
+                            
+                            <div className="flex items-center justify-between gap-1 pt-1 border-t">
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="text-xs px-1 py-0 h-7 text-foreground hover:bg-muted"
+                                onClick={(e) => handleChat(product, e)}
+                              >
+                                <MessageCircle className="mr-1 h-3 w-3 text-inherit" />
+                                Chat
+                              </Button>
+                              <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    className="text-xs px-1 py-0 h-7 text-foreground hover:bg-muted"
+                                    onClick={(e) => e.stopPropagation()}
+                                  >
+                                    <Share2 className="mr-1 h-3 w-3 text-inherit" />
+                                    Share
+                                  </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end" className="w-48">
+                                  <DropdownMenuItem
+                                    onClick={(e) =>
+                                      handleShare(product, "whatsapp", e)
+                                    }
+                                  >
+                                    <MessageSquare className="mr-2 h-4 w-4" />
+                                    WhatsApp
+                                  </DropdownMenuItem>
+                                  <DropdownMenuItem
+                                    onClick={(e) =>
+                                      handleShare(product, "facebook", e)
+                                    }
+                                  >
+                                    <Facebook className="mr-2 h-4 w-4" />
+                                    Facebook
+                                  </DropdownMenuItem>
+                                  <DropdownMenuItem
+                                    onClick={(e) => handleShare(product, "email", e)}
+                                  >
+                                    <Mail className="mr-2 h-4 w-4" />
+                                    Email
+                                  </DropdownMenuItem>
+                                  <DropdownMenuItem
+                                    onClick={(e) => handleShare(product, "copy", e)}
+                                  >
+                                    <Link className="mr-2 h-4 w-4" />
+                                    Copy Link
+                                  </DropdownMenuItem>
+                                </DropdownMenuContent>
+                              </DropdownMenu>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
                     </div>
-
-                    <div className="p-4">
-                      <div className="mb-2 flex items-start justify-between gap-2">
-                        <h3 className="font-semibold leading-tight text-foreground text-xl line-clamp-2">
-                          {product.name}
-                        </h3>
-                        <div
-                          className={`text-xl font-bold whitespace-nowrap ${
-                            product.price === 0
-                              ? "text-green-500"
-                              : "text-primary"
-                          }`}
-                        >
-                          {product.price === 0 ? "Free" : `₹${product.price}`}
-                        </div>
-                      </div>
-
-                      <div className="mb-3 text-sm text-muted-foreground">
-                        <div className="flex items-center gap-2">
-                          <Badge variant="secondary" className="font-normal">
-                            {product.sellerName || "Unknown Seller"}
-                          </Badge>
-                          <span className="text-xs">•</span>
-                          <span className="text-xs">
-                            {new Date(product.postDate).toLocaleDateString()}
-                          </span>
-                        </div>
-                      </div>
-
-                      <div className="flex items-center justify-between gap-2 pt-2 border-t">
+                    
+                    {/* Tablet and Desktop view: original card layout */}
+                    <div className="hidden sm:block">
+                      <div className="relative h-64 overflow-hidden">
+                        <img
+                          src={product.images?.[0]?.url}
+                          alt={product.name}
+                          className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                        />
                         <Button
                           variant="ghost"
-                          size="sm"
-                          className="flex-1 text-foreground hover:bg-muted"
-                          onClick={(e) => handleChat(product, e)}
+                          size="icon"
+                          className="absolute right-2 top-2 bg-background/80 backdrop-blur-sm hover:bg-background/90 z-10"
+                          onClick={(e) => handleWishlist(product.id, e)}
                         >
-                          <MessageCircle className="mr-2 h-4 w-4 text-inherit" />
-                          Chat
+                          <Heart
+                            className={`h-6 w-6 transition-colors duration-200 ${
+                              wishlistedItems.has(product.id)
+                                ? "fill-primary text-primary"
+                                : "text-primary hover:fill-primary/20"
+                            }`}
+                          />
                         </Button>
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              className="flex-1 text-foreground hover:bg-muted"
-                              onClick={(e) => e.stopPropagation()}
-                            >
-                              <Share2 className="mr-2 h-4 w-4 text-inherit" />
-                              Share
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end" className="w-48">
-                            <DropdownMenuItem
-                              onClick={(e) =>
-                                handleShare(product, "whatsapp", e)
-                              }
-                            >
-                              <MessageSquare className="mr-2 h-4 w-4" />
-                              WhatsApp
-                            </DropdownMenuItem>
-                            <DropdownMenuItem
-                              onClick={(e) =>
-                                handleShare(product, "facebook", e)
-                              }
-                            >
-                              <Facebook className="mr-2 h-4 w-4" />
-                              Facebook
-                            </DropdownMenuItem>
-                            <DropdownMenuItem
-                              onClick={(e) => handleShare(product, "email", e)}
-                            >
-                              <Mail className="mr-2 h-4 w-4" />
-                              Email
-                            </DropdownMenuItem>
-                            <DropdownMenuItem
-                              onClick={(e) => handleShare(product, "copy", e)}
-                            >
-                              <Link className="mr-2 h-4 w-4" />
-                              Copy Link
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
+                      </div>
+
+                      <div className="p-4">
+                        <div className="mb-2 flex items-start justify-between gap-2">
+                          <h3 className="font-semibold leading-tight text-foreground text-xl line-clamp-2">
+                            {product.name}
+                          </h3>
+                          <div
+                            className={`text-xl font-bold whitespace-nowrap ${
+                              product.price === 0
+                                ? "text-green-500"
+                                : "text-primary"
+                            }`}
+                          >
+                            {product.price === 0 ? "Free" : `₹${product.price}`}
+                          </div>
+                        </div>
+
+                        <div className="mb-3 text-sm text-muted-foreground">
+                          <div className="flex items-center gap-2">
+                            <Badge variant="secondary" className="font-normal">
+                              {product.sellerName || "Unknown Seller"}
+                            </Badge>
+                            <span className="text-xs">•</span>
+                            <span className="text-xs">
+                              {new Date(product.postDate).toLocaleDateString()}
+                            </span>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center justify-between gap-2 pt-2 border-t">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="flex-1 text-foreground hover:bg-muted"
+                            onClick={(e) => handleChat(product, e)}
+                          >
+                            <MessageCircle className="mr-2 h-4 w-4 text-inherit" />
+                            Chat
+                          </Button>
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="flex-1 text-foreground hover:bg-muted"
+                                onClick={(e) => e.stopPropagation()}
+                              >
+                                <Share2 className="mr-2 h-4 w-4 text-inherit" />
+                                Share
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end" className="w-48">
+                              <DropdownMenuItem
+                                onClick={(e) =>
+                                  handleShare(product, "whatsapp", e)
+                                }
+                              >
+                                <MessageSquare className="mr-2 h-4 w-4" />
+                                WhatsApp
+                              </DropdownMenuItem>
+                              <DropdownMenuItem
+                                onClick={(e) =>
+                                  handleShare(product, "facebook", e)
+                                }
+                              >
+                                <Facebook className="mr-2 h-4 w-4" />
+                                Facebook
+                              </DropdownMenuItem>
+                              <DropdownMenuItem
+                                onClick={(e) => handleShare(product, "email", e)}
+                              >
+                                <Mail className="mr-2 h-4 w-4" />
+                                Email
+                              </DropdownMenuItem>
+                              <DropdownMenuItem
+                                onClick={(e) => handleShare(product, "copy", e)}
+                              >
+                                <Link className="mr-2 h-4 w-4" />
+                                Copy Link
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </div>
                       </div>
                     </div>
                   </div>
