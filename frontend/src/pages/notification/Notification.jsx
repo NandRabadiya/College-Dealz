@@ -23,21 +23,21 @@ const NotificationContent = ({ notifications, error, onNotificationClick }) => {
   const getNotificationIcon = (type) => {
     switch (type) {
       case "CHAT":
-        return <MessageCircle className="w-4 h-4 text-blue-500" />;
+        return <MessageCircle className="w-4 h-4 text-blue-500 dark:text-blue-400" />;
       case "UPDATE":
-        return <RefreshCw className="w-4 h-4 text-green-500" />;
+        return <RefreshCw className="w-4 h-4 text-green-500 dark:text-green-400" />;
       case "WANTLIST_ITEM":
-        return <ClipboardListIcon className="w-4 h-4 text-red-500" />;
+        return <ClipboardListIcon className="w-4 h-4 text-red-500 dark:text-red-400" />;
       case "PRODUCT_ITEM":
-        return <ClipboardCheck className="w-4 h-4 text-purple-500" />;
+        return <ClipboardCheck className="w-4 h-4 text-purple-500 dark:text-purple-400" />;
       default:
-        return <Bell className="w-4 h-4 text-gray-500" />;
+        return <Bell className="w-4 h-4 text-gray-500 dark:text-gray-400" />;
     }
   };
 
   return (
     <PopoverContent 
-      className="p-0 w-80 max-h-[80vh] max-w-[calc(100vw-24px)] z-[999] bg-white shadow-lg border pointer-events-auto"
+      className="p-0 w-80 max-h-[80vh] max-w-[calc(100vw-24px)] z-[999] bg-white dark:bg-gray-900 shadow-lg border dark:border-gray-700 pointer-events-auto"
       sideOffset={10}
       align="end"
       alignOffset={-5}
@@ -46,24 +46,24 @@ const NotificationContent = ({ notifications, error, onNotificationClick }) => {
       sticky="always"
       onClick={(e) => e.stopPropagation()} // Prevent background click issue
     >
-      <div className="flex items-center justify-between p-3 border-b">
-        <h2 className="font-semibold text-sm">Notifications</h2>
-        <span className="text-xs text-gray-500">
+      <div className="flex items-center justify-between p-3 border-b dark:border-gray-700">
+        <h2 className="font-semibold text-sm dark:text-gray-100">Notifications</h2>
+        <span className="text-xs text-gray-500 dark:text-gray-400">
           {notifications.filter(n => !n.isRead).length} new
         </span>
       </div>
       <ScrollArea className="h-[300px] max-h-[calc(80vh-48px)]">
         {error ? (
-          <p className="text-red-500 text-center py-6 text-sm">{error}</p>
+          <p className="text-red-500 dark:text-red-400 text-center py-6 text-sm">{error}</p>
         ) : notifications.length === 0 ? (
-          <p className="text-gray-500 text-center py-6 text-sm">No notifications yet</p>
+          <p className="text-gray-500 dark:text-gray-400 text-center py-6 text-sm">No notifications yet</p>
         ) : (
-          <div className="divide-y">
+          <div className="divide-y dark:divide-gray-700">
             {notifications.map((notification) => (
               <div
                 key={notification.id}
-                className={`p-3 hover:bg-gray-50 transition-colors cursor-pointer ${
-                  !notification.isRead ? 'bg-blue-50' : ''
+                className={`p-3 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors cursor-pointer ${
+                  !notification.isRead ? 'bg-blue-50 dark:bg-blue-900/30' : ''
                 }`}
                 onClick={(e) => {
                   e.stopPropagation(); // Prevent background click
@@ -75,8 +75,8 @@ const NotificationContent = ({ notifications, error, onNotificationClick }) => {
                     {getNotificationIcon(notification.referenceType)}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium truncate">{notification.title}</p>
-                    <p className="text-xs text-gray-600 line-clamp-2">{notification.message}</p>
+                    <p className="text-sm font-medium truncate dark:text-gray-100">{notification.title}</p>
+                    <p className="text-xs text-gray-600 dark:text-gray-400 line-clamp-2">{notification.message}</p>
                   </div>
                 </div>
               </div>
@@ -209,10 +209,10 @@ const NotificationBell = ({ children, className = "", isMobile = false }) => {
         <Popover open={isOpen} onOpenChange={handleOpenChange}>
           <PopoverTrigger asChild>
             <div className="w-full flex justify-start items-center space-x-2 cursor-pointer">
-              <Bell className="h-5 w-5" />
-              <span className="ml-2">Notifications</span>
+              <Bell className="h-5 w-5 dark:text-gray-300" />
+              <span className="ml-2 dark:text-gray-300">Notifications</span>
               {notifications.filter(n => !n.isRead).length > 0 && (
-                <div className="bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                <div className="bg-red-500 dark:bg-red-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
                   {notifications.filter(n => !n.isRead).length}
                 </div>
               )}
@@ -240,9 +240,9 @@ const NotificationBell = ({ children, className = "", isMobile = false }) => {
       <Popover open={isOpen} onOpenChange={setIsOpen}>
         <PopoverTrigger asChild>
           <div className={`relative inline-flex items-center justify-center cursor-pointer ${className}`}>
-            {children || <Bell className="h-5 w-5" />}
+            {children || <Bell className="h-5 w-5 dark:text-gray-300" />}
             {notifications.filter(n => !n.isRead).length > 0 && (
-              <div className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+              <div className="absolute -top-1 -right-1 bg-red-500 dark:bg-red-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
                 {notifications.filter(n => !n.isRead).length}
               </div>
             )}
