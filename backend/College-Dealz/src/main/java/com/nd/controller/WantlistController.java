@@ -30,9 +30,9 @@ public class WantlistController {
     @DeleteMapping("/remove/{wantlistId}")
     public ResponseEntity<String> removeProductFromWantlist(
             @RequestHeader("Authorization") String token,
-            @PathVariable Integer wantlistId) {
+            @PathVariable Integer wantlistId, @RequestParam String reason) {
         Integer userId = extractUserIdFromToken(token);
-        wantlistService.removeProductFromWantlist(userId, wantlistId);
+        wantlistService.removeProductFromWantlist(userId, wantlistId,reason);
         return ResponseEntity.ok("Product removed from wantlist successfully");
     }
 

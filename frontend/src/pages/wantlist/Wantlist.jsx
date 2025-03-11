@@ -14,6 +14,9 @@ function Wantlist() {
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("all"); // 'all' or 'my'
   const [showInfoDialog, setShowInfoDialog] = useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [deleteItemId, setDeleteItemId] = useState(null);
+  const [deleteReason, setDeleteReason] = useState(null);
 
   useEffect(() => {
     fetchWantlists();
@@ -99,20 +102,58 @@ function Wantlist() {
     setShowForm(true);
   };
 
-  const handleDelete = async (id) => {
-    await deleteItem(id);
-    setMyWantlist(myWantlist.filter((item) => item.id !== id));
-    setAllWantlist(allWantlist.filter((item) => item.id !== id));
+  const initiateDelete = (id) => {
+    setDeleteItemId(id);
+    setShowDeleteDialog(true);
   };
 
-  const deleteItem = async (id) => {
-    await fetch(`${API_BASE_URL}/api/wantlist/remove/${id}`, {
-      method: "DELETE",
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem("jwt")}`,
-      },
-    });
+  const handleDelete = async () => {
+    if (!deleteItemId || !deleteReason) return;
+    
+    try {
+      await deleteItem(deleteItemId, deleteReason);
+      setMyWantlist(myWantlist.filter((item) => item.id !== deleteItemId));
+      setAllWantlist(allWantlist.filter((item) => item.id !== deleteItemId));
+      // Close the dialog after successful removal
+      setShowDeleteDialog(false);
+      setDeleteItemId(null);
+      setDeleteReason(null);
+    } catch (error) {
+      console.error("Error deleting item:", error);
+      // You could add error handling UI here if needed
+    }
   };
+
+  const deleteItem = async (id, reason) => {
+    try {
+      const token = localStorage.getItem("jwt");
+  
+      if (!token) {
+        console.error("JWT token not found");
+        return;
+      }
+  
+      const response = await fetch(
+        `${API_BASE_URL}/api/wantlist/remove/${id}?reason=${encodeURIComponent(reason)}`,
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+  
+      if (!response.ok) {
+        throw new Error(`Failed to remove item: ${response.statusText}`);
+      }
+  
+      const result = await response.text();
+      console.log(result);
+    } catch (error) {
+      console.error("Error removing item:", error);
+    }
+  };
+  
 
   const handlePostDeal = (wantlistData) => {
     // Logic to navigate to post a deal page with wantlist data
@@ -232,7 +273,7 @@ function Wantlist() {
                           <Edit2 size={16} />
                         </button>
                         <button
-                          onClick={() => handleDelete(item.id)}
+                          onClick={() => initiateDelete(item.id)}
                           className="p-1 text-gray-500 dark:text-gray-400 hover:text-red-600 dark:hover:text-red-400"
                           aria-label="Delete item"
                         >
@@ -309,7 +350,7 @@ function Wantlist() {
                   <span className="font-medium text-gray-800 dark:text-gray-200">
                     Wantlist
                   </span>{" "}
-                  is a place to add items you're looking for but haven’t found
+                  is a place to add items you're looking for but haven't found
                   yet.
                 </p>
                 <ul className="list-disc pl-5 space-y-1">
@@ -317,7 +358,7 @@ function Wantlist() {
                   <li>Sellers can offer deals if they have them</li>
                   <li>Get notified when your items become available</li>
                 </ul>
-                <p>It’s like a wishlist, but powered by the community! ✨</p>
+                <p>It's like a wishlist, but powered by the community! ✨</p>
               </div>
 
               <div className="flex justify-end">
@@ -327,6 +368,73 @@ function Wantlist() {
                 >
                   Got it
                 </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Delete Confirmation Dialog */}
+        {showDeleteDialog && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg max-w-md w-full p-6 relative animate-fadeIn">
+              <button
+                onClick={() => {
+                  setShowDeleteDialog(false);
+                  setDeleteItemId(null);
+                  setDeleteReason(null);
+                }}
+                className="absolute top-4 right-4 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+              >
+                <X size={20} />
+              </button>
+
+              <div className="text-center mb-6">
+                <div className="inline-flex items-center justify-center h-12 w-12 rounded-full bg-red-100 dark:bg-red-900 text-red-600 dark:text-red-300 mb-3">
+                  <Trash2 size={24} />
+                </div>
+                <h3 className="text-xl font-bold text-gray-900 dark:text-white">
+                  Remove from Wantlist
+                </h3>
+              </div>
+
+              <div className="mb-6">
+                <p className="text-gray-700 dark:text-gray-300 text-center mb-4">
+                  Did you find the product on the platform?
+                </p>
+
+                <div className="grid grid-cols-1 gap-3">
+                  <button
+                    onClick={() => {
+                      setDeleteReason("yes");
+                      handleDelete();
+                    }}
+                    className="w-full py-2 px-4 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
+                  >
+                    Yes
+                  </button>
+                  <button
+                    onClick={() => {
+                      setDeleteReason("no");
+                      handleDelete();
+                    }}
+                    className="w-full py-2 px-4 bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200 rounded-lg transition-colors"
+                  >
+                    No
+                  </button>
+                  <button
+                    onClick={() => {
+                      setDeleteReason("no_longer_needed");
+                      handleDelete();
+                    }}
+                    className="w-full py-2 px-4 bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200 rounded-lg transition-colors"
+                  >
+                    No longer needed
+                  </button>
+                </div>
+              </div>
+
+              <div className="flex justify-end">
+                
               </div>
             </div>
           </div>
