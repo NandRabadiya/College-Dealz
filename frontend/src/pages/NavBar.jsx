@@ -324,7 +324,7 @@ const NavBar = ({ onSearch, onSort }) => {
       ) : (
         <NotificationBell>
           <div className="relative cursor-pointer">
-            <Bell className="w-4 h-4" />
+            <Bell className="w-6 h-5" />
           </div>
         </NotificationBell>
       )}
