@@ -236,12 +236,11 @@ const NavBar = ({ onSearch, onSort }) => {
 
   // Modify components to accept onItemClick prop
   function NavigationItems({ isMobile = false, onItemClick }) {
+    // Don't render NavigationItems for mobile as requested
+    if (isMobile) return null;
+    
     return (
-      <div
-        className={`flex ${
-          isMobile ? "flex-col space-y-4" : "items-center space-x-4"
-        }`}
-      >
+      <div className="flex items-center space-x-4">
         <ProductSort
           onSort={(value) => {
             handleSort(value);
@@ -329,7 +328,6 @@ const NavBar = ({ onSearch, onSort }) => {
             </div>
           </NotificationBell>
         )}
-        <ThemeToggle isMobile={isMobile} />
       </div>
     );
   }
@@ -386,14 +384,7 @@ const NavBar = ({ onSearch, onSort }) => {
             />
           </div>
           <div className="flex space-x-2">
-            <Button
-              variant="outline"
-              size="icon"
-              className="flex-shrink-0"
-              onClick={() => setIsFilterOpen(true)}
-            >
-              <Filter className="h-4 w-4" />
-            </Button>
+          
 
             <Sheet open={isFilterOpen} onOpenChange={setIsFilterOpen}>
               <SheetContent
@@ -433,13 +424,6 @@ const NavBar = ({ onSearch, onSort }) => {
     </div>
   );
 
-  // const SearchBar = ({ className = "" }) => (
-  //   <div className={`relative ${className}`}>
-  //     <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-  //     <Input placeholder="Search..." className="pl-8" />
-  //   </div>
-  // );
-
   return (
     <>
       <nav className="w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50">
@@ -460,10 +444,7 @@ const NavBar = ({ onSearch, onSort }) => {
                       className="h-16 mx-auto cursor-pointer"
                       onClick={handleLogoClick}
                     />
-                    <NavigationItems
-                      isMobile
-                      onItemClick={() => setIsSidebarOpen(false)}
-                    />
+                    {/* NavigationItems component removed from mobile sidebar */}
                     <ActionButtons
                       isMobile
                       onItemClick={() => setIsSidebarOpen(false)}
@@ -477,12 +458,6 @@ const NavBar = ({ onSearch, onSort }) => {
                 <AuthSection />
               </div>
             </div>
-
-            {showMobileSearch && (
-              <div className="pb-4 px-2">
-                <SearchBar className="w-full" />
-              </div>
-            )}
           </div>
 
           <div className="hidden lg:flex flex-col items-center py-2 space-y-4">
