@@ -76,7 +76,7 @@ export const ProductSort = ({ onSort, currentSort, isLoading }) => {
       disabled={isLoading}
     >
       <SelectTrigger className="w-[180px]">
-        <SelectValue placeholder="Sort by...">
+        <SelectValue placeholder="Sort">
           {isLoading ? (
             <div className="flex items-center">
               <Loader2 className="h-4 w-4 animate-spin mr-2" />

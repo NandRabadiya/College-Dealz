@@ -178,7 +178,9 @@ const UserDeals = () => {
     try {
       const token = localStorage.getItem("jwt");
       const response = await fetch(
-        `${API_BASE_URL}/api/products/${dealId}/interested-buyers`
+        `${API_BASE_URL}/api/products/${dealId}/interested-buyers`,{ 
+        headers: {
+          'Authorization': `Bearer ${token}`}}
       );
       if (response.ok) {
         const buyers = await response.json();
