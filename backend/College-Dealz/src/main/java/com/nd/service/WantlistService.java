@@ -17,6 +17,8 @@ public interface WantlistService {
      */
     void removeProductFromWantlist(Integer userId, Integer wantlistId);
 
+    List<WantlistDto> getAllWantlist();
+
     /**
      * Fetch all wantlist items for a specific user.
      *
@@ -27,4 +29,5 @@ public interface WantlistService {
 
 
     WantlistDto getWantlistById(Integer wantlistId);
+
 }

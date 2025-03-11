@@ -54,6 +54,15 @@ public class WantlistServiceImpl implements WantlistService {
     }
 
     @Override
+    public List<WantlistDto> getAllWantlist(){
+        List<Wantlist> wantlists = wantlistRepository.findAll();
+        return wantlists
+                .stream()
+                .map(this::toDto)
+                .collect(Collectors.toList());
+    }
+
+    @Override
     public List<WantlistDto> getAllWantlistItemsByUserId(Integer userId) {
         List<Wantlist> wantlist = wantlistRepository.findByUserId(userId);
         return wantlist.stream()
@@ -68,7 +77,6 @@ public class WantlistServiceImpl implements WantlistService {
 
         return toDto(wantlist);
     }
-
     /**
      * Convert a Wantlist entity to its corresponding DTO.
      */

@@ -56,4 +56,9 @@ public class WantlistController {
 
         return jwtService.getUserIdFromToken(token);
     }
+
+    @GetMapping("/all-wantlist")
+    public ResponseEntity<List<WantlistDto>> getAllWantlist() {
+        return ResponseEntity.ok(wantlistService.getAllWantlist());
+    }
 }
