@@ -1,7 +1,6 @@
 package com.nd.controller;
 
 import com.nd.dto.*;
-import com.nd.entities.ArchivedProducts;
 import com.nd.enums.NotificationType;
 import com.nd.enums.ReferenceType;
 import com.nd.exceptions.ProductException;
@@ -255,12 +254,25 @@ public class ProductController {
     }
 
     @PostMapping("/sold-outside/{productId}")
-    public ResponseEntity<String> soldOutsideProduct(@PathVariable Integer productId,
+    public ResponseEntity<String> soldOutsidePlatform(@PathVariable Integer productId,
                                                                @RequestBody SoldOutsideResponse soldOutsideResponse) throws ProductException {
-        boolean archived = productService.soldOutsideProduct(productId, soldOutsideResponse);
+        boolean archived = productService.soldOutsidePlatfrom(productId, soldOutsideResponse);
         if (archived)
             return ResponseEntity.ok("Product marked as sold and removed successfully.");
         else return ResponseEntity.status(404).body("Failed to mark the product as sold. Please try again.");
     }
+
+
+    @PostMapping("/sold-inside-platform/{productId}")
+    public ResponseEntity<String> soldInsidePlatform(@PathVariable Integer productId,
+                                                      @RequestParam String buyerEmail,
+                                                     @RequestParam int price ) throws ProductException {
+        boolean archived = productService.soldOutsidePlatfrom(productId, soldOutsideResponse);
+        if (archived)
+            return ResponseEntity.ok("Product marked as sold and removed successfully.");
+        else return ResponseEntity.status(404).body("Failed to mark the product as sold. Please try again.");
+    }
+
+
 
 }

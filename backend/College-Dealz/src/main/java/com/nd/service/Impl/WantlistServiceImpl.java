@@ -43,7 +43,8 @@ public class WantlistServiceImpl implements WantlistService {
         wantlist.setPriceMin(wantlistDto.getPriceMin());
         wantlist.setPriceMax(wantlistDto.getPriceMax());
         wantlist.setMonthsOldMax(wantlistDto.getMonthsOldMax());
-
+        wantlist.setCreatedAt(Instant.now());
+        wantlist.setUpdatedAt(Instant.now());
         Wantlist savedWantlist = wantlistRepository.save(wantlist);
 
         // ✅ Trigger notification for all users except the one who added the item

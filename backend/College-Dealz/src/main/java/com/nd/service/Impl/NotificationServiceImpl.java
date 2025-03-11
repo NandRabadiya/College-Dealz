@@ -1,14 +1,17 @@
 package com.nd.service.Impl;
 
 import com.nd.dto.NotificationDto;
+import com.nd.dto.WantlistDto;
 import com.nd.entities.Notification;
 import com.nd.entities.University;
 import com.nd.entities.User;
+import com.nd.entities.Wantlist;
 import com.nd.enums.NotificationType;
 import com.nd.enums.ReferenceType;
 import com.nd.repositories.NotificationRepo;
 import com.nd.repositories.UserRepo;
 import com.nd.service.NotificationService;
+import com.nd.service.WantlistService;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
@@ -21,10 +24,12 @@ public class NotificationServiceImpl implements NotificationService {
 
     private final NotificationRepo notificationRepository;
     private final UserRepo userRepository;
+    private final WantlistService wantlistService;
 
-    public NotificationServiceImpl(NotificationRepo notificationRepository, UserRepo userRepository) {
+    public NotificationServiceImpl(NotificationRepo notificationRepository, UserRepo userRepository, WantlistService wantlistService) {
         this.notificationRepository = notificationRepository;
         this.userRepository = userRepository;
+        this.wantlistService = wantlistService;
     }
 
     @Override
@@ -49,10 +54,12 @@ public class NotificationServiceImpl implements NotificationService {
         List<User> allUsers = userRepository.findAllByUniversity(university);
         allUsers.remove(addedByUser); // Exclude the user who created the notification
 
+        WantlistDto wantlist = wantlistService.getWantlistById(itemId);
+
         Notification notification = new Notification();
         notification.setType(NotificationType.ITEM_INTEREST);
         notification.setTitle("New Item in Wantlist");
-        notification.setMessage("User " + addedByUserId + " added a new item with ID: " + itemId);
+        notification.setMessage("New item " + wantlist.getProductName()+ "added in wantlist ");
         notification.setIsRead(false);
         notification.setCreatedAt(Instant.now());
         notification.setReferenceId(itemId);

@@ -48,5 +48,8 @@ public interface ProductService {
 
     boolean removeProduct(Integer productId, String removalReason, boolean byUser) throws ProductException;
 
-    boolean soldOutsideProduct(Integer productId, SoldOutsideResponse soldOutsideResponse) throws ProductException;
+    boolean soldOutsidePlatfrom(Integer productId, SoldOutsideResponse soldOutsideResponse) throws ProductException;
+
+    boolean soldInsidePlatform(Integer productId, String email , int price ) throws ProductException;
+
 }
