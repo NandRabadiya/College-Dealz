@@ -71,7 +71,7 @@ function App() {
     setShowUniversitySelector(false);
   };
   return (
-    <>
+    <> 
       <Router>
       <NavBar onSearch={handleSearch} onSort={handleSort} /> {/* Pass the handlers */}
       <UniversitySelector

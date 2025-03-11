@@ -36,6 +36,8 @@ import {
 } from "@/components/ui/dropdown-menu";
 import debounce from "lodash/debounce";
 import FilterComponent from "./Filter";
+import Wantlist from "../wantlist/Wantlist";
+import WantlistTour from "../wantlist/WantlistTour";
 
 const ProductCard = ({
   searchQuery,
@@ -386,6 +388,7 @@ const ProductCard = ({
   }
 
   return (
+    <>
     <div className="container mx-auto px-4">
       <div className="flex flex-col lg:flex-row gap-6">
         <FilterComponent
@@ -559,6 +562,7 @@ const ProductCard = ({
         </div>
       </div>
     </div>
+    </>
   );
 };
 

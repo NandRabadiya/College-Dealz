@@ -3,6 +3,7 @@ import { Plus, Edit2, Trash2, Aperture, Tag, Info, X } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import WantlistForm from "./WantlistForm";
 import { API_BASE_URL } from "../Api/api";
+import WantlistPageTour from "./WantlistPageTour";
 
 function Wantlist() {
   const navigate = useNavigate();
@@ -121,6 +122,8 @@ function Wantlist() {
   const currentWantlist = activeTab === "all" ? allWantlist : myWantlist;
 
   return (
+    <>
+    <WantlistPageTour />
     <div className="min-h-screen bg-gray-100 dark:bg-gray-900 transition-colors duration-200">
       <div className="max-w-5xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 sm:mb-6 gap-3">
@@ -137,6 +140,7 @@ function Wantlist() {
               <Info size={18} />
             </button>
             <button
+            id="add-items"
               onClick={() => {
                 setEditingItem(null);
                 setShowForm(true);
@@ -152,6 +156,7 @@ function Wantlist() {
         <div className="mb-4 sm:mb-6 border-b border-gray-200 dark:border-gray-700 overflow-x-auto">
           <nav className="flex space-x-4 sm:space-x-8 min-w-max">
             <button
+            id="all-wantlist"
               onClick={() => setActiveTab("all")}
               className={`py-3 sm:py-4 px-1 inline-flex items-center border-b-2 font-medium text-sm ${
                 activeTab === "all"
@@ -162,6 +167,7 @@ function Wantlist() {
               All Products
             </button>
             <button
+            id="my-wantlist"
               onClick={() => setActiveTab("my")}
               className={`py-3 sm:py-4 px-1 inline-flex items-center border-b-2 font-medium text-sm ${
                 activeTab === "my"
@@ -327,6 +333,7 @@ function Wantlist() {
         )}
       </div>
     </div>
+    </>
   );
 }
 

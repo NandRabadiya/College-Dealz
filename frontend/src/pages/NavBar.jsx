@@ -242,7 +242,6 @@ const NavBar = ({ onSearch, onSort }) => {
           isMobile ? "flex-col space-y-4" : "items-center space-x-4"
         }`}
       >
-      
         <ProductSort
           onSort={(value) => {
             handleSort(value);
@@ -308,6 +307,7 @@ const NavBar = ({ onSearch, onSort }) => {
           {isMobile && <span className="ml-2">Wishlist</span>}
         </Button>
         <Button
+          id="wantlist-button" // Add this ID
           variant="ghost"
           size="icon"
           className={isMobile ? "w-full flex justify-start" : ""}
@@ -319,15 +319,16 @@ const NavBar = ({ onSearch, onSort }) => {
           <ClipboardPen className="h-6 w-6" />
           {isMobile && <span className="ml-2">Wantlist</span>}
         </Button>
+
         {isMobile ? (
-        <NotificationBell isMobile={true} />
-      ) : (
-        <NotificationBell>
-          <div className="relative cursor-pointer">
-            <Bell className="w-6 h-5" />
-          </div>
-        </NotificationBell>
-      )}
+          <NotificationBell isMobile={true} />
+        ) : (
+          <NotificationBell>
+            <div className="relative cursor-pointer">
+              <Bell className="w-6 h-5" />
+            </div>
+          </NotificationBell>
+        )}
         <ThemeToggle isMobile={isMobile} />
       </div>
     );
@@ -393,7 +394,7 @@ const NavBar = ({ onSearch, onSort }) => {
             >
               <Filter className="h-4 w-4" />
             </Button>
-  
+
             <Sheet open={isFilterOpen} onOpenChange={setIsFilterOpen}>
               <SheetContent
                 side="right"
@@ -419,7 +420,7 @@ const NavBar = ({ onSearch, onSort }) => {
                 </div>
               </SheetContent>
             </Sheet>
-  
+
             <ProductSort
               onSort={handleSort}
               currentSort={currentSort}
@@ -431,7 +432,7 @@ const NavBar = ({ onSearch, onSort }) => {
       </div>
     </div>
   );
-  
+
   // const SearchBar = ({ className = "" }) => (
   //   <div className={`relative ${className}`}>
   //     <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
