@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react';
-import { Plus, Edit2, Trash2, Aperture, Tag } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
-import WantlistForm from './WantlistForm';
-import { API_BASE_URL } from '../Api/api';
+import React, { useState, useEffect } from "react";
+import { Plus, Edit2, Trash2, Aperture, Tag, Info, X } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import WantlistForm from "./WantlistForm";
+import { API_BASE_URL } from "../Api/api";
 
 function Wantlist() {
   const navigate = useNavigate();
@@ -11,7 +11,8 @@ function Wantlist() {
   const [allWantlist, setAllWantlist] = useState([]);
   const [myWantlist, setMyWantlist] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState('all'); // 'all' or 'my'
+  const [activeTab, setActiveTab] = useState("all"); // 'all' or 'my'
+  const [showInfoDialog, setShowInfoDialog] = useState(false);
 
   useEffect(() => {
     fetchWantlists();
@@ -21,20 +22,23 @@ function Wantlist() {
     setLoading(true);
     try {
       // Fetch all wantlist items
-      const allResponse = await fetch(`${API_BASE_URL}/api/wantlist/all-wantlist`, {
-        method: 'GET',
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem('jwt')}`,
-        },
-      });
+      const allResponse = await fetch(
+        `${API_BASE_URL}/api/wantlist/all-wantlist`,
+        {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("jwt")}`,
+          },
+        }
+      );
       const allData = await allResponse.json();
       setAllWantlist(allData);
-      
+
       // Endpoint for my wantlist items
       const myResponse = await fetch(`${API_BASE_URL}/api/wantlist/all`, {
-        method: 'GET',
+        method: "GET",
         headers: {
-          Authorization: `Bearer ${localStorage.getItem('jwt')}`,
+          Authorization: `Bearer ${localStorage.getItem("jwt")}`,
         },
       });
       const myData = await myResponse.json();
@@ -58,10 +62,10 @@ function Wantlist() {
 
   const addItem = async (data) => {
     const response = await fetch(`${API_BASE_URL}/api/wantlist/add`, {
-      method: 'POST',
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${localStorage.getItem('jwt')}`,
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${localStorage.getItem("jwt")}`,
       },
       body: JSON.stringify(data),
     });
@@ -72,15 +76,15 @@ function Wantlist() {
 
   const updateItem = async (id, data) => {
     const response = await fetch(`${API_BASE_URL}/api/wantlist/${id}`, {
-      method: 'PUT',
+      method: "PUT",
       headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${localStorage.getItem('jwt')}`,
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${localStorage.getItem("jwt")}`,
       },
       body: JSON.stringify(data),
     });
     const updatedItem = await response.json();
-    
+
     setMyWantlist(
       myWantlist.map((item) => (item.id === id ? updatedItem : item))
     );
@@ -102,9 +106,9 @@ function Wantlist() {
 
   const deleteItem = async (id) => {
     await fetch(`${API_BASE_URL}/api/wantlist/remove/${id}`, {
-      method: 'DELETE',
+      method: "DELETE",
       headers: {
-        Authorization: `Bearer ${localStorage.getItem('jwt')}`,
+        Authorization: `Bearer ${localStorage.getItem("jwt")}`,
       },
     });
   };
@@ -114,15 +118,24 @@ function Wantlist() {
     navigate(`/post-a-deal?wantlistId=${wantlistData.id}`);
   };
 
-  const currentWantlist = activeTab === 'all' ? allWantlist : myWantlist;
+  const currentWantlist = activeTab === "all" ? allWantlist : myWantlist;
 
   return (
     <div className="min-h-screen bg-gray-100 dark:bg-gray-900 transition-colors duration-200">
       <div className="max-w-5xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 sm:mb-6 gap-3">
-          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">Wantlist</h1>
-          
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">
+            Wantlist
+          </h1>
+
           <div className="flex items-center gap-2 sm:gap-3 self-stretch sm:self-auto w-full sm:w-auto">
+            <button
+              onClick={() => setShowInfoDialog(true)}
+              className="flex items-center justify-center bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 p-2 rounded-lg transition-colors"
+              aria-label="Information about Wantlist"
+            >
+              <Info size={18} />
+            </button>
             <button
               onClick={() => {
                 setEditingItem(null);
@@ -139,21 +152,21 @@ function Wantlist() {
         <div className="mb-4 sm:mb-6 border-b border-gray-200 dark:border-gray-700 overflow-x-auto">
           <nav className="flex space-x-4 sm:space-x-8 min-w-max">
             <button
-              onClick={() => setActiveTab('all')}
+              onClick={() => setActiveTab("all")}
               className={`py-3 sm:py-4 px-1 inline-flex items-center border-b-2 font-medium text-sm ${
-                activeTab === 'all'
-                  ? 'border-blue-500 text-blue-600 dark:text-blue-400'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'
+                activeTab === "all"
+                  ? "border-blue-500 text-blue-600 dark:text-blue-400"
+                  : "border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
               }`}
             >
               All Products
             </button>
             <button
-              onClick={() => setActiveTab('my')}
+              onClick={() => setActiveTab("my")}
               className={`py-3 sm:py-4 px-1 inline-flex items-center border-b-2 font-medium text-sm ${
-                activeTab === 'my'
-                  ? 'border-blue-500 text-blue-600 dark:text-blue-400'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'
+                activeTab === "my"
+                  ? "border-blue-500 text-blue-600 dark:text-blue-400"
+                  : "border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
               }`}
             >
               My Wantlist
@@ -164,17 +177,21 @@ function Wantlist() {
         {loading ? (
           <div className="flex justify-center items-center py-10 sm:py-12">
             <Aperture className="animate-spin h-6 w-6 sm:h-8 sm:w-8 text-blue-600 dark:text-blue-400" />
-            <span className="ml-2 text-gray-600 dark:text-gray-300 text-sm sm:text-base">Loading wantlist...</span>
+            <span className="ml-2 text-gray-600 dark:text-gray-300 text-sm sm:text-base">
+              Loading wantlist...
+            </span>
           </div>
         ) : currentWantlist.length === 0 ? (
           <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6 sm:p-8 text-center">
             <h3 className="text-lg sm:text-xl font-medium text-gray-900 dark:text-white mb-2">
-              {activeTab === 'all' ? 'No products available' : 'Your wantlist is empty'}
+              {activeTab === "all"
+                ? "No products available"
+                : "Your wantlist is empty"}
             </h3>
             <p className="text-gray-600 dark:text-gray-400 mb-4 text-sm sm:text-base">
-              {activeTab === 'all' 
-                ? 'There are currently no products in the wantlist.' 
-                : 'Start adding items you\'re looking for by clicking the "Add Item" button.'}
+              {activeTab === "all"
+                ? "There are currently no products in the wantlist."
+                : 'Start adding items you\'re looking for by clicking the "Add Item You Want" button.'}
             </p>
           </div>
         ) : (
@@ -188,9 +205,9 @@ function Wantlist() {
                   <h3 className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-white truncate pr-2">
                     {item.productName}
                   </h3>
-                  
+
                   <div className="flex gap-2 ml-2 shrink-0">
-                    {activeTab === 'all' ? (
+                    {activeTab === "all" ? (
                       <button
                         onClick={() => handlePostDeal(item)}
                         className="flex items-center gap-1 text-xs sm:text-sm px-2 py-1 bg-green-600 hover:bg-green-700 text-white rounded transition-colors"
@@ -232,8 +249,8 @@ function Wantlist() {
 
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-4 text-xs sm:text-sm text-gray-600 dark:text-gray-300">
                   <div className="bg-gray-100 dark:bg-gray-700/50 p-2 rounded">
-                    <span className="font-medium block mb-1">Price Range</span>
-                    ${item.priceMin} - ${item.priceMax}
+                    <span className="font-medium block mb-1">Price Range</span>$
+                    {item.priceMin} - ${item.priceMax}
                   </div>
                   <div className="bg-gray-100 dark:bg-gray-700/50 p-2 rounded">
                     <span className="font-medium block mb-1">Max Age</span>
@@ -258,6 +275,55 @@ function Wantlist() {
             onSubmit={handleSubmit}
             initialData={editingItem}
           />
+        )}
+
+        {/* Info Dialog */}
+        {showInfoDialog && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg max-w-md w-full p-6 relative animate-fadeIn">
+              <button
+                onClick={() => setShowInfoDialog(false)}
+                className="absolute top-4 right-4 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+              >
+                <X size={20} />
+              </button>
+
+              <div className="text-center mb-4">
+                <div className="inline-flex items-center justify-center h-12 w-12 rounded-full bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-300 mb-3">
+                  <Info size={24} />
+                </div>
+                <h3 className="text-xl font-bold text-gray-900 dark:text-white">
+                  What is a Wantlist?
+                </h3>
+              </div>
+
+              <div className="space-y-3 text-gray-600 dark:text-gray-300 mb-6">
+                <p>
+                  A{" "}
+                  <span className="font-medium text-gray-800 dark:text-gray-200">
+                    Wantlist
+                  </span>{" "}
+                  is a place to add items you're looking for but haven’t found
+                  yet.
+                </p>
+                <ul className="list-disc pl-5 space-y-1">
+                  <li>Others can see what you're looking for</li>
+                  <li>Sellers can offer deals if they have them</li>
+                  <li>Get notified when your items become available</li>
+                </ul>
+                <p>It’s like a wishlist, but powered by the community! ✨</p>
+              </div>
+
+              <div className="flex justify-end">
+                <button
+                  onClick={() => setShowInfoDialog(false)}
+                  className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors"
+                >
+                  Got it
+                </button>
+              </div>
+            </div>
+          </div>
         )}
       </div>
     </div>
