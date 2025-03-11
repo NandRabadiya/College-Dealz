@@ -178,9 +178,12 @@ const UserDeals = () => {
     try {
       const token = localStorage.getItem("jwt");
       const response = await fetch(
-        `${API_BASE_URL}/api/products/${dealId}/interested-buyers`,{ 
-        headers: {
-          'Authorization': `Bearer ${token}`}}
+        `${API_BASE_URL}/api/products/${dealId}/interested-buyers`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
       );
       if (response.ok) {
         const buyers = await response.json();
@@ -463,7 +466,7 @@ const UserDeals = () => {
           <img
             src={deal.images[currentImageIndex].url}
             alt={deal.name}
-            className="w-full h-48 object-cover rounded-t-lg"
+            className="w-full h-48 object-contain bg-gray-100 rounded-t-lg"
             onError={(e) => {
               e.target.onerror = null;
               e.target.src = "account.png";
@@ -747,7 +750,7 @@ const UserDeals = () => {
         <Button
           variant="ghost"
           size="sm"
-          className="absolute top-2 right-2 bg-white/80 hover:bg-white/90"
+          className="absolute top-2 right-2 bg-white/80 hover:bg-white/90 dark:bg-gray-700 dark:hover:bg-gray-600"
           onClick={(e) => handleEditDeal(deal, e)}
         >
           <Pencil className="h-4 w-4" />
@@ -768,13 +771,13 @@ const UserDeals = () => {
         </div>
       </CardContent>
 
-      <CardFooter className="grid grid-cols-4 gap-2 p-4">
-        <div className="col-span-3 flex gap-2">
-          <DropdownMenu>
+      <CardFooter className="flex flex-col space-y-2 p-4">
+      <div className="flex flex-col sm:flex-row w-full gap-2">
+      <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button
                 variant="secondary"
-                className="flex-1"
+                className="w-full"
                 onClick={(e) => {
                   e.preventDefault();
                   e.stopPropagation();
@@ -808,7 +811,7 @@ const UserDeals = () => {
 
           <Button
             variant="outline"
-            className="flex-1"
+            className="w-full"
             onClick={(e) => {
               e.preventDefault();
               e.stopPropagation();
@@ -820,18 +823,18 @@ const UserDeals = () => {
           </Button>
         </div>
 
-        <div className="col-span-2 flex gap-2">
+        <div className="flex justify-between w-full">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button
                 variant="ghost"
-                className="flex-1"
+                className="px-3"
                 onClick={(e) => {
                   e.preventDefault();
                   e.stopPropagation();
                 }}
               >
-                <Share2 className="mr-2 h-4 w-4" />
+                <Share2 className="h-4 w-4" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="center" className="w-48">
@@ -860,7 +863,7 @@ const UserDeals = () => {
 
           <Button
             variant="ghost"
-            className="flex-1 text-destructive hover:text-destructive hover:bg-destructive/10"
+            className="px-3 text-destructive hover:text-destructive hover:bg-destructive/10"
             onClick={(e) => {
               e.preventDefault();
               e.stopPropagation();
@@ -868,7 +871,7 @@ const UserDeals = () => {
               setRemoveDialogOpen(true);
             }}
           >
-            <Trash2 className="mr-2 h-4 w-4" />
+            <Trash2 className="h-4 w-4" />
           </Button>
         </div>
       </CardFooter>
