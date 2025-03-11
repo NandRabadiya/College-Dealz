@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from "react";
 import { Heart, Trash2, Tag } from "lucide-react";
 import { API_BASE_URL } from "../Api/api";
+import { useNavigate } from "react-router-dom"; // Added import for navigation
 
 function Wishlist() {
   const [wishlistItems, setWishlistItems] = useState([]);
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate(); // Initialize navigate hook
 
   useEffect(() => {
     const fetchWishlist = async () => {
@@ -34,6 +36,11 @@ function Wishlist() {
     fetchWishlist();
   }, []);
 
+  // Handle navigating to product detail page
+  const handleProductClick = (productId) => {
+    navigate(`/product/${productId}`);
+  };
+
   const removeFromWishlist = async (wishlistId) => {
     try {
       const token = localStorage.getItem("jwt");
@@ -57,6 +64,14 @@ function Wishlist() {
     } catch (error) {
       console.error("Error removing item:", error);
     }
+  };
+
+  // Function to get the first image URL or return a placeholder
+  const getImageUrl = (item) => {
+    if (item.imageUrls && item.imageUrls.length > 0 && item.imageUrls[0]) {
+      return item.imageUrls[0];
+    }
+    return "/api/placeholder/400/320"; // Fallback to placeholder
   };
 
   return (
@@ -97,14 +112,16 @@ function Wishlist() {
             {wishlistItems.map((item) => (
               <div
                 key={item.id}
-                className="bg-white dark:bg-gray-800 rounded-xl shadow-sm overflow-hidden hover:shadow-md transition-shadow"
+                className="bg-white dark:bg-gray-800 rounded-xl shadow-sm overflow-hidden hover:shadow-md transition-shadow cursor-pointer"
+                onClick={() => handleProductClick(item.id)}
               >
                 <div className="flex flex-col sm:flex-row">
                   <div className="relative w-full sm:w-48 h-48 sm:h-auto">
                     <img
-                      src="/api/placeholder/400/320"
+                      src={getImageUrl(item)}
                       alt={item.name}
                       className="w-full h-full object-cover"
+                      
                     />
                     <div className="absolute top-2 left-2">
                       <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200">
@@ -140,7 +157,10 @@ function Wishlist() {
 
                       <div className="flex gap-2">
                         <button
-                          onClick={() => removeFromWishlist(item.id)}
+                          onClick={(e) => {
+                            e.stopPropagation(); // Prevent item click when removing
+                            removeFromWishlist(item.id);
+                          }}
                           className="inline-flex items-center px-3 py-2 border border-gray-300 dark:border-gray-600 text-sm font-medium rounded-md text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors"
                         >
                           <Trash2 className="w-4 h-4 mr-2" />

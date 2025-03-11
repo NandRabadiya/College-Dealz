@@ -19,7 +19,7 @@ import {
   CardFooter,
 } from "@/components/ui/card";
 import { API_BASE_URL } from "../Api/api";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 
 // Define enums to match backend
 const CATEGORY_ENUM = {
@@ -42,6 +42,7 @@ const PostADeal = ({ onClose, editDeal }) => {
   const location = useLocation();
   const queryParams = new URLSearchParams(location.search);
   const wantlistId = queryParams.get("wantlistId");
+  const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
     name: "",
@@ -93,7 +94,13 @@ const PostADeal = ({ onClose, editDeal }) => {
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
-
+  const handleClose = () => {
+    if (onClose) {
+      onClose(); // Call the existing onClose function if provided
+    }
+    // Navigate back to the previous page
+    navigate(-1);
+  };
   const handleChange = (e) => {
     const { name, value } = e.target;
     const sanitizedValue = name === "monthsOld" ? Math.max(0, value) : value;
@@ -295,7 +302,7 @@ const PostADeal = ({ onClose, editDeal }) => {
                 variant="ghost"
                 size="icon"
                 className="rounded-full hover:bg-muted"
-                onClick={onClose}
+                onClick={handleClose}
               >
                 <X className="h-4 w-4" />
               </Button>
