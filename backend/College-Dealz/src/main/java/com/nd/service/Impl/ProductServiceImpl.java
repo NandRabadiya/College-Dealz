@@ -524,7 +524,7 @@ public class ProductServiceImpl implements ProductService {
 
 
     @Override
-    public boolean soldOutsideProduct(Integer productId, SoldOutsideResponse soldOutsideResponse) throws ProductException {
+    public boolean soldOutsidePlatfrom(Integer productId, SoldOutsideResponse soldOutsideResponse) throws ProductException {
         // Fetch the product by ID; throw exception if not found.
         Product product = productRepo.findById(productId)
                 .orElseThrow(() -> new ProductException("Product not found with id: " + productId));
@@ -574,5 +574,59 @@ public class ProductServiceImpl implements ProductService {
 
         return true;
     }
+
+    @Override
+    public boolean soldInsidePlatform(Integer productId, String email, int price) throws ProductException {
+
+        // Fetch the product by ID; throw exception if not found.
+        Product product = productRepo.findById(productId)
+                .orElseThrow(() -> new ProductException("Product not found with id: " + productId));
+
+        // Create a new ArchivedProducts instance and copy product-related fields.
+        ArchivedProducts archived = new ArchivedProducts();
+        archived.setTitle(product.getName());
+        archived.setDescription(product.getDescription());
+        // Assuming category is an enum; convert to string if needed.
+        archived.setCategory(product.getCategory());
+        System.out.println("soldOutsideProduct : : "+ product.getPrice());
+
+        archived.setPrice(product.getPrice());
+        archived.setSellerId(product.getSeller().getId());
+        archived.setUniversityId(product.getUniversity().getId());
+
+        // Use product's createdAt as the listing date.
+        LocalDateTime listingDate = LocalDateTime.ofInstant(product.getCreatedAt(), ZoneId.systemDefault());
+        archived.setListingDate(listingDate);
+
+        // Set additional info from SoldOutsideResponse:
+        archived.setFinalSoldPrice(BigDecimal.valueOf(price));  // repurposing this field for sold-outside reason
+
+        // Convert soldDate (java.util.Date) to LocalDateTime for statusChangeDate.
+        LocalDateTime soldDate = LocalDateTime.ofInstant(Instant.now(), ZoneId.systemDefault());
+        archived.setStatusChangeDate(soldDate);
+
+        // Calculate dealCompletionTime in days between listingDate and soldDate.
+        long daysBetween = ChronoUnit.DAYS.between(listingDate, soldDate);
+        archived.setDealCompletionTime(daysBetween);
+
+        // Set the SoldToCollegeStudent flag from the response.
+    //    archived.setSoldToCollegeStudent(soldOutsideResponse.isUniversityStudent());
+
+        // Set status to SOLD_OUTSIDE (ensure this exists in your ProductStatus enum)
+        archived.setStatus(ProductStatus.SOLD_VIA_PLATFORM);
+
+        // Optionally, set confirmationStatus to a specific value or leave as default.
+        // archived.setConfirmationStatus(ConfirmationStatus.PENDING);
+
+        // Save the archived product.
+        archivedProductsRepo.save(archived);
+
+        // Remove the original product (or mark it as inactive, as per your business logic).
+        productRepo.delete(product);
+
+        return true;
+
+    }
+
 
 }
