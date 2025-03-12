@@ -487,7 +487,7 @@ function Wantlist() {
                           onClick={() => handleDelete("yes")}
                           disabled={isDeletingItem}
                           className={`w-full py-2 px-4 ${
-                            isDeletingItem && clickedButton === "yes"
+                            isDeletingItem
                               ? "bg-blue-400 cursor-not-allowed"
                               : "bg-blue-600 hover:bg-blue-700"
                           } text-white rounded-lg transition-colors flex justify-center items-center`}
