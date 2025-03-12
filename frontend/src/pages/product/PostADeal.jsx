@@ -43,6 +43,9 @@ const PostADeal = ({ onClose, editDeal }) => {
   const queryParams = new URLSearchParams(location.search);
   const wantlistId = queryParams.get("wantlistId");
   const navigate = useNavigate();
+  const [feedbackMessage, setFeedbackMessage] = useState("");
+  const [feedbackType, setFeedbackType] = useState(""); // "success" or "error"
+  const [showFeedback, setShowFeedback] = useState(false);
 
   const [formData, setFormData] = useState({
     name: "",
@@ -182,7 +185,16 @@ const PostADeal = ({ onClose, editDeal }) => {
       });
     }
   };
+  const handleSubmitSuccess = () => {
+    setFeedbackMessage("Deal posted successfully!");
+    setFeedbackType("success");
+    setShowFeedback(true);
 
+    // Auto close after 2.5 seconds
+    setTimeout(() => {
+      handleClose();
+    }, 2500);
+  };
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSubmitError("");
@@ -276,18 +288,41 @@ const PostADeal = ({ onClose, editDeal }) => {
         }
       });
 
-      if (onClose) {
-        onClose(true); // Pass true to indicate successful submission
-      }
+      // Show success message and auto-close
+      setFeedbackMessage(
+        formData.id
+          ? "Deal updated successfully!"
+          : wantlistId
+          ? "Deal posted for wantlist successfully!"
+          : "Deal posted successfully!"
+      );
+      setFeedbackType("success");
+      setShowFeedback(true);
+
+      // Auto close after 2.5 seconds
+      setTimeout(() => {
+        if (onClose) {
+          onClose(true); // Pass true to indicate successful submission
+        }
+        navigate(-1);
+      }, 2500);
     } catch (error) {
       console.error("Error submitting deal:", error);
-      setSubmitError(
+      setFeedbackMessage(
         error.message || "An unexpected error occurred. Please try again."
       );
+      setFeedbackType("error");
+      setShowFeedback(true);
+
+      // Clear feedback after 2.5 seconds
+      setTimeout(() => {
+        setShowFeedback(false);
+      }, 2500);
     } finally {
       setIsSubmitting(false);
     }
   };
+
   return (
     <div className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm flex items-center justify-center">
       <div className="w-full h-full md:h-auto md:max-h-[90vh] flex items-start justify-center overflow-hidden">
@@ -544,16 +579,22 @@ const PostADeal = ({ onClose, editDeal }) => {
           </div>
 
           <CardFooter className="sticky bottom-0 z-10 bg-background border-t p-4">
-            {submitError && (
-              <div className="w-full mb-4 p-3 text-red-600 bg-red-50 rounded-md">
-                {submitError}
+            {showFeedback && (
+              <div
+                className={`w-full mb-4 p-3 rounded-md ${
+                  feedbackType === "success"
+                    ? "text-green-600 bg-green-50 dark:bg-green-900/30 dark:text-green-200"
+                    : "text-red-600 bg-red-50 dark:bg-red-900/30 dark:text-red-200"
+                }`}
+              >
+                {feedbackMessage}
               </div>
             )}
             <Button
               type="submit"
               form="dealForm"
               className="w-full"
-              disabled={isSubmitting}
+              disabled={isSubmitting || showFeedback}
             >
               {isSubmitting
                 ? "Saving..."
