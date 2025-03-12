@@ -70,32 +70,64 @@ export const ProductSort = ({ onSort, currentSort, isLoading }) => {
   if (location.pathname !== '/') return null;
 
   return (
+    // <Select
+    //   value={currentSort || defaultSort}
+    //   onValueChange={onSort}
+    //   disabled={isLoading}
+    // >
+    //   <SelectTrigger className="w-[180px]">
+    //     <SelectValue placeholder="Sort">
+    //       {isLoading ? (
+    //         <div className="flex items-center">
+    //           <Loader2 className="h-4 w-4 animate-spin mr-2" />
+    //           <span>Sorting...</span>
+    //         </div>
+    //       ) : (
+    //         <SelectValue />
+    //       )}
+    //     </SelectValue>
+    //   </SelectTrigger>
+    //   <SelectContent>
+    //     <SelectItem value="postDate-desc">Latest First</SelectItem>
+    //     <SelectItem value="postDate-asc">Oldest First</SelectItem>
+    //     <SelectItem value="price-asc">Price: Low to High</SelectItem>
+    //     <SelectItem value="price-desc">Price: High to Low</SelectItem>
+    //     <SelectItem value="name-asc">Name: A to Z</SelectItem>
+    //     <SelectItem value="name-desc">Name: Z to A</SelectItem>
+    //   </SelectContent>
+    // </Select>
     <Select
-      value={currentSort || defaultSort}
-      onValueChange={onSort}
-      disabled={isLoading}
-    >
-      <SelectTrigger className="w-[180px]">
-        <SelectValue placeholder="Sort">
-          {isLoading ? (
-            <div className="flex items-center">
-              <Loader2 className="h-4 w-4 animate-spin mr-2" />
-              <span>Sorting...</span>
-            </div>
-          ) : (
-            <SelectValue />
-          )}
-        </SelectValue>
-      </SelectTrigger>
-      <SelectContent>
-        <SelectItem value="postDate-desc">Latest First</SelectItem>
-        <SelectItem value="postDate-asc">Oldest First</SelectItem>
-        <SelectItem value="price-asc">Price: Low to High</SelectItem>
-        <SelectItem value="price-desc">Price: High to Low</SelectItem>
-        <SelectItem value="name-asc">Name: A to Z</SelectItem>
-        <SelectItem value="name-desc">Name: Z to A</SelectItem>
-      </SelectContent>
-    </Select>
+    value={currentSort?.toString() || defaultSort?.toString()}
+    onValueChange={onSort}
+    disabled={isLoading}
+  >
+    <SelectTrigger className="w-[180px]">
+      {isLoading ? (
+        <div className="flex items-center">
+          <Loader2 className="h-4 w-4 animate-spin mr-2" />
+          <span>Sorting...</span>
+        </div>
+      ) : (
+        <SelectValue placeholder="Sort" />
+      )}
+    </SelectTrigger>
+    <SelectContent>
+      {[
+        { id: "postDate-desc", name: "Latest First" },
+        { id: "postDate-asc", name: "Oldest First" },
+        { id: "price-asc", name: "Price: Low to High" },
+        { id: "price-desc", name: "Price: High to Low" },
+        { id: "name-asc", name: "Name: A to Z" },
+        { id: "name-desc", name: "Name: Z to A" },
+      ].map((data) => (
+        <SelectItem key={data.id} value={data.id.toString()}>
+          {data.name}
+        </SelectItem>
+      ))}
+    </SelectContent>
+  </Select>
+  
+
   );
 };
 
