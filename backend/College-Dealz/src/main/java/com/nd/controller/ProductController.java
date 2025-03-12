@@ -263,15 +263,15 @@ public class ProductController {
     }
 
 
-//    @PostMapping("/sold-inside-platform/{productId}")
-//    public ResponseEntity<String> soldInsidePlatform(@PathVariable Integer productId,
-//                                                      @RequestParam String buyerEmail,
-//                                                     @RequestParam int price ) throws ProductException {
-//        boolean archived = productService.soldOutsidePlatfrom(productId, soldOutsideResponse);
-//        if (archived)
-//            return ResponseEntity.ok("Product marked as sold and removed successfully.");
-//        else return ResponseEntity.status(404).body("Failed to mark the product as sold. Please try again.");
-//    }
+    @PostMapping("/sold-inside-platform/{productId}")
+    public ResponseEntity<String> soldInsidePlatform(@PathVariable Integer productId,
+                                                      @RequestParam String buyerEmail,
+                                                     @RequestParam int price ) throws ProductException {
+        boolean archived = productService.soldInsidePlatform(productId, buyerEmail,price);
+        if (archived)
+            return ResponseEntity.ok("Product marked as sold and removed successfully.");
+        else return ResponseEntity.status(404).body("Failed to mark the product as sold. Please try again.");
+    }
 
 
 
