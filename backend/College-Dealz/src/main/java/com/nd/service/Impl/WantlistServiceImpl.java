@@ -14,6 +14,8 @@ import com.nd.service.WantlistService;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
@@ -26,6 +28,8 @@ public class WantlistServiceImpl implements WantlistService {
 
     private final WantlistRepo wantlistRepository;
     private final UserRepo userRepository;
+
+ //   @Lazy // for not creating a circular dependency
     private final NotificationService notificationService;
 
     private final ArchivedWantlistRepo archivedWantlistRepository;

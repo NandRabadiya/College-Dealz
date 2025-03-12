@@ -10,6 +10,7 @@ import com.nd.enums.NotificationType;
 import com.nd.enums.ReferenceType;
 import com.nd.repositories.NotificationRepo;
 import com.nd.repositories.UserRepo;
+import com.nd.repositories.WantlistRepo;
 import com.nd.service.NotificationService;
 import com.nd.service.WantlistService;
 import org.springframework.stereotype.Service;
@@ -24,12 +25,11 @@ public class NotificationServiceImpl implements NotificationService {
 
     private final NotificationRepo notificationRepository;
     private final UserRepo userRepository;
-    private final WantlistService wantlistService;
-
-    public NotificationServiceImpl(NotificationRepo notificationRepository, UserRepo userRepository, WantlistService wantlistService) {
+    private final WantlistRepo wantlistRepo;
+    public NotificationServiceImpl(NotificationRepo notificationRepository, UserRepo userRepository,  WantlistRepo wantlistRepo) {
         this.notificationRepository = notificationRepository;
         this.userRepository = userRepository;
-        this.wantlistService = wantlistService;
+        this.wantlistRepo = wantlistRepo;
     }
 
     @Override
@@ -54,12 +54,14 @@ public class NotificationServiceImpl implements NotificationService {
         List<User> allUsers = userRepository.findAllByUniversity(university);
         allUsers.remove(addedByUser); // Exclude the user who created the notification
 
-        WantlistDto wantlist = wantlistService.getWantlistById(itemId);
+        Wantlist wantlist = wantlistRepo.getById(itemId);
 
         Notification notification = new Notification();
         notification.setType(NotificationType.ITEM_INTEREST);
         notification.setTitle("New Item in Wantlist");
-        notification.setMessage("New item " + wantlist.getProductName()+ "added in wantlist ");
+        notification.setMessage("New item " +
+                wantlist.getProductName()+
+                 "added in wantlist ");
         notification.setIsRead(false);
         notification.setCreatedAt(Instant.now());
         notification.setReferenceId(itemId);
@@ -92,9 +94,6 @@ public class NotificationServiceImpl implements NotificationService {
 
         userRepository.save(user); // ✅ Ensure user changes are saved
         notificationRepository.save(notification); // ✅ Save notification
-//
-//        notification.addUser(user); // ✅ Maintain bidirectional relationship
-//        notificationRepository.save(notification);
     }
 
 
