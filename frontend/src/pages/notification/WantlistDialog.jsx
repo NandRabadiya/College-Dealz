@@ -41,11 +41,11 @@ const WantlistDialog = ({ isOpen, onClose, wantlistData }) => {
             <div className="text-sm font-medium dark:text-gray-300">Price Range:</div>
             <div className="col-span-2 dark:text-gray-200">
               {wantlistData.priceMin && wantlistData.priceMax
-                ? `$${wantlistData.priceMin} - $${wantlistData.priceMax}`
+                ? `₹${wantlistData.priceMin} - ₹${wantlistData.priceMax}`
                 : wantlistData.priceMin
-                ? `Min $${wantlistData.priceMin}`
+                ? `Min ₹${wantlistData.priceMin}`
                 : wantlistData.priceMax
-                ? `Max $${wantlistData.priceMax}`
+                ? `Max ₹${wantlistData.priceMax}`
                 : "Not specified"}
             </div>
             

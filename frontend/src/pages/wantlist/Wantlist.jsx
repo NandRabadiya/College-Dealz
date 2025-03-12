@@ -159,7 +159,19 @@ function Wantlist() {
     // Logic to navigate to post a deal page with wantlist data
     navigate(`/post-a-deal?wantlistId=${wantlistData.id}`);
   };
-
+// Format date
+const formatDate = (dateString) => {
+  try {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', { 
+      year: 'numeric', 
+      month: 'short', 
+      day: 'numeric' 
+    });
+  } catch (e) {
+    return "Unknown date";
+  }
+};
   const currentWantlist = activeTab === "all" ? allWantlist : myWantlist;
 
   return (
@@ -296,16 +308,17 @@ function Wantlist() {
 
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-4 text-xs sm:text-sm text-gray-600 dark:text-gray-300">
                   <div className="bg-gray-100 dark:bg-gray-700/50 p-2 rounded">
-                    <span className="font-medium block mb-1">Price Range</span>$
-                    {item.priceMin} - ${item.priceMax}
+                    <span className="font-medium block mb-1">Price Range</span>₹
+                    {item.priceMin} - ₹{item.priceMax}
                   </div>
                   <div className="bg-gray-100 dark:bg-gray-700/50 p-2 rounded">
-                    <span className="font-medium block mb-1">Max Age</span>
-                    {item.monthsOldMax} months
+                    <span className="font-medium block mb-1">Product is used for (in year(s))</span>
+                    {item.monthsOldMax} year(s)
                   </div>
                   <div className="bg-gray-100 dark:bg-gray-700/50 p-2 rounded col-span-2 sm:col-span-1">
                     <span className="font-medium block mb-1">Updated</span>
-                    {new Date(item.updatedAt).toLocaleDateString()}
+                    {formatDate(item.updatedAt)}
+                    {/* {new Date(item.updatedAt).toLocaleDateString()} */}
                   </div>
                 </div>
               </div>

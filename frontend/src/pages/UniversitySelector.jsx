@@ -25,12 +25,12 @@ const UniversitySelector = ({ onUniversitySelect, isOpen, onOpenChange }) => {
     const fetchUniversities = async () => {
       try {
         const response = await fetch(`${API_BASE_URL}/api/universities/public`);
-        if (!response.ok) throw new Error('Failed to fetch universities');
+        if (!response.ok) throw new Error('Failed to fetch communities');
         const data = await response.json();
         setUniversities(data);
       } catch (err) {
-        setError('Failed to load universities. Please try again later.');
-        console.error('Error fetching universities:', err);
+        setError('Failed to load community. Please try again later.');
+        console.error('Error fetching community:', err);
       }
     };
 
@@ -49,9 +49,9 @@ const UniversitySelector = ({ onUniversitySelect, isOpen, onOpenChange }) => {
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Select Your University</DialogTitle>
+          <DialogTitle>Select Your Community</DialogTitle>
           <DialogDescription>
-            Please select your university to see relevant products
+            Please select your community to see relevant products
           </DialogDescription>
         </DialogHeader>
         
@@ -64,7 +64,7 @@ const UniversitySelector = ({ onUniversitySelect, isOpen, onOpenChange }) => {
               onValueChange={setSelectedUniversity}
             >
               <SelectTrigger>
-                <SelectValue placeholder="Select a university" />
+                <SelectValue placeholder="Select a community" />
               </SelectTrigger>
               <SelectContent>
                 {universities.map((university) => (

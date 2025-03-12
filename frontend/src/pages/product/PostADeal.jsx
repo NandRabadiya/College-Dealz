@@ -368,7 +368,7 @@ const PostADeal = ({ onClose, editDeal }) => {
                   {/* Months Old */}
                   <div className="space-y-2">
                     <Label htmlFor="monthsOld" className="text-sm font-medium">
-                      Age (months)
+                     Product is used for (in year(s))
                     </Label>
                     <Input
                       type="number"

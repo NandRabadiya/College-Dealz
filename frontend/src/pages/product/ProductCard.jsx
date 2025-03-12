@@ -379,6 +379,19 @@ const ProductCard = ({
     }
   };
 
+  const formatDate = (dateString) => {
+    try {
+      const date = new Date(dateString);
+      return date.toLocaleDateString('en-US', { 
+        year: 'numeric', 
+        month: 'short', 
+        day: 'numeric' 
+      });
+    } catch (e) {
+      return "Unknown date";
+    }
+  };
+
   if (loading) {
     return <div className="m-4 text-center">Loading products...</div>;
   }
@@ -468,7 +481,8 @@ const ProductCard = ({
                                   </Badge>
                                   <span className="text-xs">•</span>
                                   <span className="text-xs">
-                                    {new Date(product.postDate).toLocaleDateString()}
+                                  {formatDate(product.postDate)}
+                                    {/* {new Date(product.postDate).toLocaleDateString()} */}
                                   </span>
                                 </div>
                               </div>
@@ -580,7 +594,8 @@ const ProductCard = ({
                             </Badge>
                             <span className="text-xs">•</span>
                             <span className="text-xs">
-                              {new Date(product.postDate).toLocaleDateString()}
+                            {formatDate(product.postDate)}
+                              {/* {new Date(product.postDate).toLocaleDateString()} */}
                             </span>
                           </div>
                         </div>

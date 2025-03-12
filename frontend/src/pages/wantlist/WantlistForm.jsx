@@ -84,7 +84,7 @@ function WantlistForm({ onClose, onSubmit, initialData }) {
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                Min Price ($)
+                Min Price (₹)
               </label>
               <input
                 type="number"
@@ -98,7 +98,7 @@ function WantlistForm({ onClose, onSubmit, initialData }) {
 
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                Max Price ($)
+                Max Price (₹)
               </label>
               <input
                 type="number"
@@ -113,7 +113,7 @@ function WantlistForm({ onClose, onSubmit, initialData }) {
 
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-              Maximum Age (months)
+              Product is used for (in year(s))
             </label>
             <input
               type="number"

@@ -267,9 +267,9 @@ const ProductDetails = () => {
 
             {product.monthsOld != null && (
               <div>
-                <h3 className="text-sm font-semibold mb-1">Age</h3>
+                <h3 className="text-sm font-semibold mb-1">Product is used for</h3>
                 <p className="text-sm text-muted-foreground">
-                  {product.monthsOld} months old
+                  {product.monthsOld} year(s)
                 </p>
               </div>
             )}
