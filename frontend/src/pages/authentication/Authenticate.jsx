@@ -1,6 +1,12 @@
 import React, { useState, useEffect } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { X } from "lucide-react";
@@ -10,19 +16,18 @@ import GoogleLoginButton from "./GoogleLoginButton";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 
-const Authenticate = ({isOpen, onClose}) => {
+const Authenticate = ({ isOpen, onClose }) => {
   const [errorMessage, setErrorMessage] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
   const navigate = useNavigate();
   const location = useLocation();
   const dispatch = useDispatch();
-  const isAuthenticated = useSelector(state => state.auth.isAuthenticated);
+  const isAuthenticated = useSelector((state) => state.auth.isAuthenticated);
 
   const from = location.state?.from || "/";
 
   console.log("Authenticate - location state:", location.state);
   console.log("Authenticate - isAuthenticated:", isAuthenticated);
-
 
   React.useEffect(() => {
     if (isAuthenticated) {
@@ -34,21 +39,25 @@ const Authenticate = ({isOpen, onClose}) => {
   const handleAuthSuccess = (message) => {
     setSuccessMessage(message);
     setErrorMessage("");
-    const redirectProductId = sessionStorage.getItem('redirectProductId');
-  if (redirectProductId) {
-    sessionStorage.removeItem('redirectProductId'); // Clean up
-    navigate(`/product/${redirectProductId}`);
-  } 
+    const redirectProductId = sessionStorage.getItem("redirectProductId");
+    if (redirectProductId) {
+      sessionStorage.removeItem("redirectProductId"); // Clean up
+      navigate(`/product/${redirectProductId}`);
+    }
     //navigate(from, { replace: true });
- };
-
+  };
 
   const handleAuthError = (message) => {
     setErrorMessage(message);
     setSuccessMessage("");
   };
-
-
+  const handleClose = () => {
+    if (onClose) {
+      onClose(); // Call the existing onClose function if provided
+    }
+    // Navigate back to the previous page
+    navigate(-1);
+  };
   if (!isOpen) return null;
 
   return (
@@ -59,7 +68,7 @@ const Authenticate = ({isOpen, onClose}) => {
             variant="ghost"
             size="icon"
             className="absolute right-2 top-2"
-            onClick={onClose}
+            onClick={handleClose}
           >
             <X className="h-4 w-4" />
           </Button>
@@ -107,12 +116,17 @@ const Authenticate = ({isOpen, onClose}) => {
               <div className="w-full border-t border-border"></div>
             </div>
             <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-card px-2 text-muted-foreground">Or continue with</span>
+              <span className="bg-card px-2 text-muted-foreground">
+                Or continue with
+              </span>
             </div>
           </div>
 
-          <GoogleLoginButton onSuccess={handleAuthSuccess} onError={handleAuthError} />
-          </CardContent>
+          <GoogleLoginButton
+            onSuccess={handleAuthSuccess}
+            onError={handleAuthError}
+          />
+        </CardContent>
       </Card>
     </div>
   );
