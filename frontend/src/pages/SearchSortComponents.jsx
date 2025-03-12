@@ -70,32 +70,6 @@ export const ProductSort = ({ onSort, currentSort, isLoading }) => {
   if (location.pathname !== '/') return null;
 
   return (
-    // <Select
-    //   value={currentSort || defaultSort}
-    //   onValueChange={onSort}
-    //   disabled={isLoading}
-    // >
-    //   <SelectTrigger className="w-[180px]">
-    //     <SelectValue placeholder="Sort">
-    //       {isLoading ? (
-    //         <div className="flex items-center">
-    //           <Loader2 className="h-4 w-4 animate-spin mr-2" />
-    //           <span>Sorting...</span>
-    //         </div>
-    //       ) : (
-    //         <SelectValue />
-    //       )}
-    //     </SelectValue>
-    //   </SelectTrigger>
-    //   <SelectContent>
-    //     <SelectItem value="postDate-desc">Latest First</SelectItem>
-    //     <SelectItem value="postDate-asc">Oldest First</SelectItem>
-    //     <SelectItem value="price-asc">Price: Low to High</SelectItem>
-    //     <SelectItem value="price-desc">Price: High to Low</SelectItem>
-    //     <SelectItem value="name-asc">Name: A to Z</SelectItem>
-    //     <SelectItem value="name-desc">Name: Z to A</SelectItem>
-    //   </SelectContent>
-    // </Select>
     <Select
     value={currentSort?.toString() || defaultSort?.toString()}
     onValueChange={onSort}
