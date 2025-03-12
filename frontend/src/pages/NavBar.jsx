@@ -208,18 +208,16 @@ const NavBar = ({ onSearch, onSort }) => {
       variant="ghost"
       size="icon"
       onClick={toggleTheme}
-      className={isMobile ? "w-full flex justify-start" : ""}
+      // className={isMobile ? "w-full flex justify-start" : ""}
       aria-label="Toggle theme"
     >
       {theme === "light" ? (
         <>
           <Moon className="h-5 w-5" />
-          {isMobile && <span className="ml-2">Dark Mode</span>}
         </>
       ) : (
         <>
           <Sun className="h-5 w-5" />
-          {isMobile && <span className="ml-2">Light Mode</span>}
         </>
       )}
     </Button>
@@ -238,7 +236,7 @@ const NavBar = ({ onSearch, onSort }) => {
   function NavigationItems({ isMobile = false, onItemClick }) {
     // Don't render NavigationItems for mobile as requested
     if (isMobile) return null;
-    
+
     return (
       <div className="flex items-center space-x-4">
         <ProductSort
@@ -322,11 +320,14 @@ const NavBar = ({ onSearch, onSort }) => {
         {isMobile ? (
           <NotificationBell isMobile={true} />
         ) : (
-          <NotificationBell>
-            <div className="relative cursor-pointer">
-              <Bell className="w-6 h-5" />
-            </div>
-          </NotificationBell>
+          <>
+            <NotificationBell>
+              <div className="relative cursor-pointer">
+                <Bell className="w-6 h-5" />
+              </div>
+            </NotificationBell>
+            <ThemeToggle />
+          </>
         )}
       </div>
     );
@@ -384,8 +385,6 @@ const NavBar = ({ onSearch, onSort }) => {
             />
           </div>
           <div className="flex space-x-2">
-          
-
             <Sheet open={isFilterOpen} onOpenChange={setIsFilterOpen}>
               <SheetContent
                 side="right"
