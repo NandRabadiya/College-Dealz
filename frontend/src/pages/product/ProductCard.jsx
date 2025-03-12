@@ -75,7 +75,7 @@ const ProductCard = ({
 
   const [filters, setFilters] = useState({
     minPrice: 0,
-    maxPrice: 10000,
+    maxPrice: 5000,
     categories: "",
   });
 
@@ -595,7 +595,6 @@ const ProductCard = ({
                             <span className="text-xs">•</span>
                             <span className="text-xs">
                             {formatDate(product.postDate)}
-                              {/* {new Date(product.postDate).toLocaleDateString()} */}
                             </span>
                           </div>
                         </div>
