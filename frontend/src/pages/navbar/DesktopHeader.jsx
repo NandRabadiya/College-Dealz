@@ -3,7 +3,7 @@ import { Bell } from "lucide-react";
 import LogoSection from "./LogoSection";
 import NavigationItems from "./NavigationItems";
 import ActionButtons from "./ActionButtons";
-import WantlistButton from "../WantlistButton";
+import WantlistButton from "./WantlistButton";
 import NotificationBell from "../notification/Notification";
 import ThemeToggle from "./ThemeToggle";
 import AuthSection from "./AuthSection";

@@ -3,8 +3,9 @@ import {
   Routes,
   Route,
   Navigate,
+  useLocation,
 } from "react-router-dom";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Home from "./pages/Home";
 import Authenticate from "./pages/authentication/Authenticate";
 import Dashboard from "./pages/dasboard/Profile";
@@ -12,145 +13,191 @@ import ProductDetails from "./pages/product/ProductDetails";
 import PostADeal from "./pages/product/PostADeal";
 import NavBar from "./pages/navbar/NavBar";
 import ProtectedRoute from "./Routes/ProtectedRoute";
-import { useEffect } from "react";
 import { useDispatch } from "react-redux";
 import { getUser } from "./redux/Auth/actions";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import WishList from "./pages/wishlist/WishList";
-import Wantlist from "./pages/wantlist/Wantlist";
 import Messages from "./pages/chat/Messages";
+import WantlistPageTour from "./pages/wantlist/WantlistPageTour";
+import WantlistTour from "./pages/wantlist/WantlistTour";
+import Wantlist from "./pages/wantlist/Wantlist";
 import UniversitySelector from "./pages/UniversitySelector";
 import PublicProductDetails from "./pages/product/PublicProductDetails";
 import ErrorPage from "./pages/ErrorPage";
 import OAuthCallback from "./pages/authentication/OAuthCallback";
+
 
 // PrivateRoute component
 const PrivateRoute = ({ element, isLoggedIn, redirectTo }) => {
   return isLoggedIn ? element : <Navigate to={redirectTo} />;
 };
 
+// Tour Handler component (moved outside of App)
+const AppRoutes = ({ 
+  searchQuery, 
+  sortField, 
+  sortDir, 
+  selectedUniversity, 
+  hasSeenTour 
+}) => {
+  const location = useLocation();
+  
+  return (
+    <>
+      {/* Only render tour components on their specific routes */}
+      {location.pathname === '/' && (
+        <WantlistTour hasSeenTour={hasSeenTour} />
+      )}
+      
+      {location.pathname === '/wantlist' && (
+        <WantlistPageTour hasSeenTour={hasSeenTour} />
+      )}
+      
+      {/* Main routes */}
+      <Routes>
+        {/* Public Route */}
+        <Route
+          path="/"
+          element={
+            <Home
+              searchQuery={searchQuery}
+              sortField={sortField}
+              sortDir={sortDir}
+              selectedUniversity={selectedUniversity}
+            />
+          }
+        />
+        <Route path="/messages" element={<Messages />} />
+        {/* Login/Register Route */}
+        <Route path="/oauth-callback" element={<OAuthCallback />} />
+        <Route
+          path="/Authenticate"
+          element={<Authenticate isOpen={true} />}
+        />
+        <Route path="/admin" element={<AdminDashboard />} />
+        <Route
+          path="/product/public/:productId"
+          element={<PublicProductDetails />}
+        />
+        {/* Protected Route */}
+        <Route
+          path="/dashboard"
+          element={
+            <ProtectedRoute>
+              <Dashboard />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/wishlist"
+          element={
+            <ProtectedRoute>
+              <WishList />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/wantlist"
+          element={
+            <ProtectedRoute>
+              <Wantlist />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/product/:productId"
+          element={
+            <ProtectedRoute>
+              <ProductDetails />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/post-a-deal"
+          element={
+            <ProtectedRoute>
+              <PostADeal />
+            </ProtectedRoute>
+          }
+        />
+        {/* 404 Route */}
+        <Route path="*" element={<ErrorPage />} />
+      </Routes>
+    </>
+  );
+};
+
 function App() {
-  // Simulating user authentication status (replace with actual logic, e.g., context or Redux)
-  // const [isLoggedIn, setIsLoggedIn] = useState(true);
   const dispatch = useDispatch();
-  // In your App.jsx or main component
-  useEffect(() => {
-    const token = localStorage.getItem("jwt");
-    if (token) {
-      dispatch(getUser(token));
-    }
-  }, [dispatch]);
+  
+  // Tour state
+  const [hasSeenTour, setHasSeenTour] = useState(false);
+  
   // Search and sort state
   const [searchQuery, setSearchQuery] = useState("");
   const [sortField, setSortField] = useState("postDate");
   const [sortDir, setSortDir] = useState("desc");
   const [showUniversitySelector, setShowUniversitySelector] = useState(false);
   const [selectedUniversity, setSelectedUniversity] = useState(null);
+
   // Handlers
   const handleSearch = (query) => setSearchQuery(query);
   const handleSort = (field, dir) => {
-    console.log('App.js sort update:', field, dir); // Add this log
+    console.log("App.js sort update:", field, dir);
     setSortField(field);
     setSortDir(dir);
   };
+
+  // Check auth on mount
   useEffect(() => {
     const token = localStorage.getItem("jwt");
-    //const savedUniversity = localStorage.getItem("selectedUniversity");
-    
     if (token) {
       dispatch(getUser(token));
-    } else  {
+    } else {
       setShowUniversitySelector(true);
-    } 
+    }
     console.log("App.js useEffect", { token });
   }, [dispatch]);
+
+  // For testing tour
+  useEffect(() => {
+    // This would be replaced with API call in production
+    // const fetchUserPreferences = async () => {
+    //   try {
+    //     const response = await api.getUserPreferences();
+    //     setHasSeenTour(response.data.hasSeenTour);
+    //   } catch (error) {
+    //     console.error("Failed to fetch user preferences", error);
+    //   }
+    // };
+    // fetchUserPreferences();
+    
+    // For testing - set to false to show the tour
+    console.log('User has seen tour:', hasSeenTour);
+  }, []);
 
   const handleUniversitySelect = (universityId) => {
     setSelectedUniversity(universityId);
     localStorage.setItem("selectedUniversity", universityId);
     setShowUniversitySelector(false);
   };
+
   return (
-    <> 
-      <Router>
-      <NavBar onSearch={handleSearch} onSort={handleSort} /> {/* Pass the handlers */}
+    <Router>
+      <NavBar onSearch={handleSearch} onSort={handleSort} />
       <UniversitySelector
-          isOpen={showUniversitySelector}
-          onOpenChange={setShowUniversitySelector}
-          onUniversitySelect={handleUniversitySelect}
-        />
-        <Routes>
-          {/* Public Route */}
-      
-          <Route
-            path="/"
-            element={
-              <Home
-                searchQuery={searchQuery}
-                sortField={sortField}
-                sortDir={sortDir}
-                selectedUniversity={selectedUniversity}
-              />
-            }
-          />{" "}
-          <Route path="/messages" element={<Messages />} />
-          {/* Login/Register Route */}
-          <Route path="/oauth-callback" element={<OAuthCallback/>} />
-          <Route
-            path="/Authenticate"
-            element={<Authenticate isOpen={true} />}
-          />
-
-          <Route path="/admin" element={<AdminDashboard />} />
-          <Route path="/product/public/:productId" element={<PublicProductDetails />} />
-          {/* Protected Route */}
-          <Route
-            path="/dashboard"
-            element={
-              <ProtectedRoute>
-                <Dashboard />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/wishlist"
-            element={
-              <ProtectedRoute>
-                <WishList />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/wantlist"
-            element={
-              <ProtectedRoute>
-                <Wantlist />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/product/:productId"
-            element={
-              <ProtectedRoute>
-                <ProductDetails />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/post-a-deal"
-            element={
-              <ProtectedRoute>
-                <PostADeal />
-              </ProtectedRoute>
-            }
-          />
-          {/* 404 Route */}
-          {/* <Route path="*" element={<h1>404 Not Found</h1>} /> */}
-          <Route path="*" element={<ErrorPage />} />
-
-        </Routes>
-      </Router>
-    </>
+        isOpen={showUniversitySelector}
+        onOpenChange={setShowUniversitySelector}
+        onUniversitySelect={handleUniversitySelect}
+      />
+      <AppRoutes 
+        searchQuery={searchQuery}
+        sortField={sortField}
+        sortDir={sortDir}
+        selectedUniversity={selectedUniversity}
+        hasSeenTour={hasSeenTour}
+      />
+    </Router>
   );
 }
 

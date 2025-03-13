@@ -1,325 +1,147 @@
-import React, { useState, useEffect, useRef } from "react";
-import Joyride, { ACTIONS, STATUS } from "react-joyride";
-import { useNavigate } from "react-router-dom";
+import React, { useState, useEffect, useRef } from 'react';
+import Joyride, { STATUS } from 'react-joyride';
 
-const WantlistPageTour = () => {
-  const [run, setRun] = useState(false);
-  const [steps, setSteps] = useState([]);
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const stepTimeoutRef = useRef(null);
-  const navigate = useNavigate();
+const WantlistPageTour = ({ hasSeenTour, markTourAsSeen }) => {
+  const [runTour, setRunTour] = useState(false);
+  const [stepsReady, setStepsReady] = useState(false);
+  const targetCheckRef = useRef(null);
+  const checkCountRef = useRef(0);
+  const MAX_CHECKS = 20; // Give up after ~10 seconds
 
-  // Prepare steps but only add them one at a time
-  const allSteps = [
-    { 
-      key: "add-items",
-      target: "#add-items", 
-      content: "➕ Add items you want but can't find yet.", 
-      placement: "right",
-      disableBeacon: true,
-      spotlightClicks: false,
-      disableOverlayClose: true,
-    },
-    { 
-      key: "my-wantlist",
-      target: "#my-wantlist", 
-      content: "📌 Manage items you've added to your Wantlist.", 
-      placement: "right",
-      spotlightClicks: false,
-      disableOverlayClose: true,
-    },
-    { 
-      key: "all-wantlist",
-      target: "#all-wantlist", 
-      content: "🔍 See what others need & post a deal if you have it!", 
-      placement: "left",
-      spotlightClicks: false,
-      disableOverlayClose: true,
-    },
-  ];
-
-  // Load first step and check if elements exist
   useEffect(() => {
-    const hasSeenPageTour = localStorage.getItem("hasSeenWantlistPageTour");
-    if (hasSeenPageTour) return;
-
-    let checkInterval;
-    let attempts = 0;
-    const maxAttempts = 20;
-
-    const checkAndSetupTour = () => {
-      attempts++;
-      console.log(`Checking for wantlist elements (attempt ${attempts}/${maxAttempts})...`);
-      
-      // Check if all elements exist
-      const addItemsElement = document.querySelector("#add-items");
-      const myWantlistElement = document.querySelector("#my-wantlist");
-      const allWantlistElement = document.querySelector("#all-wantlist");
-      
-      if (addItemsElement && myWantlistElement && allWantlistElement) {
-        console.log("✅ All wantlist page elements found, preparing tour...");
-        clearInterval(checkInterval);
+    // Only run tour if user hasn't seen it yet
+    if (hasSeenTour === false) {
+      const checkTargetsExist = () => {
+        const addItemsElement = document.getElementById('add-items');
+        const myWantlistElement = document.getElementById('my-wantlist');
+        const allWantlistElement = document.getElementById('all-wantlist');
         
-        // Set initial step and start tour
-        setSteps([allSteps[0]]);
+        checkCountRef.current += 1;
         
-        // Short delay before starting the tour
-        setTimeout(() => {
-          console.log("Starting WantlistPageTour with first step");
-          setRun(true);
-        }, 800);
-      } else if (attempts >= maxAttempts) {
-        console.error("❌ Not all elements found after max attempts, aborting tour");
-        clearInterval(checkInterval);
-        localStorage.setItem("hasSeenWantlistPageTour", "true"); // Prevent future attempts
-      }
-    };
-    
-    // Start checking after a delay to allow page to load
-    setTimeout(() => {
-      checkInterval = setInterval(checkAndSetupTour, 500);
-    }, 1000);
-    
-    return () => {
-      clearInterval(checkInterval);
-      if (stepTimeoutRef.current) clearTimeout(stepTimeoutRef.current);
-    };
-  }, []);
-
-  // Function to prepare for next step
-  const prepareNextStep = (nextIndex) => {
-    if (nextIndex >= allSteps.length) {
-      console.log("Tour completed, no more steps");
-      return false;
-    }
-    
-    const targetElement = document.querySelector(allSteps[nextIndex].target);
-    if (!targetElement) {
-      console.error(`Target element ${allSteps[nextIndex].target} not found`);
-      return false;
-    }
-    
-    // Scroll to the element
-    targetElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    
-    // Wait for scrolling to complete then update step
-    stepTimeoutRef.current = setTimeout(() => {
-      console.log(`Moving to step ${nextIndex}: ${allSteps[nextIndex].key}`);
-      setCurrentIndex(nextIndex);
-      setSteps([allSteps[nextIndex]]);
+        console.log(`Check #${checkCountRef.current} for wantlist page elements:`, {
+          addItems: !!addItemsElement,
+          myWantlist: !!myWantlistElement,
+          allWantlist: !!allWantlistElement
+        });
+        
+        // Check if all targets exist
+        if (addItemsElement && myWantlistElement && allWantlistElement) {
+          // Relaxed visibility check - just make sure elements have dimensions
+          const allHaveDimensions = [addItemsElement, myWantlistElement, allWantlistElement].every(el => {
+            const rect = el.getBoundingClientRect();
+            return rect.width > 0 && rect.height > 0;
+          });
+          
+          if (allHaveDimensions) {
+            console.log("✅ All wantlist page elements found and have dimensions!");
+            setStepsReady(true);
+            setRunTour(true);
+            clearInterval(targetCheckRef.current);
+          } else {
+            console.log("Elements found but some have no dimensions yet");
+          }
+        } else if (checkCountRef.current >= MAX_CHECKS) {
+          console.log("Giving up on finding tour elements after max checks");
+          clearInterval(targetCheckRef.current);
+        }
+      };
       
-      // Force re-run of the tour with the new step
-      setRun(false);
-      stepTimeoutRef.current = setTimeout(() => setRun(true), 100);
-    }, 400);
-    
-    return true;
-  };
+      // Wait for page to fully load after navigation
+      const timeoutId = setTimeout(() => {
+        checkTargetsExist();
+        targetCheckRef.current = setInterval(checkTargetsExist, 500);
+      }, 1000); // Longer delay to ensure page is fully rendered
+      
+      return () => {
+        clearTimeout(timeoutId);
+        if (targetCheckRef.current) {
+          clearInterval(targetCheckRef.current);
+        }
+      };
+    }
+  }, [hasSeenTour]);
 
   const handleJoyrideCallback = (data) => {
-    const { action, status, type } = data;
-    console.log("🔄 Joyride callback:", { action, status, type, currentIndex });
-
-    // Handle tour completion
-    if ([STATUS.FINISHED, STATUS.SKIPPED].includes(status) || action === ACTIONS.CLOSE) {
-      console.log("Tour ended or skipped");
-      setRun(false);
-      localStorage.setItem("hasSeenWantlistPageTour", "true");
-      return;
+    const { status, type } = data;
+    
+    console.log('Wantlist page tour callback:', data);
+    
+    if ([STATUS.FINISHED, STATUS.SKIPPED].includes(status)) {
+      setRunTour(false);
+      // Update the tour state
+      if (typeof markTourAsSeen === 'function') {
+        markTourAsSeen();
+      }
     }
 
-    // Handle navigation through steps
-    if (action === ACTIONS.PRIMARY || action === ACTIONS.NEXT) {
-      if (!prepareNextStep(currentIndex + 1)) {
-        // No more steps - complete the tour
-        setRun(false);
-        localStorage.setItem("hasSeenWantlistPageTour", "true");
-      }
-    } else if (action === ACTIONS.PREV && currentIndex > 0) {
-      prepareNextStep(currentIndex - 1);
+    if (type === 'error') {
+      console.error('Joyride error:', data);
     }
   };
 
-  return (
-    <div className="joyride-wrapper">
-      {run && steps.length > 0 && (
-        <Joyride
-          steps={steps}
-          run={run}
-          continuous={true}
-          showProgress={true}
-          showSkipButton={true}
-          disableScrolling={false}
-          spotlightPadding={10}
-          callback={handleJoyrideCallback}
-          styles={{
-            options: { 
-              zIndex: 100000,
-              primaryColor: "#007bff",
-              arrowColor: "#fff",
-              backgroundColor: "#fff",
-              overlayColor: "rgba(0, 0, 0, 0.5)",
-              textColor: "#333",
-            },
-            spotlight: {
-              borderRadius: 4,
-            },
-            tooltipContainer: {
-              textAlign: "center",
-            },
-            buttonNext: {
-              backgroundColor: "#007bff",
-              color: "#fff",
-            },
-            buttonBack: {
-              color: "#666",
-              marginRight: 10,
-            },
-            buttonSkip: {
-              color: "#999",
-            },
-          }}
-          floaterProps={{
-            disableAnimation: true,
-            hideArrow: false,
-          }}
-          locale={{
-            last: currentIndex === allSteps.length - 1 ? "Finish" : "Next",
-            next: "Next",
-            skip: "Skip",
-            prev: "Back"
-          }}
-        />
-      )}
-    </div>
-  );
+  const steps = [
+    {
+      target: '#add-items',
+      content: '➕ Add items you want but can\'t find yet.',
+      disableBeacon: true,
+      spotlightClicks: true,
+      placement: 'auto',
+      floaterProps: {
+        disableAnimation: true,
+      },
+    },
+    {
+      target: '#all-wantlist',
+      content: '🔍 See what others need & post a deal if you have it!',
+      spotlightClicks: true,
+      placement: 'auto',
+      floaterProps: {
+        disableAnimation: true,
+      },
+    },
+    {
+      target: '#my-wantlist',
+      content: '📌 Manage items you\'ve added to your Wantlist.',
+      spotlightClicks: true,
+      placement: 'auto',
+      floaterProps: {
+        disableAnimation: true,
+      },
+    }
+  ];
+
+  return stepsReady ? (
+    <Joyride
+      steps={steps}
+      run={runTour}
+      continuous={true}
+      disableOverlayClose={false}
+      showProgress={true}
+      disableScrolling={true}
+      styles={{
+        options: {
+          primaryColor: 'var(--primary-color, #5a67d8)',
+          textColor: 'var(--text-color, #333)',
+          backgroundColor: 'var(--background-color, #fff)',
+          arrowColor: 'var(--background-color, #fff)',
+          zIndex: 1000,
+        },
+        buttonNext: {
+          backgroundColor: 'var(--primary-color, #5a67d8)',
+          color: 'var(--button-text, #fff)',
+        },
+        spotlight: {
+          backgroundColor: 'rgba(0, 0, 0, 0.4)',
+        },
+        tooltip: {
+          padding: '12px 16px',
+          borderRadius: '8px',
+          maxWidth: '320px',
+        }
+      }}
+      callback={handleJoyrideCallback}
+    />
+  ) : null;
 };
 
 export default WantlistPageTour;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// import React, { useState, useEffect } from "react";
-// import Joyride, { ACTIONS, EVENTS, STATUS } from "react-joyride";
-// import { useNavigate } from "react-router-dom";
-
-// const WantlistPageTour = () => {
-//   const [run, setRun] = useState(false);
-//   const [stepIndex, setStepIndex] = useState(0);
-//   const [tourKey, setTourKey] = useState(0);
-//   const navigate = useNavigate();
-
-//   const steps = [
-//     { 
-//       target: "#add-items", 
-//       content: "➕ Add items you want but can't find yet.", 
-//       placement: "right",
-//       disableBeacon: true,
-//     },
-//     { 
-//       target: "#my-wantlist", 
-//       content: "📌 Manage items you've added to your Wantlist.", 
-//       placement: "right" 
-//     },
-//     { 
-//       target: "#all-wantlist", 
-//       content: "🔍 See what others need & post a deal if you have it!", 
-//       placement: "left" 
-//     },
-//   ];
-
-//   useEffect(() => {
-//     const hasSeenPageTour = localStorage.getItem("hasSeenWantlistPageTour");
-//     if (hasSeenPageTour) return;
-
-//     let attempts = 0;
-//     const maxAttempts = 15;
-    
-//     const checkElements = setInterval(() => {
-//       attempts++;
-//       const addItemsElement = document.querySelector("#add-items");
-//       const myWantlistElement = document.querySelector("#my-wantlist");
-//       const allWantlistElement = document.querySelector("#all-wantlist");
-
-//       console.log("WantlistPageTour elements check:", { 
-//         addItemsElement, 
-//         myWantlistElement, 
-//         allWantlistElement,
-//         attempts 
-//       });
-
-//       if (addItemsElement && myWantlistElement && allWantlistElement) {
-//         console.log("✅ All elements found, starting tour...");
-//         setRun(true);
-//         clearInterval(checkElements);
-//       } else if (attempts >= maxAttempts) {
-//         console.error("❌ Not all elements found after max attempts");
-//         clearInterval(checkElements);
-//       }
-//     }, 1000);
-
-//     return () => clearInterval(checkElements);
-//   }, []);
-
-//   const handleJoyrideCallback = (data) => {
-//     const { action, index, status, type } = data;
-    
-//     console.log("🔄 Joyride callback:", { action, index, status, type });
-
-//     if ([STATUS.FINISHED, STATUS.SKIPPED].includes(status) || action === ACTIONS.CLOSE) {
-//       setRun(false);
-//       localStorage.setItem("hasSeenWantlistPageTour", "true");
-//       return;
-//     }
-
-//     if (action === ACTIONS.NEXT && index < steps.length - 1) {
-//       setStepIndex(index + 1);
-//     }
-
-//     if (action === ACTIONS.PREV && index > 0) {
-//       setStepIndex(index - 1);
-//     }
-//   };
-
-//   return (
-//     <div key={tourKey} className="joyride-wrapper">
-//       {console.log("WantlistPageTour: Render")}
-//       <Joyride
-//         steps={steps}
-//         stepIndex={stepIndex}
-//         run={run}
-//         continuous
-//         showSkipButton
-//         showProgress
-//         callback={handleJoyrideCallback}
-//         disableCloseOnEsc={false}
-//         disableOverlayClose={false}
-//         styles={{
-//           options: { zIndex: 10000, primaryColor: "#007bff" },
-//         }}
-//         floaterProps={{
-//           disableAnimation: true,
-//         }}
-//         debug={true}
-//       />
-//     </div>
-//   );
-// };
-
-// export default WantlistPageTour;

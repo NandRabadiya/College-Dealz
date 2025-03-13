@@ -225,8 +225,8 @@ function Wantlist() {
   const currentWantlist = activeTab === "all" ? allWantlist : myWantlist;
 
   return (
-    <>
-      <WantlistPageTour />
+    <div className="wantlist-page">
+      {/* <WantlistPageTour /> */}
       <div className="min-h-screen bg-gray-100 dark:bg-gray-900 transition-colors duration-200">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 sm:mb-6 gap-3">
@@ -551,7 +551,7 @@ function Wantlist() {
           )}
         </div>
       </div>
-    </>
+    </div>
   );
 }
 

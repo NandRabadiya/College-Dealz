@@ -2,7 +2,7 @@ import React from "react";
 import { MessageCircle, Plus, Heart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import WantlistButton from "../WantlistButton";
+import WantlistButton from "./WantlistButton";
 import NotificationBell from "../notification/Notification";
 
 const ActionButtons = ({ 

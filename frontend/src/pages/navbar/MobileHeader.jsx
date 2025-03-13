@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Label } from "@/components/ui/label";
 import LogoSection from "./LogoSection";
-import WantlistButton from "../WantlistButton";
+import WantlistButton from "./WantlistButton";
 import ThemeToggle from "./ThemeToggle";
 import AuthSection from "./AuthSection";
 import ActionButtons from "./ActionButtons";
