@@ -10,7 +10,7 @@ import Authenticate from "./pages/authentication/Authenticate";
 import Dashboard from "./pages/dasboard/Profile";
 import ProductDetails from "./pages/product/ProductDetails";
 import PostADeal from "./pages/product/PostADeal";
-import NavBar from "./pages/NavBar";
+import NavBar from "./pages/navbar/NavBar";
 import ProtectedRoute from "./Routes/ProtectedRoute";
 import { useEffect } from "react";
 import { useDispatch } from "react-redux";

@@ -18,7 +18,7 @@ import {
   VERIFY_OTP_FAILURE
 } from "./ActionTypes";
 import { API_BASE_URL } from "../../pages/Api/api";
-import { AUTH_STATE_CHANGE_EVENT } from '../../pages/NavBar'; // Adjust the import path as needed
+import { AUTH_STATE_CHANGE_EVENT } from '../../pages/navbar/NavBar'; // Adjust the import path as needed
 
 
 // Login Action
