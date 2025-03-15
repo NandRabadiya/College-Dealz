@@ -271,6 +271,7 @@ public class ProductController {
         if (archived)
             return ResponseEntity.ok("Product marked as sold and removed successfully.");
         else return ResponseEntity.status(404).body("Failed to mark the product as sold. Please try again.");
+
     }
 
 
