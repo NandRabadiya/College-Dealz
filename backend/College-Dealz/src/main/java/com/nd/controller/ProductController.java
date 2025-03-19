@@ -273,5 +273,4 @@ public class ProductController {
         else return ResponseEntity.status(404).body("Failed to mark the product as sold. Please try again.");
 
     }
-
 }
