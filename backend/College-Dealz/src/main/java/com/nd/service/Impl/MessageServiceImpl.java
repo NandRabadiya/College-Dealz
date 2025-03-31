@@ -2,11 +2,13 @@ package com.nd.service.Impl;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 import com.nd.entities.Chat;
 import com.nd.entities.Message;
 import com.nd.entities.User;
 import com.nd.exceptions.*;
+import com.nd.repositories.ChatRepo;
 import com.nd.repositories.MessageRepo;
 import com.nd.repositories.ProductRepo;
 import com.nd.repositories.UserRepo;
@@ -25,6 +27,9 @@ public class MessageServiceImpl implements MessageService {
 
     @Autowired
     private UserRepo userRepository;
+
+    @Autowired
+    private ChatRepo chatRepository;
 
 
     @Autowired
@@ -54,5 +59,42 @@ public class MessageServiceImpl implements MessageService {
         List<Message> findByChatIdOrderByCreatedAtAsc = messageRepository.findByChatIdOrderByCreatedAtAsc(chat.getId());
         return findByChatIdOrderByCreatedAtAsc;
     }
+
+    public List<Message> getMessagesByChatId(int chatId) {
+        return messageRepository.findByChatIdOrderByCreatedAtAsc(chatId);
+    }
+
+    public Message saveMessage(Message message) {
+        Chat chat = message.getChat();
+        // Ensure the message is added to the chat's message list
+        chat.addMessage(message);
+        return messageRepository.save(message);
+    }
+
+    public Message createMessage(int senderId, int receiverId, String content, int chatId) {
+
+        Optional<User> senderO=userRepository.findById(senderId);
+        Optional<User> receiverO=userRepository.findById(receiverId);
+        Optional<Chat> chatOptional=chatRepository.getChatById(chatId);
+
+        User sender,receiver;
+        Chat chat;
+        if(senderO.isPresent() && receiverO.isPresent() && chatOptional.isPresent()) {
+            sender = senderO.get();
+            receiver = receiverO.get();
+            chat = chatOptional.get();
+        }else{
+            throw  new ResourceNotFoundException("User or chat not found with id: ");
+        }
+
+        Message message = new Message();
+        message.setSender(sender);
+        message.setReceiver(receiver);
+        message.setContent(content);
+        message.setChat(chat);
+
+        return saveMessage(message);
+    }
+
 }
 

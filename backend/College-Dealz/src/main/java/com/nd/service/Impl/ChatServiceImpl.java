@@ -3,6 +3,7 @@ package com.nd.service.Impl;
 import com.nd.dto.ChatDTO;
 import com.nd.dto.MessageDTO;
 import com.nd.entities.Chat;
+import com.nd.entities.Message;
 import com.nd.entities.Product;
 import com.nd.entities.User;
 import com.nd.repositories.ChatRepo;
@@ -14,6 +15,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -115,4 +117,48 @@ public class ChatServiceImpl implements ChatService {
                 messages
         );
     }
+
+    public List<ChatDTO> getAllChatsByUser(int userId) {
+        // Get all chats where the user is either sender or receiver
+        return chatRepository.findBySenderIdOrReceiverId(userId, userId)
+                .stream()
+                .map(this::mapToDTO)
+                .collect(Collectors.toList());
+    }
+
+    public ChatDTO findOrCreateChat(int senderId, int receiverId, int productId) {
+        // Try to find an existing chat for this user-receiver-product combination
+        Optional<Chat> existingChat = chatRepository.findBySenderIdAndReceiverIdAndProductId(senderId, receiverId, productId);
+
+        if (existingChat.isPresent()) {
+            return mapToDTO(existingChat.get());
+        } else {
+            // Create a new chat if one doesn't exist
+
+            Optional<User> senderO=userRepository.findById(senderId);
+            Optional<User> receiverO=userRepository.findById(receiverId);
+            Optional<Product> productO=productRepository.findById(productId);
+
+            User sender , receiver;
+            Product product;
+            if (senderO.isPresent() && receiverO.isPresent() && productO.isPresent()) {
+                sender=senderO.get();
+               receiver=receiverO.get();
+               product=productO.get();
+            }else{
+                throw new RuntimeException("Sender or Receiver or Product not found : ");
+            }
+
+            Chat newChat = new Chat(sender, receiver, product);
+            return mapToDTO(chatRepository.save(newChat));
+        }
+    }
+
+    public void addMessageToChat(Chat chat, Message message) {
+        chat.addMessage(message);
+        chatRepository.save(chat);
+    }
+
+
+
 }
