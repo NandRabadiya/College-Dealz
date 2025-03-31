@@ -17,7 +17,8 @@ import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { Switch } from "@/components/ui/switch";
 import AdminDashboard from "../admin/AdminDashboard";
-
+import axios from "axios";
+import { API_BASE_URL } from "../Api/api"; // Adjust the import path as necessary
 const Dashboard = () => {
   const { user, isAuthenticated } = useSelector((state) => state.auth);
   const [localUser, setLocalUser] = useState({
@@ -49,15 +50,17 @@ const Dashboard = () => {
     if (user) {
       setLocalUser({
         profilePicture: user.profilePicture || "account.png",
-        name: user.name,
+        name: user.username, // ✅ Use `username` from API response
         email: user.email,
-        university: user.university?.name || user.university || "N/A",
-        isAdmin: setIsAdmin(user.roles?.some((role) => role.name === "ADMIN")), // Check if roles include ADMIN
+        university: user.universityName || "N/A", // ✅ Use `universityName` from API response
       });
+  
+      setIsAdmin(user.roles?.includes("ADMIN")); // ✅ Fix role check (directly checks if "ADMIN" exists in array)
+      
       console.log("User roles:", user.roles); 
     }
   }, [user]);
-
+  
   // Format price to currency (example for future deal use)
   const formatPrice = (price) =>
     new Intl.NumberFormat("en-IN", {
@@ -66,14 +69,32 @@ const Dashboard = () => {
     }).format(price);
 
   // Handle profile update
-  const handleProfileUpdate = () => {
-    setLocalUser((prev) => ({
-      ...prev,
-      name: editedName,
-      profilePicture: editedImage || prev.profilePicture,
-    }));
-    setIsEditingProfile(false);
-  };
+  const handleProfileUpdate = async () => {
+    const authToken = localStorage.getItem("jwt");
+    if (!authToken) {
+        console.error("No auth token found");
+        return; 
+    }
+    try {
+        const response = await axios.put(
+            `${API_BASE_URL}/api/dashboard/update`, // ✅ Send user's ID in the URL
+            {
+                username: editedName, // ✅ Use correct key from API response
+                profilePicture: editedImage || localUser.profilePicture,
+            },
+            {
+                headers: { Authorization: `Bearer ${authToken}` }, // ✅ Pass token in headers
+            }
+        );
+
+        setLocalUser(response.data); // ✅ Update state with new user data
+        setIsEditingProfile(false);
+        console.log("Profile updated successfully:", response.data);
+    } catch (error) {
+        console.error("Error updating profile:", error);
+    }
+};
+
 
   // Handle image change for profile
   const handleImageChange = (e) => {

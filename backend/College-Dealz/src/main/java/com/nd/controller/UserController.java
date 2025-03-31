@@ -61,19 +61,19 @@ public class UserController {
     }
 
     // 🔹 PUT /dashboard/{id} → Update user profile
-    @PutMapping("/{id}")
+    @PutMapping("/update")
     public ResponseEntity<DashboardDTO> updateDashboard(
-            @PathVariable int id,
+
             @RequestBody DashboardDTO dashboardDTO,
             @RequestHeader("Authorization") String token) {
 
         int userId =jwtService.getUserIdFromToken(token);
 
-        if (userId != id) {
-            return ResponseEntity.status(403).body(null); // Forbidden: User can only update their own profile
-        }
+//        if (userId != id) {
+//            return ResponseEntity.status(403).body(null); // Forbidden: User can only update their own profile
+//        }
 
-        DashboardDTO updatedProfile = userService.updateDashboard(id, dashboardDTO);
+        DashboardDTO updatedProfile = userService.updateDashboard(userId, dashboardDTO);
         return ResponseEntity.ok(updatedProfile);
     }
 
