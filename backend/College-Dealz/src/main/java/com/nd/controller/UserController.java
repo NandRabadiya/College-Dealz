@@ -3,6 +3,7 @@ import java.util.List;
 
 
 import com.nd.dto.ApiResponse;
+import com.nd.dto.DashboardDTO;
 import com.nd.dto.UserDto;
 import com.nd.entities.User;
 import com.nd.service.JwtService;
@@ -30,13 +31,6 @@ public class UserController {
         return new ResponseEntity<>(createUserDto, HttpStatus.CREATED);
     }
 
-    // PUT- update user
-    @PutMapping("/{userId}")
-    public ResponseEntity<UserDto> updateUser(@Valid @RequestBody UserDto userDto, @PathVariable("userId") Integer uid) {
-        UserDto updatedUser = this.userService.updateUser(userDto, uid);
-        return ResponseEntity.ok(updatedUser);
-    }
-
     //ADMIN
     // DELETE -delete user
    // @PreAuthorize("hasRole('ADMIN')")
@@ -59,14 +53,28 @@ public class UserController {
         return ResponseEntity.ok(this.userService.getUserById(userId));
     }
 
-    //user-dashboard
+
     @GetMapping("/dashboard")
-    public ResponseEntity<User> getUserProfileHandler(@RequestHeader("Authorization") String jwt) throws RuntimeException {
-        User user = userService.findUserByJwt(jwt);
-        System.out.println(jwt);
-        System.out.println(user);
-        user.setPassword(null);
-        return new ResponseEntity<>(user, HttpStatus.ACCEPTED);
+    public ResponseEntity<DashboardDTO> getDashboard(@RequestHeader("Authorization") String token) {
+        Integer userId = jwtService.getUserIdFromToken(token); // Get userId from token
+        return ResponseEntity.ok(userService.getDashboard(userId));
+    }
+
+    // 🔹 PUT /dashboard/{id} → Update user profile
+    @PutMapping("/{id}")
+    public ResponseEntity<DashboardDTO> updateDashboard(
+            @PathVariable int id,
+            @RequestBody DashboardDTO dashboardDTO,
+            @RequestHeader("Authorization") String token) {
+
+        int userId =jwtService.getUserIdFromToken(token);
+
+        if (userId != id) {
+            return ResponseEntity.status(403).body(null); // Forbidden: User can only update their own profile
+        }
+
+        DashboardDTO updatedProfile = userService.updateDashboard(id, dashboardDTO);
+        return ResponseEntity.ok(updatedProfile);
     }
 
 }

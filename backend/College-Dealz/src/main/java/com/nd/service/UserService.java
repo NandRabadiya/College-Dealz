@@ -1,30 +1,15 @@
 package com.nd.service;
+import com.nd.dto.DashboardDTO;
 import com.nd.dto.UserDto;
 import com.nd.entities.User;
 
 import java.util.List;
-import java.util.UUID;
 
 public interface UserService {
-//    UserDto createUser(UserCreateDTO userCreateDTO);
-//   UserDto updateUser(UUID userId, UserUpdateDTO userUpdateDTO);
-//    UserDto getUserById(UUID userId);
-//    List<UserDto> getAllUsers();
-//    void deleteUser(UUID userId);
-//    UserDto addRoleToUser(UUID userId, String roleName);
-//    UserDto removeRoleFromUser(UUID userId, String roleName);
-//    boolean verifyEmail(String token);
-//    void resetPassword(String email);
-
-
 
     UserDto registerNewUser(UserDto user);
 
     UserDto userToDto(User user);
-
-    //UserDto createUser(UserDto user);
-
-    UserDto updateUser(UserDto user, Integer userId);
 
     UserDto getUserById(Integer userId);
 
@@ -32,7 +17,9 @@ public interface UserService {
 
     void deleteUser(Integer userId);
 
+    DashboardDTO updateDashboard(int userId, DashboardDTO dashboardDTO);
+
+    DashboardDTO getDashboard(Integer userId);
 
 
-    User findUserByJwt(String jwt);
 }
