@@ -65,6 +65,9 @@ public class ProductServiceImpl implements ProductService {
     @Autowired
     private ImageRepo imageRepo;
 
+    @Autowired
+    private WishlistRepository wishlistRepository;
+
     @Override
     public ProductDto createProduct(ProductDto productDto, String authHeader) throws ResourceNotFoundException {
 
@@ -425,6 +428,7 @@ public class ProductServiceImpl implements ProductService {
         productDto.setMonthsOld(product.getMonthsOld());
         productDto.setSellerId(product.getSeller().getId());
         productDto.setUniversityId(product.getUniversity().getId());
+        productDto.setWishlisted(wishlistRepository.existsByUserIdAndProductId(product.getSeller().getId(),product.getId()));
 
         productDto.setSellerName(product.getSeller().getName());
         productDto.setPostDate(product.getPostDate());

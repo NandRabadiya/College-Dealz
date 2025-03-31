@@ -55,6 +55,7 @@ public class ProductDto {
     private List<Integer> removeImageIds;
 
     private List<String> imageUrls;
+    private boolean isWishlisted;
 
 
 }
