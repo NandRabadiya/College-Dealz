@@ -2,6 +2,8 @@ import React, { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import logo from "../../assets/photo/logo.png";
+import lightLogo from "../../assets/photo/logo-light.png";
+import darkLogo from "../../assets/photo/logo-dark.png";
 
 // Import the new components
 import ThemeToggle from "./ThemeToggle";
@@ -186,20 +188,20 @@ const NavBar = ({ onSearch, onSort, onFilterChange }) => {
   const toggleTheme = () => {
     const newTheme = theme === "light" ? "dark" : "light";
     setTheme(newTheme);
-    document.documentElement.classList.toggle("dark");
+    document.documentElement.classList.toggle("dark", newTheme === "dark");
     localStorage.setItem("theme", newTheme);
   };
   return (
     <>
       <nav className={cn(
-        "w-full border-b bg-background/95 backdrop-blur-md supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50 transition-all duration-300",
+        "w-full border-b bg-background/95 backdrop-blur-md supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50",
         scrolled && "shadow-subtle"
       )}>
         <div className="max-w-7xl mx-auto px-4">
           {/* MOBILE VIEW */}<MobileHeader 
             isSidebarOpen={isSidebarOpen}
             setIsSidebarOpen={setIsSidebarOpen}
-            logo={logo}
+            logo={theme === "dark" ? darkLogo : lightLogo}
             handleLogoClick={handleLogoClick}
             handleWantlist={handleWantlist}
             theme={theme}
@@ -214,8 +216,8 @@ const NavBar = ({ onSearch, onSort, onFilterChange }) => {
 
           {/* DESKTOP VIEW */}
           <DesktopHeader 
-            logo={logo}
-            handleLogoClick={handleLogoClick}
+          logo={theme === "dark" ? darkLogo : lightLogo}
+          handleLogoClick={handleLogoClick}
             handleSearch={handleSearch}
             handleSort={handleSort}
             handleChat={handleChat}
