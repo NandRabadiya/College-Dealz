@@ -25,6 +25,7 @@ import UniversitySelector from "./pages/UniversitySelector";
 import PublicProductDetails from "./pages/product/PublicProductDetails";
 import ErrorPage from "./pages/ErrorPage";
 import OAuthCallback from "./pages/authentication/OAuthCallback";
+import FeedbackWidget from "./pages/FeedbackWidget";
 
 
 // PrivateRoute component
@@ -44,6 +45,7 @@ const AppRoutes = ({
   
   return (
     <>
+    <FeedbackWidget/>
       {/* Only render tour components on their specific routes */}
       {location.pathname === '/' && (
         <WantlistTour hasSeenTour={hasSeenTour} />

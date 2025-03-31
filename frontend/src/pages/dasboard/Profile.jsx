@@ -54,6 +54,7 @@ const Dashboard = () => {
         university: user.university?.name || user.university || "N/A",
         isAdmin: setIsAdmin(user.roles?.some((role) => role.name === "ADMIN")), // Check if roles include ADMIN
       });
+      console.log("User roles:", user.roles); 
     }
   }, [user]);
 
@@ -131,6 +132,7 @@ const Dashboard = () => {
                   </Badge>
                       {console.log("isAdmin", isAdmin)}
                   {isAdmin ? (
+                  // {true ? (
                     <div className="flex items-center justify-center space-x-2 mt-4">
                       <span className="text-sm">User</span>
                       <Switch
