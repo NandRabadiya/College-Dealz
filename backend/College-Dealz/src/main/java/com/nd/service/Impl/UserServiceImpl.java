@@ -1,6 +1,7 @@
 package com.nd.service.Impl;
 
 
+import com.nd.dto.DashboardDTO;
 import com.nd.dto.UserDto;
 import com.nd.entities.Role;
 import com.nd.entities.University;
@@ -12,7 +13,6 @@ import com.nd.repositories.UniversityRepo;
 import com.nd.repositories.UserRepo;
 import com.nd.service.JwtService;
 import com.nd.service.UserService;
-import jakarta.validation.constraints.Null;
 import lombok.*;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,33 +47,6 @@ public class UserServiceImpl implements UserService {
     @Autowired
     JwtService jwtService;
 
-
-
-    public UserServiceImpl() {
-    }
-
-//    @Override
-//    public UserDto createUser(UserDto userDto) {
-//        User user = this.dtoToUser(userDto);
-//        User savedUser = this.userRepo.save(user);
-//        return this.userToDto(savedUser);
-//    }
-
-    @Override
-    public UserDto updateUser(UserDto userDto, Integer userId) {
-
-        User user = this.userRepo.findById(userId)
-                .orElseThrow(() -> new ResourceNotFoundException("User", " Id ", userId));
-
-        user.setName(userDto.getName());
-        user.setEmail(userDto.getEmail());
-        user.setPassword(userDto.getPassword());
-
-
-        User updatedUser = this.userRepo.save(user);
-        UserDto userDto1 = this.userToDto(updatedUser);
-        return userDto1;
-    }
 
     @Override
     public UserDto getUserById(Integer userId) {
@@ -110,40 +83,7 @@ public class UserServiceImpl implements UserService {
     }
 
 
-    @Override
-    public User findUserByJwt(String jwt) {
-        String email = jwtService.getEmailFromToken(jwt);
-        return findUserByEmail(email);
-    }
-
-    private User findUserByEmail(String email) {
-
-
-
-        User user = userRepo.findUByEmail(email);
-
-       if(user!= null) {
-           return user;
-       }
-        System.out.println("User not found");
-       throw new RuntimeException("User not found");
-    }
-
-
-    public User dtoToUser(UserDto userDto) {
-        //  User user = this.modelMapper.map(userDto, User.class);
-
-        User user = new User();
-        user.setId(userDto.getId());
-        user.setName(userDto.getName());
-        user.setEmail(userDto.getEmail());
-        user.setPassword(userDto.getPassword());
-        //  user.setRoles(userDto.getRoles());
-
-        return user;
-    }
-
-    public UserDto userToDto(User user) {
+   public UserDto userToDto(User user) {
         // UserDto userDto = this.modelMapper.map(user, UserDto.class);
 
         UserDto userDtoResponse = new UserDto();
@@ -243,7 +183,38 @@ public class UserServiceImpl implements UserService {
 
     }
 
+    public DashboardDTO getDashboard(Integer userId) {
+        User user = userRepo.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
 
+        return mapToDto(user);
+    }
+
+    public DashboardDTO updateDashboard(int userId, DashboardDTO dashboardDTO) {
+        User user = userRepo.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        user.setName(dashboardDTO.getUsername());
+        user.setEmail(dashboardDTO.getEmail());
+
+        if (dashboardDTO.getProfilePicture() != null) {
+            user.setProfilePicture(dashboardDTO.getProfilePicture());
+        }
+
+        userRepo.save(user);
+        return mapToDto(user);
+    }
+
+    private DashboardDTO mapToDto(User user) {
+        return DashboardDTO.builder()
+                .username(user.getName())
+                .universityName(user.getUniversity() != null ? user.getUniversity().getName() : "N/A")
+                .email(user.getEmail())
+                .profilePicture(user.getProfilePicture())
+                .provider(user.getProvider().toString()) // Assuming this is the Google Auth profile URL
+                .roles(user.getRoles().stream().map(Role::getName).collect(Collectors.toSet()))
+                .build();
+    }
     protected boolean canEqual(final Object other) {
         return other instanceof UserServiceImpl;
     }
