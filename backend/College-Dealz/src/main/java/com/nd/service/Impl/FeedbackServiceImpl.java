@@ -1,7 +1,10 @@
 package com.nd.service.Impl;
 
 import com.nd.entities.Feedback;
+import com.nd.entities.User;
+import com.nd.exceptions.ResourceNotFoundException;
 import com.nd.repositories.FeedbackRepo;
+import com.nd.repositories.UserRepo;
 import com.nd.service.FeedbackService;
 import com.nd.service.JwtService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,6 +13,7 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class FeedbackServiceImpl implements FeedbackService {
@@ -22,6 +26,8 @@ public class FeedbackServiceImpl implements FeedbackService {
 
     @Autowired
     private JwtService  jwtService;
+    @Autowired
+    private UserRepo userRepo;
 
     @Override
     public Feedback submitFeedback(Feedback feedback, String authHeader) {
@@ -29,6 +35,17 @@ public class FeedbackServiceImpl implements FeedbackService {
 
 
         String sender_email=jwtService.getEmailFromToken(authHeader);
+        feedback.setEmail(sender_email);
+
+        Optional<User> senderO=userRepo.findById(jwtService.getUserIdFromToken(authHeader));
+        String name;
+        if(senderO.isPresent()){
+            name=senderO.get().getName();
+        }
+        else{
+            throw  new ResourceNotFoundException("User not found with id: ");
+        }
+        feedback.setName(name);
 
         Feedback savedFeedback = feedbackRepository.save(feedback);
 

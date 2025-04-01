@@ -28,7 +28,7 @@ const FeedbackWidget = () => {
     try {
       await axios.post(
         `${API_BASE_URL}/api/feedback/`,
-        { rating, message: message.trim() || "N/A" },
+        { star: rating, message: message.trim() || "N/A" },
         { headers: { Authorization: `Bearer ${authToken}` } }
       );
       setSubmitted(true);
