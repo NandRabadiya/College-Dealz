@@ -341,6 +341,7 @@ function AdminDashboard() {
               },
             }
           );
+          fetchAdmins();
           toast({
             title: "Success",
             description: "User has been made an admin",
@@ -354,6 +355,7 @@ function AdminDashboard() {
               },
             }
           );
+          fetchAdmins();
           toast({
             title: "Success",
             description: "Admin privileges removed",
