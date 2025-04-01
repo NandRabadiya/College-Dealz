@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Supplier;
 
 @Service
 public class FeedbackServiceImpl implements FeedbackService {
@@ -72,4 +73,14 @@ public class FeedbackServiceImpl implements FeedbackService {
 
         mailSender.send(mailMessage);
     }
+
+    @Override
+    public void deleteFeedback(int id){
+
+
+        Optional<Feedback> feedbackOptional=feedbackRepository.findById(id);
+        feedbackOptional.ifPresent(feedback -> feedbackRepository.delete(feedback));
+
+    }
+
 }

@@ -38,6 +38,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         String authHeader = request.getHeader("Authorization");
 
+        System.out.println("In filter\n\n");
         if(authHeader == null || !authHeader.startsWith("Bearer ")) {
             filterChain.doFilter(request,response);
             return;
@@ -63,8 +64,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 SecurityContextHolder.getContext().setAuthentication(authToken);
             }
         }
+        System.out.println("In filter before do filter\n\n");
+
         filterChain.doFilter(request, response);
 
+        System.out.println("In filter after do filter\n\n");
 
     }
 }
