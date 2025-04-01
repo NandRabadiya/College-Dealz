@@ -47,8 +47,8 @@ public class ArchivedProductsController {
 
     // DELETE an archived product by id
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteArchivedProduct(@PathVariable int id) {
+    public ResponseEntity<ResponseEntity<?>> deleteArchivedProduct(@PathVariable int id) {
         archivedProductsService.deleteArchivedProduct(id);
-        return ResponseEntity.noContent().build();
+        return ResponseEntity.ok().build();
     }
 }
