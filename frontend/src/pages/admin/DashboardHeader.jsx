@@ -3,7 +3,7 @@ import { School, Package, Users, Shield, MessageSquare, ArchiveIcon } from "luci
 
 const DashboardHeader = ({ activeTab, setActiveTab }) => {
   const navItems = [
-    { id: "universities", icon: School, label: "Universities" },
+    { id: "universities", icon: School, label: "Community" },
     { id: "products", icon: Package, label: "Products" },
     { id: "archivedProducts", icon: ArchiveIcon, label: "Archived" },
     { id: "users", icon: Users, label: "Users" },

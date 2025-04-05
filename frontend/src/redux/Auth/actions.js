@@ -146,6 +146,7 @@ export const logout = () => async (dispatch) => {
 
     // Clear token from local storage
     localStorage.removeItem("jwt");
+    localStorage.removeItem("isAdminView");
     window.dispatchEvent(new CustomEvent(AUTH_STATE_CHANGE_EVENT));
   } catch (error) {
     console.error("Logout failed:", error);

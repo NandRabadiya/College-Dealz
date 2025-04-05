@@ -179,10 +179,10 @@ function AdminDashboard() {
       );
       setUniversities(response.data);
     } catch (error) {
-      console.error("Error fetching universities:", error);
+      console.error("Error fetching communities:", error);
       toast({
         title: "Error",
-        description: "Failed to load university data",
+        description: "Failed to load community data",
         variant: "destructive",
       });
     }
@@ -258,7 +258,7 @@ function AdminDashboard() {
         );
         toast({
           title: "Success",
-          description: "University updated successfully",
+          description: "Community updated successfully",
         });
       } else {
         await axios.post(`${API_BASE_URL}/api/universities`, formData, {
@@ -268,7 +268,7 @@ function AdminDashboard() {
         });
         toast({
           title: "Success",
-          description: "University added successfully",
+          description: "Community added successfully",
         });
       }
       fetchUniversities();
@@ -276,10 +276,10 @@ function AdminDashboard() {
       setEditingUniversity(null);
       setFormData({ name: "", domain: "", location: "" });
     } catch (error) {
-      console.error("Error saving university:", error);
+      console.error("Error saving community:", error);
       toast({
         title: "Error",
-        description: "Failed to save university data",
+        description: "Failed to save C=community data",
         variant: "destructive",
       });
     }
@@ -296,7 +296,7 @@ function AdminDashboard() {
   };
 
   const handleDelete = async (id) => {
-    if (!window.confirm("Are you sure you want to delete this university?")) {
+    if (!window.confirm("Are you sure you want to delete this community?")) {
       return;
     }
     
@@ -309,13 +309,13 @@ function AdminDashboard() {
       fetchUniversities();
       toast({
         title: "Success",
-        description: "University deleted successfully",
+        description: "Community deleted successfully",
       });
     } catch (error) {
-      console.error("Error deleting university:", error);
+      console.error("Error deleting community:", error);
       toast({
         title: "Error",
-        description: "Failed to delete university",
+        description: "Failed to delete community",
         variant: "destructive",
       });
     }

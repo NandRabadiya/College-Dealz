@@ -17,7 +17,7 @@ const UniversitiesTab = ({
     <div className="animate-fade-in">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 space-y-4 sm:space-y-0">
         <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
-          Manage Universities
+          Manage communities
         </h2>
         <button
           onClick={() => {
@@ -28,14 +28,14 @@ const UniversitiesTab = ({
           className="flex items-center gap-2 bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary/90 w-full sm:w-auto justify-center sm:justify-start transition-all duration-200 shadow-sm hover:shadow-md"
         >
           <PlusCircle className="h-5 w-5" />
-          Add University
+          Add Community
         </button>
       </div>
 
       {isAddingUniversity && (
         <div className="mb-8 bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md border border-gray-100 dark:border-gray-700">
           <h3 className="text-lg font-medium mb-4 text-gray-900 dark:text-white">
-            {editingUniversity ? "Edit University" : "Add New University"}
+            {editingUniversity ? "Edit Community" : "Add New Community"}
           </h3>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
@@ -157,7 +157,7 @@ const UniversitiesTab = ({
               {universities.length === 0 && (
                 <tr>
                   <td colSpan="4" className="px-6 py-4 text-center text-sm text-gray-500 dark:text-gray-400">
-                    No universities found
+                    No communities found
                   </td>
                 </tr>
               )}

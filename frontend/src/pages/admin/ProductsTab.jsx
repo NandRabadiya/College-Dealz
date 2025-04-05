@@ -25,7 +25,7 @@ const ProductsTab = ({ products, currentImageIndexes, setCurrentImageIndexes, ha
     const fetchUniversities = async () => {
       try {
         const response = await fetch(`${API_BASE_URL}/api/universities/public`);
-        if (!response.ok) throw new Error("Failed to fetch universities");
+        if (!response.ok) throw new Error("Failed to fetch community");
         const data = await response.json();
         const universityMap = {};
         data.forEach((uni) => {
@@ -33,7 +33,7 @@ const ProductsTab = ({ products, currentImageIndexes, setCurrentImageIndexes, ha
         });
         setUniversities(universityMap);
       } catch (err) {
-        console.error("Error fetching universities:", err);
+        console.error("Error fetching community:", err);
       }
     };
     fetchUniversities();

@@ -34,8 +34,15 @@ const Dashboard = () => {
   const [isEditingProfile, setIsEditingProfile] = useState(false);
   const [editedName, setEditedName] = useState(localUser.name);
   const [editedImage, setEditedImage] = useState(null);
-  const [isAdminView, setIsAdminView] = useState(false);
-  const [isAdmin, setIsAdmin] = useState(false);
+  const [isAdminView, setIsAdminView] = useState(() => {
+    const saved = localStorage.getItem("isAdminView");
+    return saved === "true"; // convert string to boolean
+  });
+  useEffect(() => {
+    localStorage.setItem("isAdminView", isAdminView);
+  }, [isAdminView]);
+  
+    const [isAdmin, setIsAdmin] = useState(false);
 
   const [deals, setDeals] = useState([]); // Replace with fetched data if applicable
   const [isEditingDeal, setIsEditingDeal] = useState(false);
@@ -50,12 +57,12 @@ const Dashboard = () => {
     if (user) {
       setLocalUser({
         profilePicture: user.profilePicture || "account.png",
-        name: user.username, // ✅ Use `username` from API response
+        name: user.username, 
         email: user.email,
-        university: user.universityName || "N/A", // ✅ Use `universityName` from API response
+        university: user.universityName || "N/A", 
       });
   
-      setIsAdmin(user.roles?.includes("ADMIN")); // ✅ Fix role check (directly checks if "ADMIN" exists in array)
+      setIsAdmin(user.roles?.includes("ADMIN"));
       
       console.log("User roles:", user.roles); 
     }
