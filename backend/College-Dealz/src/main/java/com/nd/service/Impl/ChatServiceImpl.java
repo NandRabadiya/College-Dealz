@@ -1,6 +1,7 @@
 package com.nd.service.Impl;
 
 import com.nd.dto.ChatDTO;
+import com.nd.dto.CheckChatRequest;
 import com.nd.dto.MessageDTO;
 import com.nd.entities.Chat;
 import com.nd.entities.Message;
@@ -159,6 +160,16 @@ public class ChatServiceImpl implements ChatService {
         chatRepository.save(chat);
     }
 
+    public boolean checkChat(CheckChatRequest checkChatRequest) {
 
+        Optional<Chat> existingChat = chatRepository.findBySenderIdAndReceiverIdAndProductId(checkChatRequest.getSenderId(),
+                checkChatRequest.getReceiverId(), checkChatRequest.getProductId());
+
+        if (existingChat.isPresent()) {
+            return true;
+        } else {
+            return false;
+        }
+    }
 
 }
