@@ -211,12 +211,22 @@ public class UserServiceImpl implements UserService {
                 .universityName(user.getUniversity() != null ? user.getUniversity().getName() : "N/A")
                 .email(user.getEmail())
                 .profilePicture(user.getProfilePicture())
+                .guided(user.isGuided())
                 .provider(user.getProvider().toString()) // Assuming this is the Google Auth profile URL
                 .roles(user.getRoles().stream().map(Role::getName).collect(Collectors.toSet()))
                 .build();
     }
     protected boolean canEqual(final Object other) {
         return other instanceof UserServiceImpl;
+    }
+
+    public void updateGuided(int userId ,boolean guided) {
+        User user = userRepo.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        user.setGuided(guided);
+        userRepo.save(user);
+
     }
 
 }

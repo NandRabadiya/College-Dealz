@@ -21,5 +21,5 @@ public interface UserService {
 
     DashboardDTO getDashboard(Integer userId);
 
-
+    void updateGuided(int userId, boolean guided);
 }

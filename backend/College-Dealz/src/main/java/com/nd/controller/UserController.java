@@ -77,4 +77,12 @@ public class UserController {
         return ResponseEntity.ok(updatedProfile);
     }
 
+    @PostMapping("/guided")
+    public ResponseEntity<?> updateGuidedDashboard(@RequestHeader("Authorization") String token, @RequestParam boolean guided) {
+
+        int userId = jwtService.getUserIdFromToken(token);
+        userService.updateGuided(userId,guided);
+        return ResponseEntity.ok().build();
+    }
+
 }

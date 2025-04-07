@@ -3,7 +3,6 @@ package com.nd.config;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nd.dto.AuthResponse;
 import com.nd.entities.Role;
-import com.nd.entities.Token;
 import com.nd.entities.User;
 import com.nd.exceptions.ResourceNotFoundException;
 import com.nd.repositories.RoleRepo;
@@ -12,24 +11,20 @@ import com.nd.repositories.UniversityRepo;
 import com.nd.repositories.UserRepo;
 import com.nd.service.AuthenticationService;
 import com.nd.service.JwtService;
-import jakarta.persistence.EntityManager;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import jakarta.transaction.Transactional;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
 
-import java.io.IOException;
 import java.security.SecureRandom;
 
 
@@ -131,7 +126,7 @@ public class OAuthAuthenticationSuccessHandler implements AuthenticationSuccessH
         if (!userRepo.existsByEmail(useremail)) {
             User user = new User();
             user.setEmailVerified(true);
-            user.setEnabled(true);
+           // user.setGuided(true);
            user.setUniversity(universityRepo.findUniversitiesByDomain(domain));
 
         if (authorizedClientRegistrationId.equalsIgnoreCase("google")) {
