@@ -1,16 +1,32 @@
 import React, { useState, useEffect, useRef } from 'react';
 import Joyride, { STATUS } from 'react-joyride';
+import { useSelector } from 'react-redux';
 
-const WantlistPageTour = ({ hasSeenTour, markTourAsSeen }) => {
+const WantlistPageTour = () => {
   const [runTour, setRunTour] = useState(false);
   const [stepsReady, setStepsReady] = useState(false);
+  const [hasSeenTour, setHasSeenTour] = useState(true); // Default to true (don't show)
   const targetCheckRef = useRef(null);
   const checkCountRef = useRef(0);
   const MAX_CHECKS = 20; // Give up after ~10 seconds
+  const { user, isAuthenticated } = useSelector((state) => state.auth);
+
+  // Check localStorage on mount
+  useEffect(() => {
+    const tourSeen = localStorage.getItem('hasSeenTour') === 'true';
+    setHasSeenTour(tourSeen);
+    console.log("WantlistPageTour init - hasSeenTour:", tourSeen);
+  }, []);
+
+  // Mark tour as seen
+  const markTourAsSeen = () => {
+    localStorage.setItem('hasSeenTour', 'true');
+    setHasSeenTour(true);
+  };
 
   useEffect(() => {
-    // Only run tour if user hasn't seen it yet
-    if (hasSeenTour === false) {
+    // Only run tour if user hasn't seen it yet and is authenticated
+    if (!hasSeenTour && isAuthenticated) {
       const checkTargetsExist = () => {
         const addItemsElement = document.getElementById('add-items');
         const myWantlistElement = document.getElementById('my-wantlist');
@@ -59,7 +75,7 @@ const WantlistPageTour = ({ hasSeenTour, markTourAsSeen }) => {
         }
       };
     }
-  }, [hasSeenTour]);
+  }, [hasSeenTour, isAuthenticated]); // Proper dependency array
 
   const handleJoyrideCallback = (data) => {
     const { status, type } = data;
@@ -69,9 +85,7 @@ const WantlistPageTour = ({ hasSeenTour, markTourAsSeen }) => {
     if ([STATUS.FINISHED, STATUS.SKIPPED].includes(status)) {
       setRunTour(false);
       // Update the tour state
-      if (typeof markTourAsSeen === 'function') {
-        markTourAsSeen();
-      }
+      markTourAsSeen();
     }
 
     if (type === 'error') {
@@ -110,6 +124,14 @@ const WantlistPageTour = ({ hasSeenTour, markTourAsSeen }) => {
     }
   ];
 
+  // Debug logging
+  console.log("Tour rendering state:", { 
+    hasSeenTour, 
+    stepsReady, 
+    runTour, 
+    isAuthenticated 
+  });
+
   return stepsReady ? (
     <Joyride
       steps={steps}
@@ -118,6 +140,7 @@ const WantlistPageTour = ({ hasSeenTour, markTourAsSeen }) => {
       disableOverlayClose={false}
       showProgress={true}
       disableScrolling={true}
+      showSkipButton={true}
       styles={{
         options: {
           primaryColor: 'var(--primary-color, #5a67d8)',

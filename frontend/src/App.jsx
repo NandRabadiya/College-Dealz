@@ -45,14 +45,10 @@ const AppRoutes = ({
   
   return (
     <>
-    <FeedbackWidget/>
-      {/* Only render tour components on their specific routes */}
-      {location.pathname === '/' && (
-        <WantlistTour hasSeenTour={hasSeenTour} />
-      )}
+    <FeedbackWidget/>      
       
       {location.pathname === '/wantlist' && (
-        <WantlistPageTour hasSeenTour={hasSeenTour} />
+        <WantlistPageTour />
       )}
       
       {/* Main routes */}
@@ -161,22 +157,6 @@ function App() {
     console.log("App.js useEffect", { token });
   }, [dispatch]);
 
-  // For testing tour
-  useEffect(() => {
-    // This would be replaced with API call in production
-    // const fetchUserPreferences = async () => {
-    //   try {
-    //     const response = await api.getUserPreferences();
-    //     setHasSeenTour(response.data.hasSeenTour);
-    //   } catch (error) {
-    //     console.error("Failed to fetch user preferences", error);
-    //   }
-    // };
-    // fetchUserPreferences();
-    
-    // For testing - set to false to show the tour
-    console.log('User has seen tour:', hasSeenTour);
-  }, []);
 
   const handleUniversitySelect = (universityId) => {
     setSelectedUniversity(universityId);
