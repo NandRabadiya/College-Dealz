@@ -4,6 +4,7 @@ import com.nd.dto.UserDto;
 import com.nd.entities.Role;
 import com.nd.entities.University;
 import com.nd.entities.User;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -13,30 +14,32 @@ import java.util.Optional;
 import java.util.UUID;
 
 public interface UserRepo extends JpaRepository<User, Integer> {
+
     Optional<User> findByEmail(String email);
 
     boolean existsByEmail(String email);
 
-    @Query("select u from User u join fetch u.roles where u.email = :email")
-    User findUByEmail(@Param("email") String email);
-
-    @Query("SELECT u.id FROM User u WHERE u.university.id = :universityId")
-    List<Integer> findUserIdsByUniversityId(@Param("universityId") Integer universityId);
-
 int countByRolesContaining(Role role);
 
-    @Override
-    Optional<User> findById(Integer integer);
+
+    @EntityGraph(attributePaths = "roles")
+    Optional<User> findWithRolesByEmail(String email);
+
+    //below is same just in query formate
+//    @Query("SELECT u FROM User u JOIN FETCH u.roles WHERE u.email = :email")
+//    Optional<User> findWithRolesByEmail(@Param("email") String email);
 
 
 
-   // int getUserByEmail(String email);
+    // int getUserByEmail(String email);
 
     @Query("SELECT u.id FROM User u WHERE u.email = :email")
     Optional<Integer> getUserIdByEmail(@Param("email") String email);
 
 
-   List<User> findByRolesContaining(Role role);
+    // Add a custom fetch method if you often need roles with users by role
+    @EntityGraph(attributePaths = "roles")
+    List<User> findByRolesContaining(Role role);
 
     List<User> findAllByUniversity(University university);
 }

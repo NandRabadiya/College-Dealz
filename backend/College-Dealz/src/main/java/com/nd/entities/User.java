@@ -73,7 +73,7 @@ public class User implements UserDetails {
     @Column(name = "provider_user_id")
     private String providerUserId;
 
-    @ManyToMany(fetch = FetchType.EAGER)
+    @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
             name = "user_roles",
             joinColumns = @JoinColumn(name = "user_id"),
