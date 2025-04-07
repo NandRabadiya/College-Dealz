@@ -39,7 +39,7 @@ const UsersTab = ({ users, handleToggleAdmin, handleReportUser }) => {
                         className="h-10 w-10 rounded-full object-cover border border-gray-200 dark:border-gray-600"
                         src={
                           user.profile_picture ||
-                          "https://placeholder.co/40"
+                          "account.png"
                         }
                         alt={user.name || "User"}
                       />

@@ -3,12 +3,12 @@ import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
 
-const AuthSection = ({ 
-  isMobile = false, 
-  onItemClick, 
-  isAuthenticated, 
-  handleAuthClick, 
-  handleProfile 
+const AuthSection = ({
+  isMobile = false,
+  onItemClick,
+  isAuthenticated,
+  handleAuthClick,
+  handleProfile,
 }) => {
   return (
     <div className={cn("flex items-center", isMobile ? "w-full" : "space-x-2")}>
@@ -40,7 +40,15 @@ const AuthSection = ({
         >
           <Avatar className="h-8 w-8 border-2 border-primary/10">
             <AvatarImage src="/api/placeholder/32/32" />
-            <AvatarFallback>UN</AvatarFallback>
+            <AvatarFallback>
+              <img
+                src="account.png"
+                alt="User"
+                width={40}
+                height={40}
+                className="rounded-full object-cover border border-gray-200 dark:border-gray-600"
+              />
+            </AvatarFallback>
           </Avatar>
           {isMobile && <span>Profile</span>}
         </Button>
