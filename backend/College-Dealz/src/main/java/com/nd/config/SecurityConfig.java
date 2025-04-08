@@ -63,7 +63,8 @@ public class SecurityConfig {
             "/send-otp**",
             "/verify**",
             "/resend-otp**",
-            "/api/products/public/shared-product/**"
+            "/api/products/public/shared-product/**",
+            "/ws/**", "/ws-native/**"
     );
 
     @Bean

@@ -52,6 +52,7 @@
 package com.nd.controller;
 
 import com.nd.dto.ChatDTO;
+import com.nd.dto.CheckChatRequest;
 import com.nd.dto.ProductDto;
 import com.nd.dto.UserDto;
 import com.nd.entities.Chat;
@@ -100,5 +101,12 @@ public class ChatController {
     public ResponseEntity<ChatDTO> getChatById(@PathVariable int chatId) {
         ChatDTO chat = chatService.getChatById(chatId);
         return ResponseEntity.ok(chat);
+    }
+
+    @PostMapping("/check")
+    public ResponseEntity<Boolean> checkChats(@RequestBody CheckChatRequest checkChatRequest) {
+
+        boolean check = chatService.checkChat(checkChatRequest);
+        return ResponseEntity.ok(check);
     }
 }

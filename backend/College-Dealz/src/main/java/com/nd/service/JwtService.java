@@ -16,6 +16,7 @@ import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import javax.crypto.SecretKey;
@@ -197,10 +198,10 @@ public class JwtService {
         String email = getEmailFromToken(token);
 
         // Fetch the user by email and handle cases where the user is not found
-        User user = userRepo.findUByEmail(email);
-        if (user == null) {
-            throw new ResourceNotFoundException("User with email '" + email + "' not found");
-        }
+        User user = userRepo.findWithRolesByEmail(email)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + email));
+        ;
+
 
         // Check if the user has a university associated and handle the null case
         if (user.getUniversity() == null) {

@@ -20,8 +20,8 @@ public class Token {
     @Column(name = "is_logged_out")
     private boolean loggedOut;
 
-    @ManyToOne(cascade = CascadeType.MERGE)
-    @JoinColumn(name = "user_id")
+    @ManyToOne( fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id" , nullable = false)
     private User user;
 
     public Integer getId() {

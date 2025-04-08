@@ -101,7 +101,7 @@ public class MessageController {
         int chatId = messageDTO.getChatId();
         String content = messageDTO.getContent();
 
-        Message message = messageService.createMessage(senderId, receiverId, content, chatId);
+        MessageDTO message = messageService.createMessage(senderId, receiverId, content, chatId);
 
         // Notify subscribers
         messagingTemplate.convertAndSend("/topic/chat/" + chatId, message);
@@ -117,10 +117,10 @@ public class MessageController {
         String content = (String) payload.get("content");
 
 
-        Message message = messageService.createMessage(senderId, receiverId, content, chatId);
+        MessageDTO messageDTO = messageService.createMessage(senderId, receiverId, content, chatId);
 
         // Send message to subscribers of this chat
-        messagingTemplate.convertAndSend("/topic/chat/" + chatId, message);
+        messagingTemplate.convertAndSend("/topic/chat/" + chatId, messageDTO);
     }
 
 }

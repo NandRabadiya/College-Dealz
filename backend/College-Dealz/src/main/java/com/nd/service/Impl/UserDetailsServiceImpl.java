@@ -26,17 +26,20 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-
         System.out.println("Looking for user: " + email);
 
-        User user = userRepository.findByEmail(email)
+        // Use the fetch method to avoid LazyInitializationException
+        User user = userRepository.findWithRolesByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + email));
 
-        Set<GrantedAuthority> authorities=
-                user.getRoles().stream().map(role -> new SimpleGrantedAuthority(role.getName()))
+        Set<GrantedAuthority> authorities = user.getRoles().stream()
+                .map(role -> new SimpleGrantedAuthority(role.getName()))
                 .collect(Collectors.toSet());
-    System.out.println("\n\n"+authorities+"\n\n");
+
+        System.out.println("\n\n" + authorities + "\n\n");
+
         return new org.springframework.security.core.userdetails.User(email, user.getPassword(), authorities);
     }
+
 
 }

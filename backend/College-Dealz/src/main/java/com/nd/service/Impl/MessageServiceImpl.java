@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
+import com.nd.dto.MessageDTO;
 import com.nd.entities.Chat;
 import com.nd.entities.Message;
 import com.nd.entities.User;
@@ -71,7 +72,8 @@ public class MessageServiceImpl implements MessageService {
         return messageRepository.save(message);
     }
 
-    public Message createMessage(int senderId, int receiverId, String content, int chatId) {
+    @Transactional
+    public MessageDTO createMessage(int senderId, int receiverId, String content, int chatId) {
 
         Optional<User> senderO=userRepository.findById(senderId);
         Optional<User> receiverO=userRepository.findById(receiverId);
@@ -93,8 +95,22 @@ public class MessageServiceImpl implements MessageService {
         message.setContent(content);
         message.setChat(chat);
 
-        return saveMessage(message);
+
+               Message msg= saveMessage(message);
+
+        return mapToDto(msg);
+
     }
 
+     private MessageDTO mapToDto(Message message) {
+        return new MessageDTO(
+                message.getSender().getId(),
+                message.getReceiver().getId(),
+                message.getChat().getId(),
+                message.getContent(),
+                message.getCreatedAt()
+        );
+    }
 }
+
 
