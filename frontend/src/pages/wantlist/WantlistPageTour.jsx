@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import Joyride, { STATUS } from 'react-joyride';
 import { useSelector } from 'react-redux';
+import { API_BASE_URL } from '../Api/api';
+import axios from 'axios';
 
 const WantlistPageTour = () => {
   const [runTour, setRunTour] = useState(false);
@@ -13,15 +15,31 @@ const WantlistPageTour = () => {
 
   // Check localStorage on mount
   useEffect(() => {
-    const tourSeen = localStorage.getItem('hasSeenTour') === 'true';
+    // const tourSeen = localStorage.getItem('hasSeenTour') === 'true';
+    const tourSeen = user?.guided;
     setHasSeenTour(tourSeen);
     console.log("WantlistPageTour init - hasSeenTour:", tourSeen);
   }, []);
 
-  // Mark tour as seen
-  const markTourAsSeen = () => {
-    localStorage.setItem('hasSeenTour', 'true');
-    setHasSeenTour(true);
+  
+  const markTourAsSeen = async () => {
+    try {
+      const token = localStorage.getItem('jwt');
+      
+      await axios.post(
+        `${API_BASE_URL}/api/users/guided?guided=true`,
+        null,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          }
+        }
+      );
+  
+      setHasSeenTour(true);
+    } catch (error) {
+      console.error('Failed to update guided tour status:', error);
+    }
   };
 
   useEffect(() => {

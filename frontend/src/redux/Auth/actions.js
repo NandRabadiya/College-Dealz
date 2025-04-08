@@ -52,11 +52,6 @@ export const login = (credentials) => async (dispatch) => {
           }
         );
         console.log("User details fetched:", userResponse.data);
-        // localStorage.setItem("hasSeenTour", userResponse.data.enabled);
-        console.log("hasSeenTour", userResponse.data.enabled);
-
-        localStorage.setItem("hasSeenTour",false);
-
         dispatch({ type: GET_USER_SUCCESS, payload: userResponse.data });
       } catch (error) {
         console.error("Error fetching user details:", error);
