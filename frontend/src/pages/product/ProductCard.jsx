@@ -36,9 +36,10 @@ import {
 } from "@/components/ui/dropdown-menu";
 import debounce from "lodash/debounce";
 import FilterComponent from "./Filter";
-import Wantlist from "../wantlist/Wantlist";
-import WantlistTour from "../wantlist/WantlistTour";
-
+import { useSelector } from "react-redux";
+import { Loader2 } from "lucide-react";
+import axios from "axios";
+import ChatInitiator from "../chat/ChatInitiator";
 const ProductCard = ({
   searchQuery,
   sortField,
@@ -46,7 +47,8 @@ const ProductCard = ({
   selectedUniversity,
 }) => {
   console.log("ProductCard mounted with university:", selectedUniversity);
-
+  const { user, isAuth } = useSelector((state) => state.auth);
+  const currentUser = user || null;
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -325,11 +327,36 @@ const ProductCard = ({
     fetchWishlistStatus();
   }, [isAuthenticated]);
 
-  const handleChat = (product, e) => {
-    handleProtectedAction(() => {
-      console.log("Starting chat about:", product);
-    }, e);
-  };
+  // const handleChat =  (product, e) => {
+  //   console.log("Checking chat for product:", currentUser.id, product.sellerId, product.id);
+
+  //   handleProtectedAction(async () => {
+  //     try {
+  //       const response = await axios.post(`${API_BASE_URL}/chats/check`, {
+  //         senderId: currentUser.id,
+  //         receiverId: product.sellerId,
+  //         productId: product.id
+  //       });
+
+  //       if (response.data === true) {
+  //         // Existing chat - redirect to chat
+  //         const chatResponse = await axios.post(`${API_BASE_URL}/chats/create`, {
+  //           senderId: currentUser.id,
+  //           receiverId: product.sellerId,
+  //           productId: product.id
+  //         });
+  //         navigate(`/chats/${chatResponse.data.id}`);
+  //       } else {
+  //         // No existing chat - navigate to chat page without a chat selected
+  //         navigate('/chats/new', {
+  //           state: { receiverId: product.sellerId, productId: product.id }
+  //         });
+  //       }
+  //     } catch (err) {
+  //       console.error('Error checking or creating chat:', err);
+  //     }
+  //   }, e);
+  // };
 
   const handleShare = (product, platform, e) => {
     e.stopPropagation();
@@ -423,13 +450,14 @@ const ProductCard = ({
               <>
                 <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
                   {products.map((product) => (
-
                     <div
                       key={product.id}
                       className="group relative overflow-hidden rounded-lg border bg-card transition-all hover:shadow-md cursor-pointer"
                       onClick={() => handleProductClick(product.id)}
                     >
-                    {console.log(`Product ${product.id}: isWishlisted = ${product.isWishlisted}`)}
+                      {console.log(
+                        `Product ${product.id}: isWishlisted = ${product.isWishlisted}`
+                      )}
 
                       {/* Mobile view: horizontal card layout */}
                       <div className="block sm:hidden">
@@ -496,15 +524,20 @@ const ProductCard = ({
                               </div>
 
                               <div className="flex items-center justify-between gap-1 pt-1 border-t">
-                                <Button
+                                {/* <Button
                                   variant="ghost"
                                   size="sm"
                                   className="text-xs px-1 py-0 h-7 text-foreground hover:bg-muted"
-                                  onClick={(e) => handleChat(product, e)}
+                                  // onClick={(e) => handleChat(product, e)}
                                 >
-                                  <MessageCircle className="mr-1 h-3 w-3 text-inherit" />
-                                  Chat
-                                </Button>
+                                  <MessageCircle className="mr-1 h-3 w-3 text-inherit" /> */}
+                                <ChatInitiator
+                                  productId={product.id}
+                                  sellerId={product.sellerId}
+                                  currentUserId={currentUser?.id}
+                                />
+                                {/* Chat
+                                </Button> */}
                                 <DropdownMenu>
                                   <DropdownMenuTrigger asChild>
                                     <Button
@@ -619,7 +652,7 @@ const ProductCard = ({
                           </div>
 
                           <div className="flex items-center justify-between gap-2 pt-2 border-t">
-                            <Button
+                            {/* <Button
                               variant="ghost"
                               size="sm"
                               className="flex-1 text-foreground hover:bg-muted"
@@ -627,7 +660,12 @@ const ProductCard = ({
                             >
                               <MessageCircle className="mr-2 h-4 w-4 text-inherit" />
                               Chat
-                            </Button>
+                            </Button> */}
+                            <ChatInitiator
+                              productId={product.id}
+                              sellerId={product.sellerId}
+                              currentUserId={currentUser?.id}
+                            />
                             <DropdownMenu>
                               <DropdownMenuTrigger asChild>
                                 <Button

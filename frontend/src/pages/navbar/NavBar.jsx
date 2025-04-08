@@ -147,6 +147,7 @@ const NavBar = ({ onSearch, onSort, onFilterChange }) => {
   const handleChat = () => {
     handleProtectedAction("", () => {
       console.log("Navigating to chat");
+      navigate("/chats");
     });
   };
 

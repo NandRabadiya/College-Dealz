@@ -10,6 +10,7 @@ import java.util.Set;
 @AllArgsConstructor
 @Builder
 public class DashboardDTO {
+    private Integer id;
     private String username;
     private String universityName;
     private String email;

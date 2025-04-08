@@ -207,6 +207,7 @@ public class UserServiceImpl implements UserService {
 
     private DashboardDTO mapToDto(User user) {
         return DashboardDTO.builder()
+                .id(user.getId())
                 .username(user.getName())
                 .universityName(user.getUniversity() != null ? user.getUniversity().getName() : "N/A")
                 .email(user.getEmail())

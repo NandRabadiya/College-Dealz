@@ -1,57 +1,169 @@
 import React, { useState, useEffect } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { TiMessages } from "react-icons/ti";
+import { useNavigate } from "react-router-dom";
+import { chatService } from "./chatservice";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { formatDistanceToNow } from "date-fns";
+import { MessageCircle, Search } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Loader2 } from 'lucide-react';
+import { useToast } from "@/hooks/use-toast";
 
-const ChatList = ({ onSelectConversation }) => {
-    // const [conversations, setConversations] = useState([]);
+const ChatList = () => {
+  const [chats, setChats] = useState([]);
+  const [filteredChats, setFilteredChats] = useState([]);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [isLoading, setIsLoading] = useState(true);
+  const navigate = useNavigate();
+  const { toast } = useToast();
 
-    // useEffect(() => {
-    //     const fetchConversations = async () => {
-    //         // Fetch conversation list from backend API
-    //         const response = await fetch("http://localhost:8080/api/conversations");
-    //         const data = await response.json();
-    //         setConversations(data);
-    //     };
-    //     fetchConversations();
-    // }, []);
+  const currentUserId = parseInt(localStorage.getItem("userId"));
 
-    // return (
-    //     <Card className="bg-[#1a1425] border-purple-600/20">
-    //         <CardHeader>
-    //             <CardTitle className="text-xl text-white flex items-center">
-    //                 <TiMessages className="mr-2 h-7 w-7 flex-shrink-0" />
-    //                 <span className="truncate">Chats</span>
-    //             </CardTitle>
-    //         </CardHeader>
-    //         <CardContent>
-    //             <div className="space-y-2">
-    //                 {conversations.length === 0 ? (
-    //                     <p className="text-gray-400 text-sm text-center py-4">No conversations yet</p>
-    //                 ) : (
-    //                     conversations.map((conv) => (
-    //                         <div
-    //                             key={conv.chatId}
-    //                             className="p-3 rounded-lg hover:bg-[#2a2435] cursor-pointer transition-colors duration-200 border border-purple-600/20"
-    //                             onClick={() => onSelectConversation(conv.chatId)}
-    //                         >
-    //                             <div className="flex items-center justify-between mb-1">
-    //                                 <h3 className="text-white font-medium">
-    //                                     {conv.participantName}
-    //                                 </h3>
-    //                                 <small className="text-gray-400 text-xs">
-    //                                     {new Date(conv.lastMessage.createdAt).toLocaleString()}
-    //                                 </small>
-    //                             </div>
-    //                             <p className="text-gray-400 text-sm line-clamp-1">
-    //                                 {conv.lastMessage.content}
-    //                             </p>
-    //                         </div>
-    //                     ))
-    //                 )}
-    //             </div>
-    //         </CardContent>
-    //     </Card>
-    // );
+  useEffect(() => {
+    const fetchChats = async () => {
+      try {
+        if (!currentUserId) {
+          navigate("/Authenticate", { state: { from: "/chats" } });
+          return;
+        }
+
+        const chatsData = await chatService.getUserChats(currentUserId);
+        setChats(chatsData);
+        setFilteredChats(chatsData);
+      } catch (error) {
+        console.error("Error fetching chats:", error);
+        toast({
+          title: "Error",
+          description: "Failed to load chats. Please try again later.",
+          variant: "destructive",
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchChats();
+  }, [currentUserId, navigate, toast]);
+
+  useEffect(() => {
+    if (searchQuery.trim() === "") {
+      setFilteredChats(chats);
+    } else {
+      const query = searchQuery.toLowerCase();
+      const filtered = chats.filter(chat => {
+        const otherUser = chat.sender.id === currentUserId ? chat.receiver : chat.sender;
+        return (
+          otherUser.name.toLowerCase().includes(query) ||
+          (chat.product && chat.product.name.toLowerCase().includes(query))
+        );
+      });
+      setFilteredChats(filtered);
+    }
+  }, [searchQuery, chats, currentUserId]);
+
+  const handleChatClick = (chatId) => {
+    navigate(`/chats/${chatId}`);
+  };
+
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center h-[calc(100vh-80px)]">
+        <Loader2 />
+      </div>
+    );
+  }
+
+  return (
+    <div className="container max-w-4xl mx-auto py-6 px-4">
+      <Card className="shadow-md border border-border/60">
+        <CardHeader className="border-b border-border/60 p-4">
+          <div className="flex flex-col space-y-3">
+            <h1 className="text-2xl font-bold">Your Chats</h1>
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+              <Input 
+                type="text"
+                placeholder="Search chats..." 
+                className="pl-10"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
+            </div>
+          </div>
+        </CardHeader>
+        
+        <CardContent className="p-0 divide-y divide-border/60">
+          {filteredChats.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-16 px-4 text-center">
+              <MessageCircle className="h-16 w-16 text-muted-foreground mb-4" />
+              <h3 className="text-lg font-medium">No chats yet</h3>
+              <p className="text-muted-foreground mt-1">
+                When you start a conversation with a seller, it will appear here.
+              </p>
+            </div>
+          ) : (
+            filteredChats.map((chat) => {
+              const otherUser = chat.sender.id === currentUserId ? chat.receiver : chat.sender;
+              const lastMessage = chat.lastMessage;
+              
+              return (
+                <div 
+                  key={chat.id} 
+                  className="py-4 px-5 hover:bg-muted/40 cursor-pointer transition-colors duration-150"
+                  onClick={() => handleChatClick(chat.id)}
+                >
+                  <div className="flex items-start space-x-4">
+                    <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+                      {otherUser.profilePicture ? (
+                        <img 
+                          src={otherUser.profilePicture} 
+                          alt={otherUser.name} 
+                          className="h-full w-full rounded-full object-cover"
+                        />
+                      ) : (
+                        <span className="text-lg font-semibold text-primary">{otherUser.name.charAt(0).toUpperCase()}</span>
+                      )}
+                    </div>
+                    
+                    <div className="flex-1 min-w-0">
+                      <div className="flex justify-between items-start">
+                        <h3 className="font-medium truncate">{otherUser.name}</h3>
+                        {lastMessage && (
+                          <span className="text-xs text-muted-foreground whitespace-nowrap">
+                            {formatDistanceToNow(new Date(lastMessage.timestamp), { addSuffix: true })}
+                          </span>
+                        )}
+                      </div>
+                      
+                      {lastMessage ? (
+                        <p className="text-sm text-muted-foreground truncate mt-1">
+                          {lastMessage.content}
+                        </p>
+                      ) : (
+                        <p className="text-sm text-muted-foreground italic mt-1">
+                          No messages yet
+                        </p>
+                      )}
+                      
+                      {chat.product && (
+                        <div className="mt-2 flex items-center">
+                          <span className="text-xs bg-muted/60 dark:bg-muted/40 px-2 py-0.5 rounded-full mr-2 max-w-[200px] truncate">
+                            About: {chat.product.name}
+                          </span>
+                          <span className="text-xs font-medium">
+                            ₹{chat.product.price}
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              );
+            })
+          )}
+        </CardContent>
+      </Card>
+    </div>
+  );
 };
 
 export default ChatList;

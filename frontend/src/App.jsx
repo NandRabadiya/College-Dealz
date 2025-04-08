@@ -17,16 +17,16 @@ import { useDispatch } from "react-redux";
 import { getUser } from "./redux/Auth/actions";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import WishList from "./pages/wishlist/WishList";
-import Messages from "./pages/chat/Messages";
 import WantlistPageTour from "./pages/wantlist/WantlistPageTour";
-import WantlistTour from "./pages/wantlist/WantlistTour";
 import Wantlist from "./pages/wantlist/Wantlist";
 import UniversitySelector from "./pages/UniversitySelector";
 import PublicProductDetails from "./pages/product/PublicProductDetails";
 import ErrorPage from "./pages/ErrorPage";
 import OAuthCallback from "./pages/authentication/OAuthCallback";
 import FeedbackWidget from "./pages/FeedbackWidget";
-
+import { useSelector } from "react-redux";
+import Chat from "./pages/chat/Chat";
+import ChatList from "./pages/chat/ChatList";
 
 // PrivateRoute component
 const PrivateRoute = ({ element, isLoggedIn, redirectTo }) => {
@@ -39,10 +39,9 @@ const AppRoutes = ({
   sortField, 
   sortDir, 
   selectedUniversity, 
-  hasSeenTour 
 }) => {
   const location = useLocation();
-  
+
   return (
     <>
     <FeedbackWidget/>      
@@ -65,7 +64,8 @@ const AppRoutes = ({
             />
           }
         />
-        <Route path="/messages" element={<Messages />} />
+         <Route path="/chats" element={<ChatList />} />
+         <Route path="/chats/:chatId" element={<Chat />} />
         {/* Login/Register Route */}
         <Route path="/oauth-callback" element={<OAuthCallback />} />
         <Route

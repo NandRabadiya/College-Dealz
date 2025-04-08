@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import ProductCard from "./product/ProductCard";
 import NavBar from "./navbar/NavBar";
-import WantlistTour from "./wantlist/WantlistTour";
 const Home = ({ searchQuery, sortField, sortDir, selectedUniversity }) => {
   console.log("Home received sort props:", { sortField, sortDir, selectedUniversity });
 
