@@ -47,8 +47,7 @@ const ProductCard = ({
   selectedUniversity,
 }) => {
   console.log("ProductCard mounted with university:", selectedUniversity);
-  const { user, isAuth } = useSelector((state) => state.auth);
-  const currentUser = user || null;
+  const currentUserId = localStorage.getItem("userId");
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -534,7 +533,7 @@ const ProductCard = ({
                                 <ChatInitiator
                                   productId={product.id}
                                   sellerId={product.sellerId}
-                                  currentUserId={currentUser?.id}
+                                  currentUserId={currentUserId}
                                 />
                                 {/* Chat
                                 </Button> */}
@@ -664,7 +663,7 @@ const ProductCard = ({
                             <ChatInitiator
                               productId={product.id}
                               sellerId={product.sellerId}
-                              currentUserId={currentUser?.id}
+                              currentUserId={currentUserId}
                             />
                             <DropdownMenu>
                               <DropdownMenuTrigger asChild>

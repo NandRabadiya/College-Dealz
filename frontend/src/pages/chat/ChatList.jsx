@@ -7,7 +7,6 @@ import { MessageCircle, Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Loader2 } from 'lucide-react';
 import { useToast } from "@/hooks/use-toast";
-import { useSelector } from "react-redux";
 
 const ChatList = () => {
   const [chats, setChats] = useState([]);
@@ -16,9 +15,8 @@ const ChatList = () => {
   const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate();
   const { toast } = useToast();
-  const{user, isAuthenticated} = useSelector((state) => state.auth);
 
-  const currentUserId = user.id;
+  const currentUserId = localStorage.getItem("userId");
 
   useEffect(() => {
     const fetchChats = async () => {
@@ -52,7 +50,7 @@ const ChatList = () => {
     } else {
       const query = searchQuery.toLowerCase();
       const filtered = chats.filter(chat => {
-        const otherUser = chat.senderId === currentUserId ? chat.receiver : chat.sender;
+        const otherUser = chat.senderId === currentUserId ? chat.senderId : chat.receiverId;
         return (
           otherUser.name.toLowerCase().includes(query) ||
           (chat.product && chat.product.name.toLowerCase().includes(query))
@@ -104,7 +102,7 @@ const ChatList = () => {
             </div>
           ) : (
             filteredChats.map((chat) => {
-              const otherUserName = chat.senderId === currentUserId ? chat.receiverName : chat.senderName;
+              const otherUserName = chat.senderId === currentUserId ? chat.senderName : chat.receiverName;
               const lastMessage = chat.lastMessage;
               
               return (

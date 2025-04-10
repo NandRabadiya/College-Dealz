@@ -117,6 +117,7 @@ export const getUser = (token) => {
       const user = response.data;
       // localStorage.setItem("userId",user.)
       dispatch({ type: GET_USER_SUCCESS, payload: user });
+      localStorage.setItem("userId", user.id);
       console.log("req User ", user);
     } catch (error) {
       const errorMessage =
@@ -147,6 +148,7 @@ export const logout = () => async (dispatch) => {
     // Clear token from local storage
     localStorage.removeItem("jwt");
     localStorage.removeItem("isAdminView");
+    localStorage.removeItem("userId");
     window.dispatchEvent(new CustomEvent(AUTH_STATE_CHANGE_EVENT));
   } catch (error) {
     console.error("Logout failed:", error);

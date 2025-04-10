@@ -22,36 +22,17 @@ export const chatService = {
     }
   },
 
-  // Check if a chat exists between users for a product
-  checkChatExists: async (senderId, receiverId, productId) => {
-    try {
-      const response = await axios.post(
-        `${API_BASE_URL}/api/chats/check`,
-        {
-          senderId,
-          receiverId,
-          productId,
-        },
-        getHeaders()
-      );
-      return response.data;
-    } catch (error) {
-      console.error("Error checking chat:", error);
-      throw error;
-    }
-  },
-
   // Create a new chat
   createChat: async (senderId, receiverId, productId) => {
     try {
       const response = await axios.post(
         `${API_BASE_URL}/api/chats/create`,
         {
-          senderId,
-          receiverId,
-          productId,
+          senderId: parseInt(senderId),
+          receiverId: parseInt(receiverId),
+          productId: parseInt(productId),
         },
-       getHeaders()
+        getHeaders()
       );
       return response.data;
     } catch (error) {
