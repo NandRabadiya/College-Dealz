@@ -1,18 +1,30 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { messageService } from "./messageService";
-import { chatService } from "./chatservice";
+import { chatService } from "./chatService";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+} from "@/components/ui/card";
 import { ArrowLeft, Send } from "lucide-react";
 import ChatMessage from "./ChatMessage";
-import { Loader2 } from 'lucide-react';
+import { Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useSelector } from "react-redux";
+import { useLocation } from "react-router-dom";
 
 const Chat = () => {
-  const { chatId } = useParams();
+  const location = useLocation();
+  const queryParams = new URLSearchParams(location.search);
+
+  const productId = queryParams.get("productId");
+  const receiverIdFromQuery = queryParams.get("receiverId"); // Assuming you're passing this too
+
+  const [chatId, setChatId] = useState(useParams().chatId || null);
   const navigate = useNavigate();
   const [chat, setChat] = useState(null);
   const [messages, setMessages] = useState([]);
@@ -28,24 +40,40 @@ const Chat = () => {
   const currentUserId = user.id;
 
   useEffect(() => {
-    const fetchChatAndMessages = async () => {
+    const initializeChat = async () => {
       try {
+        let finalChatId = chatId;
+
+        // If chatId is not present, create a new chat
+        if (!finalChatId && receiverIdFromQuery && productId) {
+          const response = await chatService.createChat({
+            senderId: currentUserId,
+            receiverId: receiverIdFromQuery,
+            productId: productId,
+          });
+          finalChatId = response.chatId;
+          setChatId(finalChatId);
+          console.log("New chat created with ID:", finalChatId);
+        }
+
+        if (!finalChatId) {
+          throw new Error("Chat ID not found");
+        }
+
         // Fetch chat details
-        const chatData = await chatService.getChatById(chatId);
+        const chatData = await chatService.getChatById(finalChatId);
         setChat(chatData);
 
         // Fetch messages
-        const messagesData = await messageService.getChatMessages(chatId);
+        const messagesData = await messageService.getChatMessages(finalChatId);
         setMessages(messagesData);
-        
-        // Check if chat has messages
-        setChatStarted(messagesData && messagesData.length > 0);
-        
+
+        setChatStarted(messagesData.length > 0);
       } catch (error) {
-        console.error("Error fetching chat data:", error);
+        console.error("Error initializing chat:", error);
         toast({
           title: "Error",
-          description: "Failed to load chat. Please try again later.",
+          description: "Unable to load chat.",
           variant: "destructive",
         });
         navigate("/chats");
@@ -54,16 +82,14 @@ const Chat = () => {
       }
     };
 
-    if (chatId) {
-      fetchChatAndMessages();
-    }
+    initializeChat();
 
     return () => {
       if (subscription.current) {
         subscription.current.unsubscribe();
       }
     };
-  }, [chatId, navigate, toast]);
+  }, [chatId, currentUserId, receiverIdFromQuery, productId, navigate, toast]);
 
   useEffect(() => {
     // Scroll to bottom when messages change
@@ -71,21 +97,40 @@ const Chat = () => {
   }, [messages]);
 
   useEffect(() => {
-    // Connect to WebSocket
-    const stompClient = messageService.connectWebSocket();
+    let stompClientInstance = null;
 
-    // Subscribe to the chat channel
-    if (chatId) {
+    const onConnected = () => {
+      if (!chatId) {
+        console.warn("chatId not available yet. Will wait...");
+        return;
+      }
+
       const onMessageReceived = (message) => {
         setMessages((prevMessages) => [...prevMessages, message]);
       };
 
-      setTimeout(() => {
-        subscription.current = messageService.subscribeToChat(chatId, onMessageReceived);
-      }, 1000); // Give the connection time to establish
-    }
+      // Subscribe to the chat topic
+      subscription.current = messageService.subscribeToChat(
+        chatId,
+        onMessageReceived
+      );
+    };
+
+    const onDisconnected = () => {
+      console.log("Disconnected from WebSocket");
+    };
+
+    // Connect WebSocket and save the instance
+    stompClientInstance = messageService.connectWebSocket(
+      onConnected,
+      onDisconnected
+    );
 
     return () => {
+      // Clean up subscription and WebSocket
+      if (subscription.current) {
+        subscription.current.unsubscribe();
+      }
       messageService.disconnect();
     };
   }, [chatId]);
@@ -93,26 +138,35 @@ const Chat = () => {
   const handleSendMessage = async (e) => {
     e.preventDefault();
 
-    if (!messageInput.trim()) return;
-    
+    const trimmedMessage = messageInput.trim();
+    if (!trimmedMessage) return;
+
     if (!chatStarted) {
       setChatStarted(true);
     }
 
-    try {
-      const receiverId = chat.sender.id === currentUserId
-        ? chat.receiver.id
-        : chat.sender.id;
+    const receiverId =
+      chat.senderId === currentUserId ? chat.receiverId : chat.senderId;
 
-      // Send message via REST API (more reliable)
+    const newMessage = {
+      sender: { id: currentUserId },
+      receiver: { id: receiverId },
+      content: trimmedMessage,
+      chatId,
+      timestamp: new Date().toISOString(),
+    };
+
+    // Optimistically update the UI
+    setMessages((prev) => [...prev, newMessage]);
+    setMessageInput("");
+
+    try {
       await messageService.sendMessage(
         currentUserId,
         receiverId,
-        messageInput,
+        trimmedMessage,
         chatId
       );
-
-      setMessageInput("");
     } catch (error) {
       console.error("Error sending message:", error);
       toast({
@@ -120,33 +174,33 @@ const Chat = () => {
         description: "Failed to send message. Please try again.",
         variant: "destructive",
       });
+      // Optionally remove the optimistic message or mark it as failed
     }
   };
 
-  const startChat = async () => {
-    if (!chatStarted) {
-      const receiverId = chat.sender.id === currentUserId
-        ? chat.receiver.id
-        : chat.sender.id;
-      
-      try {
-        await messageService.sendMessage(
-          currentUserId,
-          receiverId,
-          "Hello! I'm interested in your product.",
-          chatId
-        );
-        setChatStarted(true);
-      } catch (error) {
-        console.error("Error starting chat:", error);
-        toast({
-          title: "Error",
-          description: "Failed to start chat. Please try again.",
-          variant: "destructive",
-        });
-      }
-    }
-  };
+  // const startChat = async () => {
+  //   if (!chatStarted) {
+  //     const receiverId =
+  //       chat.senderId === currentUserId ? chat.receiverId : chat.senderId;
+
+  //     try {
+  //       await messageService.sendMessage(
+  //         currentUserId,
+  //         receiverId,
+  //         "Hello! I'm interested in your product.",
+  //         chatId
+  //       );
+  //       setChatStarted(true);
+  //     } catch (error) {
+  //       console.error("Error starting chat:", error);
+  //       toast({
+  //         title: "Error",
+  //         description: "Failed to start chat. Please try again.",
+  //         variant: "destructive",
+  //       });
+  //     }
+  //   }
+  // };
 
   if (isLoading) {
     return (
@@ -156,16 +210,17 @@ const Chat = () => {
     );
   }
 
-  const otherUser = chat?.sender.id === currentUserId ? chat.receiver : chat.sender;
+  const otherUser =
+    chat?.senderId === currentUserId ? chat.receiver : chat.sender;
 
   return (
     <div className="container max-w-4xl mx-auto py-6 px-4">
       <Card className="shadow-md border border-border/60">
         <CardHeader className="border-b border-border/60 p-4">
           <div className="flex items-center space-x-4">
-            <Button 
-              variant="ghost" 
-              size="icon" 
+            <Button
+              variant="ghost"
+              size="icon"
               onClick={() => navigate("/chats")}
               className="rounded-full h-8 w-8"
             >
@@ -186,7 +241,7 @@ const Chat = () => {
             </div>
           </div>
         </CardHeader>
-        
+
         <CardContent className="p-0">
           <div className="flex flex-col h-[60vh] overflow-hidden">
             {/* Product Preview */}
@@ -194,15 +249,17 @@ const Chat = () => {
               <div className="p-3 border-b border-border/60 bg-muted/30">
                 <div className="flex items-center space-x-3">
                   {chat.product.imageUrls && chat.product.imageUrls[0] && (
-                    <img 
-                      src={chat.product.imageUrls[0]} 
-                      alt={chat.product.name} 
+                    <img
+                      src={chat.product.imageUrls[0]}
+                      alt={chat.product.name}
                       className="w-12 h-12 object-cover rounded-md"
                     />
                   )}
                   <div className="flex-1">
                     <h3 className="text-sm font-medium">{chat.product.name}</h3>
-                    <p className="text-sm text-muted-foreground">₹{chat.product.price}</p>
+                    <p className="text-sm text-muted-foreground">
+                      ₹{chat.product.price}
+                    </p>
                   </div>
                 </div>
               </div>
@@ -210,29 +267,19 @@ const Chat = () => {
 
             {/* Messages */}
             <div className="flex-1 overflow-y-auto p-4 space-y-2">
-              {messages.length === 0 ? (
-                <div className="h-full flex flex-col items-center justify-center text-center p-4">
-                  <p className="text-muted-foreground mb-4">No messages yet.</p>
-                  {!chatStarted && (
-                    <Button onClick={startChat}>
-                      Start Chat
-                    </Button>
-                  )}
-                </div>
-              ) : (
-                messages.map((message) => (
-                  <ChatMessage
-                    key={message.id}
-                    message={message}
-                    isCurrentUser={message.sender.id === currentUserId}
-                  />
-                ))
-              )}
+              {messages.map((message) => (
+                <ChatMessage
+                  key={message.id}
+                  message={message}
+                  isCurrentUser={message.sender.id === currentUserId}
+                />
+              ))}
+
               <div ref={messagesEndRef} />
             </div>
           </div>
         </CardContent>
-        
+
         {chatStarted && (
           <CardFooter className="border-t border-border/60 p-3">
             <form onSubmit={handleSendMessage} className="flex w-full gap-2">

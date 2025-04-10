@@ -1,8 +1,7 @@
-
 import axios from "axios";
 import { API_BASE_URL } from "../Api/api";
 import SockJS from "sockjs-client";
-import { Stomp } from "@stomp/stompjs";
+import { Client } from "@stomp/stompjs";
 
 let stompClient = null;
 
@@ -13,7 +12,7 @@ const getHeaders = () => ({
 });
 
 export const messageService = {
-  // Get messages from a specific chat
+  // Fetch messages for a given chat
   getChatMessages: async (chatId) => {
     try {
       const response = await axios.get(
@@ -27,7 +26,7 @@ export const messageService = {
     }
   },
 
-  // Send a message via REST API
+  // Send a message using REST fallback
   sendMessage: async (senderId, receiverId, content, chatId) => {
     try {
       const response = await axios.post(
@@ -47,39 +46,45 @@ export const messageService = {
     }
   },
 
-  // Connect to WebSocket for real-time messaging
-  connectWebSocket: (onMessageReceived) => {
+  // Connect and initialize STOMP WebSocket
+  connectWebSocket: (onConnected, onDisconnected) => {
     const socket = new SockJS(`${API_BASE_URL}/ws`);
-    stompClient = Stomp.over(socket);
-
-    stompClient.connect({}, () => {
-      console.log("WebSocket connected");
-    }, (error) => {
-      console.error("WebSocket connection error:", error);
+    stompClient = new Client({
+      webSocketFactory: () => socket,
+      reconnectDelay: 5000,
+      onConnect: () => {
+        console.log("WebSocket connected");
+        if (onConnected) onConnected();
+      },
+      onDisconnect: () => {
+        console.log("WebSocket disconnected");
+        if (onDisconnected) onDisconnected();
+      },
+      onStompError: (frame) => {
+        console.error("STOMP error:", frame);
+      },
     });
 
-    return stompClient;
+    stompClient.activate();
   },
 
-  // Subscribe to a specific chat channel
+  // Subscribe to a specific chat topic
   subscribeToChat: (chatId, onMessageReceived) => {
     if (!stompClient || !stompClient.connected) {
-      console.error("STOMP client not connected");
+      console.warn("Waiting for STOMP to connect before subscribing...");
       return null;
     }
 
-    const subscription = stompClient.subscribe(`/topic/chat/${chatId}`, (message) => {
+    return stompClient.subscribe(`/topic/chat/${chatId}`, (message) => {
       const receivedMessage = JSON.parse(message.body);
       onMessageReceived(receivedMessage);
     });
-
-    return subscription;
   },
 
-  // Send a message via WebSocket
+  // Send a message through WebSocket
   sendMessageViaWebSocket: (chatId, senderId, receiverId, content) => {
     if (!stompClient || !stompClient.connected) {
-      console.error("STOMP client not connected");
+      console.warn("WebSocket not connected. Try reconnecting.");
       return;
     }
 
@@ -89,13 +94,17 @@ export const messageService = {
       content,
     };
 
-    stompClient.send(`/app/chat.sendMessage/${chatId}`, {}, JSON.stringify(message));
+    stompClient.publish({
+      destination: `/app/chat.sendMessage/${chatId}`,
+      body: JSON.stringify(message),
+    });
   },
 
   // Disconnect WebSocket
   disconnect: () => {
-    if (stompClient) {
-      stompClient.disconnect();
+    if (stompClient && stompClient.active) {
+      stompClient.deactivate();
+      console.log("WebSocket deactivated");
     }
   },
 };

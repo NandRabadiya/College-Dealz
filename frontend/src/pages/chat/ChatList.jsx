@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { chatService } from "./chatservice";
+import { chatService } from "./chatService";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { formatDistanceToNow } from "date-fns";
 import { MessageCircle, Search } from "lucide-react";
@@ -15,8 +15,9 @@ const ChatList = () => {
   const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate();
   const { toast } = useToast();
+  const{user, isAuthenticated} = useSelector((state) => state.auth);
 
-  const currentUserId = parseInt(localStorage.getItem("userId"));
+  const currentUserId = user.id;
 
   useEffect(() => {
     const fetchChats = async () => {
@@ -50,7 +51,7 @@ const ChatList = () => {
     } else {
       const query = searchQuery.toLowerCase();
       const filtered = chats.filter(chat => {
-        const otherUser = chat.sender.id === currentUserId ? chat.receiver : chat.sender;
+        const otherUser = chat.senderId === currentUserId ? chat.receiver : chat.sender;
         return (
           otherUser.name.toLowerCase().includes(query) ||
           (chat.product && chat.product.name.toLowerCase().includes(query))
@@ -102,7 +103,7 @@ const ChatList = () => {
             </div>
           ) : (
             filteredChats.map((chat) => {
-              const otherUser = chat.sender.id === currentUserId ? chat.receiver : chat.sender;
+              const otherUser = chat.senderId === currentUserId ? chat.receiver : chat.sender;
               const lastMessage = chat.lastMessage;
               
               return (

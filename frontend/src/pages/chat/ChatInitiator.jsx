@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { MessageCircle } from "lucide-react";
-import { chatService } from "./chatservice";
+import { chatService } from "./chatService";
 import { useToast } from "@/hooks/use-toast";
 
 const ChatInitiator = ({ productId, sellerId, currentUserId }) => {
@@ -34,36 +34,38 @@ const ChatInitiator = ({ productId, sellerId, currentUserId }) => {
     }
 
     setIsLoading(true);
-    try {
-      // Check if a chat already exists
-      const chatExists = await chatService.checkChatExists(
-        currentUserId,
-        sellerId,
-        productId
-      );
+    // try {
+    //   // Check if a chat already exists
+    //   const chatExists = await chatService.checkChatExists(
+    //     currentUserId,
+    //     sellerId,
+    //     productId
+    //   );
 
-      if (chatExists) {
-        // Get the existing chat
-        const chats = await chatService.getUserChats(currentUserId);
-        const existingChat = chats.find(
-          (chat) => 
-            (chat.product.id === productId) && 
-            ((chat.sender.id === currentUserId && chat.receiver.id === sellerId) || 
-             (chat.sender.id === sellerId && chat.receiver.id === currentUserId))
-        );
+    //   if (chatExists) {
+    //     // Get the existing chat
+    //     const chats = await chatService.getUserChats(currentUserId);
+    //     const existingChat = chats.find(
+    //       (chat) => 
+    //         (chat.productId === productId) && 
+    //         ((chat.senderId === currentUserId && chat.receiverId === sellerId) || 
+    //          (chat.senderId === sellerId && chat.receiverId === currentUserId))
+    //     );
 
-        if (existingChat) {
-          navigate(`/chats/${existingChat.id}`);
-        } else {
-          // Create a new chat if somehow it exists but we can't find it
-          const newChat = await chatService.createChat(currentUserId, sellerId, productId);
-          navigate(`/chats/${newChat.id}`);
-        }
-      } else {
-        // Create a new chat
-        const newChat = await chatService.createChat(currentUserId, sellerId, productId);
-        navigate(`/chats/${newChat.id}`);
-      }
+    //     if (existingChat) {
+    //       navigate(`/chats/${existingChat.chatId}`);
+    //     } else {
+    //       // Create a new chat if somehow it exists but we can't find it
+    //       const newChat = await chatService.createChat(currentUserId, sellerId, productId);
+    //       navigate(`/chats/${newChat.chatId}`);
+    //     }
+    //   } else {
+    //     // Create a new chat
+    //   }
+      
+    try{
+      const chat = await chatService.createChat(currentUserId, sellerId, productId);
+      navigate(`/chats/${chat.chatId}`);
     } catch (error) {
       console.error("Error initiating chat:", error);
       toast({
