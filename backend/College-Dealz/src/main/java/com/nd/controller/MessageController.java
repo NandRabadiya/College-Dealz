@@ -88,8 +88,8 @@ public class MessageController {
 
     // REST endpoint to get messages from a chat
     @GetMapping("/chats/{chatId}/messages")
-    public ResponseEntity<List<Message>> getChatMessages(@PathVariable int chatId) {
-        List<Message> messages = messageService.getMessagesByChatId(chatId);
+    public ResponseEntity<List<MessageDTO>> getChatMessages(@PathVariable int chatId) {
+        List<MessageDTO> messages = messageService.getMessagesByChatId(chatId);
         return ResponseEntity.ok(messages);
     }
 

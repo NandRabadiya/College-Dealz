@@ -106,15 +106,19 @@ public class ChatServiceImpl implements ChatService {
                         chat.getId(),
                         message.getSender().getId(),
                         message.getContent(),
-                        message.getCreatedAt()
+                        message.getCreatedAt(),
+                        message.getCreatedTime()
                 ))
                 .collect(Collectors.toList());
 
         return new ChatDTO(
                 chat.getId(),
                 chat.getSender().getId(),
+                chat.getSender().getName(),
                 chat.getReceiver().getId(),
+                chat.getReceiver().getName(),
                 chat.getProduct().getId(),
+                chat.getProduct().getName(),
                 messages
         );
     }

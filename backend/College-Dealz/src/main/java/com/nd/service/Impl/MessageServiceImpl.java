@@ -1,8 +1,11 @@
 package com.nd.service.Impl;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import com.nd.dto.MessageDTO;
 import com.nd.entities.Chat;
@@ -46,7 +49,8 @@ public class MessageServiceImpl implements MessageService {
         Message message = new Message();
         message.setContent(content);
         message.setSender(sender);
-        message.setCreatedAt(LocalDateTime.now());
+        message.setCreatedAt(LocalDate.now());
+        message.setCreatedTime(LocalTime.now());
        // message.setChat(chat);
         Message savedMessage=messageRepository.save(message);
 
@@ -61,8 +65,10 @@ public class MessageServiceImpl implements MessageService {
         return findByChatIdOrderByCreatedAtAsc;
     }
 
-    public List<Message> getMessagesByChatId(int chatId) {
-        return messageRepository.findByChatIdOrderByCreatedAtAsc(chatId);
+    public List<MessageDTO> getMessagesByChatId(int chatId) {
+
+        return messageRepository.findByChatIdOrderByCreatedAtAsc(chatId).stream()
+                .map(this::mapToDto).toList();
     }
 
     public Message saveMessage(Message message) {
@@ -108,7 +114,8 @@ public class MessageServiceImpl implements MessageService {
                 message.getReceiver().getId(),
                 message.getChat().getId(),
                 message.getContent(),
-                message.getCreatedAt()
+                message.getCreatedAt(),
+                message.getCreatedTime()
         );
     }
 }

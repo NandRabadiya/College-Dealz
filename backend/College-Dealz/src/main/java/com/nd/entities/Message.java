@@ -5,7 +5,9 @@ import jakarta.persistence.*;
 import lombok.Data;
 import org.hibernate.annotations.CreationTimestamp;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 
 @Data
 @Entity
@@ -33,5 +35,11 @@ public class Message {
     private String content; // Text message content
 
     @CreationTimestamp
-    private LocalDateTime createdAt; // Auto-set timestamp
+    @Column(name = "created_at", columnDefinition = "DATE") // only date (yyyy-MM-dd)
+    private LocalDate createdAt;
+
+    @CreationTimestamp
+    @Column(name = "created_time", columnDefinition = "TIME") // only time (HH:mm:ss)
+    private LocalTime createdTime;
+
 }
