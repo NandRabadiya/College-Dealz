@@ -43,7 +43,7 @@ const Chat = () => {
     const initializeChat = async () => {
       try {
         let finalChatId = chatId;
-
+  
         // If chatId is not present, create a new chat
         if (!finalChatId && receiverIdFromQuery && productId) {
           const response = await chatService.createChat({
@@ -55,20 +55,17 @@ const Chat = () => {
           setChatId(finalChatId);
           console.log("New chat created with ID:", finalChatId);
         }
-
+  
         if (!finalChatId) {
           throw new Error("Chat ID not found");
         }
-
-        // Fetch chat details
+  
+        // Fetch chat details (including messages)
         const chatData = await chatService.getChatById(finalChatId);
         setChat(chatData);
-
-        // Fetch messages
-        const messagesData = await messageService.getChatMessages(finalChatId);
-        setMessages(messagesData);
-
-        setChatStarted(messagesData.length > 0);
+  
+        setMessages(chatData.messages || []);
+        setChatStarted((chatData.messages || []).length > 0);
       } catch (error) {
         console.error("Error initializing chat:", error);
         toast({
@@ -81,16 +78,16 @@ const Chat = () => {
         setIsLoading(false);
       }
     };
-
+  
     initializeChat();
-
+  
     return () => {
       if (subscription.current) {
         subscription.current.unsubscribe();
       }
     };
   }, [chatId, currentUserId, receiverIdFromQuery, productId, navigate, toast]);
-
+  
   useEffect(() => {
     // Scroll to bottom when messages change
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -210,8 +207,8 @@ const Chat = () => {
     );
   }
 
-  const otherUser =
-    chat?.senderId === currentUserId ? chat.receiver : chat.sender;
+  const otherUserName =
+    chat?.senderId === currentUserId ? chat.receiverName : chat.senderName;
 
   return (
     <div className="container max-w-4xl mx-auto py-6 px-4">
@@ -227,16 +224,18 @@ const Chat = () => {
               <ArrowLeft size={18} />
             </Button>
             <div className="flex flex-col">
-              <h2 className="text-lg font-semibold">{otherUser?.name}</h2>
+              <h2 className="text-lg font-semibold">{otherUserName}</h2>
               <div className="flex items-center space-x-2">
                 <span className="text-xs text-muted-foreground">
-                  {chat?.product?.name ? `About: ${chat.product.name}` : ""}
+                  {chat?.productId?.productName
+                    ? `About: ${chat.productName}`
+                    : ""}
                 </span>
-                {chat?.product?.price && (
+                {/* {chat?.product?.price && (
                   <span className="text-xs bg-muted dark:bg-muted/40 px-1.5 py-0.5 rounded">
                     ₹{chat.product.price}
                   </span>
-                )}
+                )} */}
               </div>
             </div>
           </div>
@@ -245,7 +244,7 @@ const Chat = () => {
         <CardContent className="p-0">
           <div className="flex flex-col h-[60vh] overflow-hidden">
             {/* Product Preview */}
-            {chat?.product && (
+            {/* {chat?.product && (
               <div className="p-3 border-b border-border/60 bg-muted/30">
                 <div className="flex items-center space-x-3">
                   {chat.product.imageUrls && chat.product.imageUrls[0] && (
@@ -258,12 +257,12 @@ const Chat = () => {
                   <div className="flex-1">
                     <h3 className="text-sm font-medium">{chat.product.name}</h3>
                     <p className="text-sm text-muted-foreground">
-                      ₹{chat.product.price}
+                      ₹{chat.product}
                     </p>
                   </div>
                 </div>
               </div>
-            )}
+            )} */}
 
             {/* Messages */}
             <div className="flex-1 overflow-y-auto p-4 space-y-2">
@@ -271,7 +270,7 @@ const Chat = () => {
                 <ChatMessage
                   key={message.id}
                   message={message}
-                  isCurrentUser={message.sender.id === currentUserId}
+                  isCurrentUser={message.senderId === currentUserId}
                 />
               ))}
 

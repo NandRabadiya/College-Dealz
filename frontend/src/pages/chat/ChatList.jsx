@@ -7,6 +7,7 @@ import { MessageCircle, Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Loader2 } from 'lucide-react';
 import { useToast } from "@/hooks/use-toast";
+import { useSelector } from "react-redux";
 
 const ChatList = () => {
   const [chats, setChats] = useState([]);
@@ -103,31 +104,23 @@ const ChatList = () => {
             </div>
           ) : (
             filteredChats.map((chat) => {
-              const otherUser = chat.senderId === currentUserId ? chat.receiver : chat.sender;
+              const otherUserName = chat.senderId === currentUserId ? chat.receiverName : chat.senderName;
               const lastMessage = chat.lastMessage;
               
               return (
                 <div 
-                  key={chat.id} 
+                  key={chat.chatId} 
                   className="py-4 px-5 hover:bg-muted/40 cursor-pointer transition-colors duration-150"
-                  onClick={() => handleChatClick(chat.id)}
+                  onClick={() => handleChatClick(chat.chatId)}
                 >
                   <div className="flex items-start space-x-4">
                     <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
-                      {otherUser.profilePicture ? (
-                        <img 
-                          src={otherUser.profilePicture} 
-                          alt={otherUser.name} 
-                          className="h-full w-full rounded-full object-cover"
-                        />
-                      ) : (
-                        <span className="text-lg font-semibold text-primary">{otherUser.name.charAt(0).toUpperCase()}</span>
-                      )}
+                        <span className="text-lg font-semibold text-primary">{otherUserName.charAt(0).toUpperCase()}</span>
                     </div>
                     
                     <div className="flex-1 min-w-0">
                       <div className="flex justify-between items-start">
-                        <h3 className="font-medium truncate">{otherUser.name}</h3>
+                        <h3 className="font-medium truncate">{otherUserName}</h3>
                         {lastMessage && (
                           <span className="text-xs text-muted-foreground whitespace-nowrap">
                             {formatDistanceToNow(new Date(lastMessage.timestamp), { addSuffix: true })}
@@ -135,7 +128,17 @@ const ChatList = () => {
                         )}
                       </div>
                       
-                      {lastMessage ? (
+                     
+                      
+                      {chat.productId && (
+                        <div className="mt-2 flex items-center">
+                          <span className="text-xs bg-muted/60 dark:bg-muted/40 px-2 py-0.5 rounded-full mr-2 max-w-[200px] truncate">
+                            About: {chat.productName}
+                          </span>
+                         
+                        </div>
+                      )}
+                       {lastMessage ? (
                         <p className="text-sm text-muted-foreground truncate mt-1">
                           {lastMessage.content}
                         </p>
@@ -143,17 +146,6 @@ const ChatList = () => {
                         <p className="text-sm text-muted-foreground italic mt-1">
                           No messages yet
                         </p>
-                      )}
-                      
-                      {chat.product && (
-                        <div className="mt-2 flex items-center">
-                          <span className="text-xs bg-muted/60 dark:bg-muted/40 px-2 py-0.5 rounded-full mr-2 max-w-[200px] truncate">
-                            About: {chat.product.name}
-                          </span>
-                          <span className="text-xs font-medium">
-                            ₹{chat.product.price}
-                          </span>
-                        </div>
                       )}
                     </div>
                   </div>

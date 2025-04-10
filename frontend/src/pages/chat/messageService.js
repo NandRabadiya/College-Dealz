@@ -13,18 +13,18 @@ const getHeaders = () => ({
 
 export const messageService = {
   // Fetch messages for a given chat
-  getChatMessages: async (chatId) => {
-    try {
-      const response = await axios.get(
-        `${API_BASE_URL}/api/messages/chats/${chatId}/messages`,
-        getHeaders()
-      );
-      return response.data;
-    } catch (error) {
-      console.error("Error fetching chat messages:", error);
-      throw error;
-    }
-  },
+  // getChatMessages: async (chatId) => {
+  //   try {
+  //     const response = await axios.get(
+  //       `${API_BASE_URL}/api/messages/chats/${chatId}/messages`,
+  //       getHeaders()
+  //     );
+  //     return response.data;
+  //   } catch (error) {
+  //     console.error("Error fetching chat messages:", error);
+  //     throw error;
+  //   }
+  // },
 
   // Send a message using REST fallback
   sendMessage: async (senderId, receiverId, content, chatId) => {

@@ -19,13 +19,18 @@ const ChatMessage = ({ message, isCurrentUser }) => {
         )}
       >
         <p className="text-sm">{message.content}</p>
-        <p className={cn(
-          "text-xs mt-1",
-          isCurrentUser
-            ? "text-primary-foreground/70"
-            : "text-muted-foreground"
-        )}>
-          {formatDistanceToNow(new Date(message.timestamp), { addSuffix: true })}
+        <p
+          className={cn(
+            "text-xs mt-1",
+            isCurrentUser
+              ? "text-primary-foreground/70"
+              : "text-muted-foreground"
+          )}
+        >
+          {formatDistanceToNow(
+            new Date(`${message.createdAt}T${message.createdTime}`),
+            { addSuffix: true }
+          )}
         </p>
       </div>
     </div>
