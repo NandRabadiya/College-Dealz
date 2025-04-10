@@ -101,10 +101,10 @@ public class MessageController {
         int chatId = messageDTO.getChatId();
         String content = messageDTO.getContent();
 
-        MessageDTO message = messageService.createMessage(senderId, receiverId, content, chatId);
+        MessageDTO messageDTO1 = messageService.createMessage(senderId, receiverId, content, chatId);
 
         // Notify subscribers
-        messagingTemplate.convertAndSend("/topic/chat/" + chatId, message);
+        messagingTemplate.convertAndSend("/topic/chat/" + chatId, messageDTO1);
 
         return ResponseEntity.ok().build();
     }

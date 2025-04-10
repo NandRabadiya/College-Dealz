@@ -102,9 +102,9 @@ public class ChatServiceImpl implements ChatService {
         List<MessageDTO> messages = chat.getMessages()
                 .stream()
                 .map(message -> new MessageDTO(
-                        message.getId(),
-                        chat.getId(),
                         message.getSender().getId(),
+                        message.getReceiver().getId(),
+                        chat.getId(),
                         message.getContent(),
                         message.getCreatedAt(),
                         message.getCreatedTime()
