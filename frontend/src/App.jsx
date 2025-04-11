@@ -27,6 +27,7 @@ import FeedbackWidget from "./pages/FeedbackWidget";
 import { useSelector } from "react-redux";
 import Chat from "./pages/chat/Chat";
 import ChatList from "./pages/chat/ChatList";
+import ChatContainer from "./pages/chat/ChatContainer";
 
 // PrivateRoute component
 const PrivateRoute = ({ element, isLoggedIn, redirectTo }) => {
@@ -64,8 +65,10 @@ const AppRoutes = ({
             />
           }
         />
-         <Route path="/chats" element={<ChatList />} />
-         <Route path="/chats/:chatId" element={<Chat />} />
+         <Route path="/chats" element={<ChatContainer />} />
+         <Route path="/chats/:chatId" element={<ChatContainer />} />
+         {/* <Route path="/chats" element={<ChatList />} />
+         <Route path="/chats/:chatId" element={<Chat />} /> */}
         {/* Login/Register Route */}
         <Route path="/oauth-callback" element={<OAuthCallback />} />
         <Route
@@ -167,6 +170,7 @@ function App() {
   return (
     <Router>
       <NavBar onSearch={handleSearch} onSort={handleSort} />
+
       <UniversitySelector
         isOpen={showUniversitySelector}
         onOpenChange={setShowUniversitySelector}
@@ -179,6 +183,7 @@ function App() {
         selectedUniversity={selectedUniversity}
         hasSeenTour={hasSeenTour}
       />
+    
     </Router>
   );
 }

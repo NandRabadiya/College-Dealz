@@ -4,23 +4,17 @@ import { messageService } from "./messageService";
 import { chatService } from "./chatService";
 import { Button } from "@/components/ui/button"; 
 import { Input } from "@/components/ui/input";
-import {
-  Card,
-  CardContent,
-  CardFooter,
-  CardHeader,
-} from "@/components/ui/card";
 import { ArrowLeft, Send, Loader2, WifiOff } from "lucide-react";
 import ChatMessage from "./ChatMessage";
 import { useToast } from "@/hooks/use-toast";
 import { format, isSameDay, isYesterday, parseISO, isToday } from "date-fns";
 
-const Chat = () => {
+const Chat = ({ chatId: propChatId, onBackClick }) => {
   const location = useLocation();
   const queryParams = new URLSearchParams(location.search);
   const productId = queryParams.get("productId");
   const receiverIdFromQuery = queryParams.get("receiverId");
-  const [chatId, setChatId] = useState(useParams().chatId || null);
+  const [chatId, setChatId] = useState(propChatId || useParams().chatId || null);
   const navigate = useNavigate();
   const [chat, setChat] = useState(null);
   const [messages, setMessages] = useState([]);
@@ -33,8 +27,16 @@ const Chat = () => {
   const messagesEndRef = useRef(null);
   const stompSubscription = useRef(null);
   const reconnectTimerRef = useRef(null);
+  const currentChatIdRef = useRef(chatId);
+  const messagesContainerRef = useRef(null);
   const { toast } = useToast();
   const currentUserId = localStorage.getItem("userId");
+  const websocketConnectionRef = useRef(false);
+
+  // Update the currentChatIdRef when chatId changes
+  useEffect(() => {
+    currentChatIdRef.current = chatId;
+  }, [chatId]);
 
   const groupMessagesByDate = (messages) => {
     if (!messages || messages.length === 0) return [];
@@ -89,248 +91,389 @@ const Chat = () => {
     return format(date, "dd MMMM yyyy");
   };
 
-const connectWebSocket = useCallback(() => {
-  if (!chatId) return;
-  
-  // Define message handler within the proper scope
-  const onMessageReceived = (receivedMessage) => {
-    console.log("Message received:", receivedMessage);
-    setMessages(prevMessages => {
-      // Check if message already exists to prevent duplicates
-      const messageExists = prevMessages.some(msg => 
-        msg.id === receivedMessage.id || 
-        (msg.content === receivedMessage.content && 
-         msg.senderId === receivedMessage.senderId &&
-         Math.abs(new Date(msg.timestamp || Date.now()) - new Date(receivedMessage.timestamp || Date.now())) < 5000)
-      );
-      
-      if (messageExists) return prevMessages;
-      return [...prevMessages, receivedMessage];
-    });
-  };
-  
-  const onConnected = () => {
-    console.log("Connected to WebSocket and STOMP client is ready");
-    setIsWebsocketConnected(true);
-    setUsingRESTFallback(false);
+  const connectWebSocket = useCallback((newChatId) => {
+    if (!newChatId) {
+      console.warn("Cannot connect WebSocket: No chat ID provided");
+      return;
+    }
     
-    // Add a small delay to ensure STOMP client is fully established
-    setTimeout(() => {
-      // Unsubscribe first if already subscribed
+    console.log(`Initializing WebSocket connection for chat ${newChatId}`);
+    websocketConnectionRef.current = true;
+  
+    const onMessageReceived = (receivedMessage) => {
+      console.log(`Message received for chat ${newChatId}:`, receivedMessage);
+      
+      // Only process messages for the currently active chat
+      if (newChatId !== currentChatIdRef.current) {
+        console.log(`Ignoring message for inactive chat: ${newChatId} vs current ${currentChatIdRef.current}`);
+        return;
+      }
+      
+      if (receivedMessage.chatId && receivedMessage.chatId.toString() !== newChatId.toString()) {
+        console.warn(`Received message for different chat ID: ${receivedMessage.chatId} vs ${newChatId}`);
+        return;
+      }
+      
+      setMessages(prevMessages => {
+        // Check if this message already exists
+        const messageExists = prevMessages.some(msg => 
+          msg.id === receivedMessage.id || 
+          (msg.content === receivedMessage.content && 
+           msg.senderId === receivedMessage.senderId &&
+           Math.abs(new Date(msg.timestamp || Date.now()) - new Date(receivedMessage.timestamp || Date.now())) < 5000)
+        );
+        
+        if (messageExists) {
+          console.log("Duplicate message detected, ignoring");
+          return prevMessages;
+        }
+        
+        console.log("Adding new message to state");
+        return [...prevMessages, receivedMessage];
+      });
+    };
+  
+    const onConnected = () => {
+      console.log(`WebSocket connected successfully for chat ${newChatId}`);
+      
+      // Only update connection status if this is still the active chat
+      if (newChatId === currentChatIdRef.current) {
+        setIsWebsocketConnected(true);
+        setUsingRESTFallback(false);
+      } else {
+        console.log(`Connected to inactive chat ${newChatId}, current is ${currentChatIdRef.current}`);
+      }
+      
+      // Clean up any existing subscription
+      if (stompSubscription.current) {
+        try {
+          console.log("Cleaning up existing subscription before creating new one");
+          stompSubscription.current.unsubscribe();
+          stompSubscription.current = null;
+        } catch (e) {
+          console.error("Error unsubscribing from existing topic:", e);
+        }
+      }
+
+      // Add a small delay to ensure WebSocket is ready
+      setTimeout(() => {
+        if (websocketConnectionRef.current && newChatId === currentChatIdRef.current) {
+          console.log(`Now subscribing to topic for chat ${newChatId}`);
+          stompSubscription.current = messageService.subscribeToChat(
+            newChatId,
+            onMessageReceived
+          );
+        } else {
+          console.warn(`WebSocket connection was cancelled or chat changed before subscription. 
+                       Was connecting to: ${newChatId}, Current: ${currentChatIdRef.current}`);
+        }
+      }, 500);
+    };
+  
+    const onDisconnected = (error) => {
+      console.log(`WebSocket disconnected for chat ${newChatId}:`, error);
+      
+      // Only update UI state if this is still the active chat
+      if (newChatId === currentChatIdRef.current) {
+        setIsWebsocketConnected(false);
+        setUsingRESTFallback(true);
+      }
+  
       if (stompSubscription.current) {
         try {
           stompSubscription.current.unsubscribe();
+          stompSubscription.current = null;
         } catch (e) {
-          console.error("Error unsubscribing:", e);
+          console.error("Error unsubscribing on disconnect:", e);
+        }
+      }
+    };
+  
+    messageService.connectWebSocket(onConnected, onDisconnected);
+  }, []);
+
+  // Effect for handling WebSocket when chatId changes
+  useEffect(() => {
+    if (!chatId) {
+      console.log("No chat ID available, skipping WebSocket setup");
+      return;
+    }
+  
+    console.log(`Chat ID changed to ${chatId}, setting up WebSocket`);
+    
+    // Reset connection flag
+    websocketConnectionRef.current = false;
+    
+    // Clean up any existing connection
+    if (stompSubscription.current) {
+      try {
+        console.log("Unsubscribing from previous chat topic");
+        stompSubscription.current.unsubscribe();
+        stompSubscription.current = null;
+      } catch (e) {
+        console.error("Error unsubscribing from previous chat:", e);
+      }
+    }
+    
+    messageService.disconnect();
+    
+    // Reset connection status immediately for better UX
+    setIsWebsocketConnected(false);
+    
+    // Add a short delay before reconnecting
+    const setupTimeout = setTimeout(() => {
+      // Verify this is still the current chat before connecting
+      if (chatId === currentChatIdRef.current) {
+        console.log(`Setting up new WebSocket connection for chat ${chatId}`);
+        connectWebSocket(chatId);
+      } else {
+        console.log(`Skipping WebSocket setup for old chat ${chatId}, current is ${currentChatIdRef.current}`);
+      }
+    }, 500);
+    
+    return () => {
+      console.log(`Cleaning up WebSocket for chat ${chatId}`);
+      websocketConnectionRef.current = false;
+      clearTimeout(setupTimeout);
+      
+      if (stompSubscription.current) {
+        try {
+          stompSubscription.current.unsubscribe();
+          stompSubscription.current = null;
+        } catch (e) {
+          console.error("Error unsubscribing on cleanup:", e);
         }
       }
       
-      // Now subscribe with the properly defined message handler
-      stompSubscription.current = messageService.subscribeToChat(
-        chatId,
-        onMessageReceived  // This was missing in your code
-      );
-    }, 500);
-  };
+      messageService.disconnect();
+    };
+  }, [chatId, connectWebSocket]);
   
-  const onDisconnected = (error) => {
-    console.log("Disconnected from WebSocket:", error);
-    setIsWebsocketConnected(false);
-    setUsingRESTFallback(true);
-    
-    // Clear any existing subscription
-    if (stompSubscription.current) {
-      try {
-        stompSubscription.current.unsubscribe();
-      } catch(e) {
-        console.error("Error unsubscribing:", e);
-      }
-    }
-  };
-  
-  messageService.connectWebSocket(onConnected, onDisconnected);
-}, [chatId]);
-  // Initialize chat data
+  // Main effect for initializing chat data
   useEffect(() => {
+    // Update chatId if it changes from props
+    if (propChatId && propChatId !== chatId) {
+      console.log(`Updating chatId from props: ${propChatId}`);
+      setChatId(propChatId);
+      return; // Let the next effect call handle loading the new chat
+    }
+    
     const initializeChat = async () => {
-      try {
+      // Clear previous chat data immediately to prevent flicker
+      if (chatId) {
         setIsLoading(true);
+        setMessages([]);  // Clear messages immediately when loading a new chat
+        setChat(null);    // Clear chat data
+      }
+      
+      try {
         let finalChatId = chatId;
-
-        // Create a new chat if needed
+  
         if (!finalChatId && receiverIdFromQuery && productId) {
-          console.log("Creating new chat...");
+          console.log("Creating new chat with receiverId:", receiverIdFromQuery, "and productId:", productId);
           const response = await chatService.createChat(
             currentUserId, 
             receiverIdFromQuery, 
             productId
           );
           finalChatId = response.chatId || response.id;
+          console.log("New chat created with ID:", finalChatId);
           setChatId(finalChatId);
-          // Update URL without reloading the page
           navigate(`/chats/${finalChatId}`, { replace: true });
+          return; // Let the effect triggered by setChatId handle loading
         }
-
+  
         if (!finalChatId) {
           throw new Error("Chat ID not found");
         }
-
-        // Get chat data
+        
+        // Verify this is still the current chat before loading data
+        if (finalChatId !== currentChatIdRef.current) {
+          console.log(`Aborting load for old chat ${finalChatId}, current is ${currentChatIdRef.current}`);
+          return;
+        }
+  
+        console.log(`Fetching chat data for ID: ${finalChatId}`);
         const chatData = await chatService.getChatById(finalChatId);
+        
+        // Final check to make sure we're still working with the current chat
+        if (finalChatId !== currentChatIdRef.current) {
+          console.log(`Discarding data for old chat ${finalChatId}, current is ${currentChatIdRef.current}`);
+          return;
+        }
+        
         setChat(chatData);
-        
-        // Ensure messages is an array
+  
         const chatMessages = Array.isArray(chatData.messages) ? chatData.messages : [];
+        console.log(`Loaded ${chatMessages.length} messages for chat ${finalChatId}`);
         setMessages(chatMessages);
-        
         setChatStarted(chatMessages.length > 0);
-        
-        // Attempt WebSocket connection
-        connectWebSocket();
+  
       } catch (error) {
         console.error("Error initializing chat:", error);
-        toast({
-          title: "Error",
-          description: "Unable to load chat. Please try again.",
-          variant: "destructive",
-        });
-        navigate("/chats");
+        
+        // Only show error if this is still the current chat
+        if (chatId === currentChatIdRef.current) {
+          toast({
+            title: "Error",
+            description: "Unable to load chat. Please try again.",
+            variant: "destructive",
+          });
+          if (!onBackClick) navigate("/chats");
+        }
       } finally {
-        setIsLoading(false);
+        // Only update loading state if this is still the current chat
+        if (chatId === currentChatIdRef.current) {
+          setIsLoading(false);
+        }
       }
     };
-
-    initializeChat();
-
-    // Polling for messages when websocket is not available
+  
+    if (chatId || (receiverIdFromQuery && productId)) {
+      initializeChat();
+    }
+  
+    // Setup polling for fallback
     const pollInterval = setInterval(() => {
-      if (usingRESTFallback && chatId) {
-        console.log("Polling for new messages...");
+      if (usingRESTFallback && chatId && chatId === currentChatIdRef.current) {
+        console.log(`Polling for new messages in chat ${chatId}...`);
         chatService.getChatById(chatId)
           .then(chatData => {
+            // Verify this is still the current chat before updating
+            if (chatId !== currentChatIdRef.current) {
+              console.log(`Discarding polled data for old chat ${chatId}`);
+              return;
+            }
+            
             if (chatData && Array.isArray(chatData.messages)) {
               setMessages(chatData.messages);
             }
           })
           .catch(err => console.error("Error polling messages:", err));
       }
-    }, 10000); // Poll every 10 seconds
-
-    // Cleanup function
+    }, 10000);
+  
     return () => {
-      if (stompSubscription.current) {
-        try {
-          stompSubscription.current.unsubscribe();
-        } catch(e) {
-          console.error("Error unsubscribing:", e);
-        }
-      }
-      messageService.disconnect();
-      
-      if (reconnectTimerRef.current) {
-        clearTimeout(reconnectTimerRef.current);
-      }
-      
       clearInterval(pollInterval);
     };
-  }, [chatId, currentUserId, receiverIdFromQuery, productId, navigate, toast, connectWebSocket, usingRESTFallback]);
+  }, [chatId, propChatId, currentUserId, receiverIdFromQuery, productId, navigate, toast, onBackClick, usingRESTFallback]);
 
   // Scroll to bottom when messages change
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  // Handle sending a message
-const handleSendMessage = async (e) => {
-  e.preventDefault();
-  const trimmedMessage = messageInput.trim();
-  if (!trimmedMessage || isSending) return;
-  if (!chatStarted) setChatStarted(true);
-  
-  setIsSending(true);
-  
-  // Determine receiver ID
-  const receiverId = chat && chat.senderId ? 
-    (chat.senderId.toString() === currentUserId ? chat.receiverId : chat.senderId) :
-    receiverIdFromQuery;
+  const handleSendMessage = async (e) => {
+    e.preventDefault();
+    const trimmedMessage = messageInput.trim();
+    if (!trimmedMessage || isSending) return;
+    
+    // Verify we're still in the same chat
+    if (chatId !== currentChatIdRef.current) {
+      console.log(`Aborting send for old chat ${chatId}, current is ${currentChatIdRef.current}`);
+      return;
+    }
+    
+    if (!chatStarted) setChatStarted(true);
+    
+    setIsSending(true);
+    
+    // Determine receiver ID
+    const receiverId = chat && chat.senderId ? 
+      (chat.senderId.toString() === currentUserId ? chat.receiverId : chat.senderId) :
+      receiverIdFromQuery;
 
-  if (!receiverId) {
-    toast({
-      title: "Error",
-      description: "Cannot determine message recipient",
-      variant: "destructive",
-    });
-    setIsSending(false);
-    return;
-  }
+    if (!receiverId) {
+      toast({
+        title: "Error",
+        description: "Cannot determine message recipient",
+        variant: "destructive",
+      });
+      setIsSending(false);
+      return;
+    }
 
-  const now = new Date();
-  const createdAt = now.toISOString().split('T')[0]; // Format as yyyy-MM-dd
-  const createdTime = now.toTimeString().split(' ')[0]; // Format as HH:mm:ss
+    const now = new Date();
+    const createdAt = now.toISOString().split('T')[0]; // Format as yyyy-MM-dd
+    const createdTime = now.toTimeString().split(' ')[0]; // Format as HH:mm:ss
 
-  // Create temporary message for UI
-  const tempMessage = {
-    id: `temp-${Date.now()}`,
-    senderId: parseInt(currentUserId),
-    receiverId: parseInt(receiverId),
-    content: trimmedMessage,
-    chatId: parseInt(chatId),
-    timestamp: now.toISOString(),
-    createdAt: createdAt,
-    createdTime: createdTime,
-    status: "sending",
+    // Create temporary message for UI
+    const tempMessage = {
+      id: `temp-${Date.now()}`,
+      senderId: parseInt(currentUserId),
+      receiverId: parseInt(receiverId),
+      content: trimmedMessage,
+      chatId: parseInt(chatId),
+      timestamp: now.toISOString(),
+      createdAt: createdAt,
+      createdTime: createdTime,
+      status: "sending",
+    };
+
+    // Add to messages state immediately for responsive UI
+    setMessages(prev => [...prev, tempMessage]);
+    setMessageInput("");
+
+    try {
+      // Final check before sending
+      if (chatId !== currentChatIdRef.current) {
+        console.log(`Aborting message send for old chat ${chatId}`);
+        return;
+      }
+      
+      console.log(`Sending message to chat ${chatId}`);
+      // Try to send message (it will use WebSocket if available, otherwise REST)
+      const result = await messageService.sendMessage(
+        parseInt(currentUserId),
+        parseInt(receiverId),
+        trimmedMessage,
+        parseInt(chatId)
+      );
+      
+      console.log("Message send result:", result);
+      
+      // Update temp message status to sent only if we're still in the same chat
+      if (chatId === currentChatIdRef.current) {
+        setMessages(prev => 
+          prev.map(msg => 
+            msg.id === tempMessage.id 
+              ? { ...msg, status: "sent", id: result.id || msg.id } 
+              : msg
+          )
+        );
+      }
+      
+    } catch (error) {
+      console.error("Failed to send message:", error);
+      
+      // Only update UI if still in the same chat
+      if (chatId === currentChatIdRef.current) {
+        // Update the temporary message to show error status
+        setMessages(prev => 
+          prev.map(msg => 
+            msg.id === tempMessage.id 
+              ? { ...msg, status: "error" } 
+              : msg
+          )
+        );
+        
+        toast({
+          title: "Error",
+          description: "Failed to send message. Please try again.",
+          variant: "destructive",
+        });
+      }
+    } finally {
+      if (chatId === currentChatIdRef.current) {
+        setIsSending(false);
+      }
+    }
   };
-
-  // Add to messages state immediately for responsive UI
-  setMessages(prev => [...prev, tempMessage]);
-  setMessageInput("");
-
-  try {
-    // Try to send message (it will use WebSocket if available, otherwise REST)
-    const result = await messageService.sendMessage(
-      parseInt(currentUserId),
-      parseInt(receiverId),
-      trimmedMessage,
-      parseInt(chatId)
-    );
-    
-    console.log("Message send result:", result);
-    
-    // Update temp message status to sent
-    setMessages(prev => 
-      prev.map(msg => 
-        msg.id === tempMessage.id 
-          ? { ...msg, status: "sent", id: result.id || msg.id } 
-          : msg
-      )
-    );
-    
-  } catch (error) {
-    console.error("Failed to send message:", error);
-    
-    // Update the temporary message to show error status
-    setMessages(prev => 
-      prev.map(msg => 
-        msg.id === tempMessage.id 
-          ? { ...msg, status: "error" } 
-          : msg
-      )
-    );
-    
-    toast({
-      title: "Error",
-      description: "Failed to send message. Please try again.",
-      variant: "destructive",
-    });
-  } finally {
-    setIsSending(false);
-  }
-};
 
   // Loading state
   if (isLoading) {
     return (
-      <div className="flex justify-center items-center h-[calc(100vh-80px)]">
+      <div className="flex justify-center items-center h-full">
         <Loader2 className="animate-spin" />
       </div>
     );
@@ -342,95 +485,111 @@ const handleSendMessage = async (e) => {
     "Chat";
 
   return (
-    <div className="container max-w-4xl mx-auto py-6 px-4">
-      <Card className="shadow-md border border-border/60">
-        <CardHeader className="border-b border-border/60 p-4">
-          <div className="flex items-center space-x-4">
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => navigate("/chats")}
-              className="rounded-full h-8 w-8"
-            >
-              <ArrowLeft size={18} />
-            </Button>
-            <div className="flex flex-col">
-              <h2 className="text-lg font-semibold">{otherUserName}</h2>
-              {chat?.productName && (
-                <span className="text-xs text-muted-foreground">
-                  About: {chat.productName}
-                </span>
-              )}
-              
-              {/* Connection status indicator */}
-              {usingRESTFallback ? (
-                <div className="flex items-center text-xs text-amber-500 mt-1">
-                  <WifiOff size={12} className="mr-1" />
-                  <span>Using offline mode</span>
-                </div>
-              ) : !isWebsocketConnected ? (
-                <div className="flex items-center text-xs text-amber-500 mt-1">
-                  <Loader2 size={12} className="animate-spin mr-1" />
-                  <span>Connecting...</span>
-                </div>
-              ) : null}
-            </div>
+    <div className="flex flex-col h-full w-full overflow-hidden">
+      {/* Chat header - fixed at top */}
+      <div className="p-3 border-b border-border/60 flex items-center bg-card">
+        {(onBackClick || window.innerWidth < 1024) && (
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={onBackClick || (() => navigate("/chats"))}
+            className="lg:hidden mr-2 h-8 w-8 rounded-full"
+          >
+            <ArrowLeft size={18} />
+          </Button>
+        )}
+        
+        <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center mr-3 flex-shrink-0">
+          <span className="text-lg font-semibold text-primary">
+            {otherUserName.charAt(0).toUpperCase()}
+          </span>
+        </div>
+        
+        <div className="flex-1 min-w-0">
+          <h2 className="font-medium truncate">{otherUserName}</h2>
+          
+          {chat?.productName && (
+            <span className="text-xs text-muted-foreground truncate block">
+              About: {chat.productName}
+            </span>
+          )}
+        </div>
+        
+        {/* Connection status indicator */}
+        {usingRESTFallback ? (
+          <div className="flex items-center text-xs text-amber-500 ml-2">
+            <WifiOff size={14} className="mr-1" />
+            <span className="hidden sm:inline">Offline mode</span>
           </div>
-        </CardHeader>
+        ) : !isWebsocketConnected ? (
+          <div className="flex items-center text-xs text-amber-500 ml-2">
+            <Loader2 size={14} className="animate-spin mr-1" />
+            <span className="hidden sm:inline">Connecting...</span>
+          </div>
+        ) : null}
+      </div>
 
-        <CardContent className="p-0">
-          <div className="flex flex-col h-[60vh] overflow-hidden">
-            <div className="flex-1 overflow-y-auto p-4 space-y-2">
-              {messages.length === 0 ? (
-                <div className="flex items-center justify-center h-full text-muted-foreground">
-                  <p>No messages yet. Start the conversation!</p>
-                </div>
-              ) : (
-                groupMessagesByDate(messages).map((item, index) => {
-                  if (item.type === "date") {
-                    return (
-                      <div key={`date-${index}`} className="text-center my-4">
-                        <span className="text-xs px-3 py-1 bg-muted dark:bg-muted/50 rounded-full text-muted-foreground">
-                          {formatDate(item.date)}
-                        </span>
-                      </div>
-                    );
+      {/* Chat messages - scrollable area */}
+      <div 
+        className="flex-1 overflow-y-auto bg-muted/30" 
+        ref={messagesContainerRef}
+        style={{ height: "calc(100% - 120px)" }} // Adjust for header and footer height
+      >
+        <div className="p-3 space-y-1 min-h-full">
+          {messages.length === 0 ? (
+            <div className="flex items-center justify-center h-full text-muted-foreground">
+              <p>No messages yet. Start the conversation!</p>
+            </div>
+          ) : (
+            groupMessagesByDate(messages).map((item, index) => {
+              if (item.type === "date") {
+                return (
+                  <div key={`date-${index}`} className="text-center my-3">
+                    <span className="text-xs px-2 py-1 bg-muted dark:bg-muted/50 rounded-full text-muted-foreground">
+                      {formatDate(item.date)}
+                    </span>
+                  </div>
+                );
+              }
+
+              return (
+                <ChatMessage
+                  key={`msg-${index}`}
+                  message={item.message}
+                  isCurrentUser={
+                    item.message.senderId && currentUserId ? 
+                    item.message.senderId.toString() === currentUserId : false
                   }
+                  status={item.message.status}
+                />
+              );
+            })
+          )}
+          <div ref={messagesEndRef} />
+        </div>
+      </div>
 
-                  return (
-                    <ChatMessage
-                      key={`msg-${index}`}
-                      message={item.message}
-                      isCurrentUser={
-                        item.message.senderId && currentUserId ? 
-                        item.message.senderId.toString() === currentUserId : false
-                      }
-                      status={item.message.status}
-                    />
-                  );
-                })
-              )}
-              <div ref={messagesEndRef} />
-            </div>
-          </div>
-        </CardContent>
-
-        <CardFooter className="border-t border-border/60 p-3">
-          <form onSubmit={handleSendMessage} className="flex w-full gap-2">
-            <Input
-              type="text"
-              placeholder="Type a message..."
-              value={messageInput}
-              onChange={(e) => setMessageInput(e.target.value)}
-              className="flex-1"
-              disabled={isSending}
-            />
-            <Button type="submit" size="icon" disabled={isSending || !messageInput.trim()}>
-              {isSending ? <Loader2 className="animate-spin h-4 w-4" /> : <Send size={18} />}
-            </Button>
-          </form>
-        </CardFooter>
-      </Card>
+      {/* Chat input - fixed at bottom */}
+      <div className="p-3 border-t border-border/60 bg-card">
+        <form onSubmit={handleSendMessage} className="flex w-full gap-2">
+          <Input
+            type="text"
+            placeholder="Type a message..."
+            value={messageInput}
+            onChange={(e) => setMessageInput(e.target.value)}
+            className="flex-1"
+            disabled={isSending}
+          />
+          <Button 
+            type="submit" 
+            size="icon" 
+            className="rounded-full h-10 w-10 flex-shrink-0"
+            disabled={isSending || !messageInput.trim()}
+          >
+            {isSending ? <Loader2 className="animate-spin h-4 w-4" /> : <Send size={18} />}
+          </Button>
+        </form>
+      </div>
     </div>
   );
 };

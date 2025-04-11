@@ -1,32 +1,35 @@
+// Enhanced messageService.js
 import SockJS from "sockjs-client";
 import { Client } from "@stomp/stompjs";
 import { API_BASE_URL } from "../Api/api";
 
 let stompClient = null;
 let connectionAttempts = 0;
-const MAX_RECONNECT_ATTEMPTS = 5;
+const MAX_RECONNECT_ATTEMPTS = 1;
+let pendingSubscriptions = [];
 
 export const messageService = {
-  // Connect to WebSocket
   connectWebSocket: (onConnected, onDisconnected) => {
-    // Reset connection if already trying to connect
-    if (stompClient && !stompClient.connected && stompClient.active) {
-      console.log("STOMP client is activating but not connected yet, deactivating first");
+    // First, ensure any existing connection is properly closed
+    if (stompClient) {
       try {
-        stompClient.deactivate();
+        if (stompClient.connected) {
+          console.log("Disconnecting existing STOMP client before new connection");
+          stompClient.disconnect();
+        }
+        
+        if (stompClient.active) {
+          console.log("Deactivating existing STOMP client");
+          stompClient.deactivate();
+        }
       } catch (e) {
-        console.error("Error deactivating existing client:", e);
+        console.error("Error cleaning up existing connection:", e);
       }
       stompClient = null;
+      // Clear any pending subscriptions
+      pendingSubscriptions = [];
     }
     
-    // If already connected, just call the callback
-    if (stompClient && stompClient.connected) {
-      console.log("WebSocket already connected");
-      if (onConnected) onConnected();
-      return stompClient;
-    }
-
     try {
       // Check if JWT token exists
       const token = localStorage.getItem("jwt");
@@ -36,13 +39,10 @@ export const messageService = {
         return null;
       }
       
-      console.log(`Attempting to connect to ${API_BASE_URL}/ws (Attempt ${connectionAttempts + 1})`);
-      
-      // First try native WebSocket endpoint if supported
-      let socket;
+      console.log(`Connecting to ${API_BASE_URL}/ws (Attempt ${connectionAttempts + 1})`);
       
       // Use SockJS for wider compatibility
-      socket = new SockJS(`${API_BASE_URL}/ws`);
+      const socket = new SockJS(`${API_BASE_URL}/ws`);
       
       // Debug the socket state changes
       socket.onopen = function() {
@@ -51,10 +51,6 @@ export const messageService = {
       
       socket.onclose = function(event) {
         console.log(`SockJS socket closed with code: ${event.code}, reason: ${event.reason}`);
-        
-        if (event.code === 1006) {
-          console.warn("Abnormal closure - server might have rejected the connection");
-        }
       };
       
       socket.onerror = function(error) {
@@ -64,17 +60,35 @@ export const messageService = {
       stompClient = new Client({
         webSocketFactory: () => socket,
         reconnectDelay: 5000,
-        heartbeatIncoming: 10000, // Increased heartbeat intervals
+        heartbeatIncoming: 10000,
         heartbeatOutgoing: 10000,
         connectHeaders: {
           Authorization: `Bearer ${token}`
         },
         debug: function(str) {
-          console.log("STOMP: " + str);
+          if(str.includes("error") || str.includes("failed")) {
+            console.error("STOMP: " + str);
+          } else {
+            console.log("STOMP: " + str);
+          }
         },
         onConnect: (frame) => {
           console.log("STOMP client connected successfully", frame);
           connectionAttempts = 0; // Reset on successful connection
+          
+          // Process any pending subscriptions
+          if (pendingSubscriptions.length > 0) {
+            console.log(`Processing ${pendingSubscriptions.length} pending subscriptions`);
+            pendingSubscriptions.forEach(sub => {
+              try {
+                sub.execute();
+              } catch (err) {
+                console.error("Error executing pending subscription:", err);
+              }
+            });
+            pendingSubscriptions = [];
+          }
+          
           if (onConnected) onConnected();
         },
         onStompError: (frame) => {
@@ -108,25 +122,45 @@ export const messageService = {
     }
   },
 
-  // Subscribe to a chat topic
+  // Subscribe to a chat topic with more robust error handling
   subscribeToChat: (chatId, onMessageReceived) => {
+    console.log(`Attempting to subscribe to /topic/chat/${chatId}`);
+    
     if (!stompClient) {
-      console.warn("STOMP client not initialized, message subscription failed");
-      return null;
+      console.warn("STOMP client not initialized, queueing subscription");
+      const pendingSub = {
+        execute: () => messageService.subscribeToChat(chatId, onMessageReceived)
+      };
+      pendingSubscriptions.push(pendingSub);
+      return {
+        unsubscribe: () => {
+          pendingSubscriptions = pendingSubscriptions.filter(s => s !== pendingSub);
+          console.log("Removed pending subscription");
+        }
+      };
     }
     
     if (!stompClient.connected) {
-      console.warn("STOMP client not connected yet, message subscription failed");
-      return null;
+      console.warn("STOMP client not connected yet, queueing subscription");
+      const pendingSub = {
+        execute: () => messageService.subscribeToChat(chatId, onMessageReceived)
+      };
+      pendingSubscriptions.push(pendingSub);
+      return {
+        unsubscribe: () => {
+          pendingSubscriptions = pendingSubscriptions.filter(s => s !== pendingSub);
+          console.log("Removed pending subscription");
+        }
+      };
     }
 
-    console.log(`Subscribing to /topic/chat/${chatId}`);
+    console.log(`Now subscribing to /topic/chat/${chatId}`);
     try {
       // Subscribe and handle messages
-      return stompClient.subscribe(`/topic/chat/${chatId}`, (message) => {
+      const subscription = stompClient.subscribe(`/topic/chat/${chatId}`, (message) => {
         try {
           const receivedMessage = JSON.parse(message.body);
-          console.log("Message received:", receivedMessage);
+          console.log("Message received for chat", chatId, ":", receivedMessage);
           if (onMessageReceived) {
             onMessageReceived(receivedMessage);
           } else {
@@ -139,9 +173,14 @@ export const messageService = {
         // Add headers if needed for subscription authentication
         Authorization: `Bearer ${localStorage.getItem("jwt")}`
       });
+      
+      console.log(`Successfully subscribed to /topic/chat/${chatId}`);
+      return subscription;
     } catch (error) {
-      console.error("Error subscribing to topic:", error);
-      return null;
+      console.error(`Error subscribing to topic /topic/chat/${chatId}:`, error);
+      return {
+        unsubscribe: () => console.log("Dummy unsubscribe for failed subscription")
+      };
     }
   },
 
@@ -154,11 +193,12 @@ export const messageService = {
     
     // Try WebSocket first
     if (stompClient && stompClient.connected) {
-      console.log("Sending message via WebSocket");
+      console.log(`Sending message via WebSocket to chat ${chatId}`);
       const message = {
         senderId,
         receiverId,
         content,
+        chatId,
         createdAt,
         createdTime
       };
@@ -171,7 +211,8 @@ export const messageService = {
             Authorization: `Bearer ${localStorage.getItem("jwt")}`
           },
         });
-        return true;
+        console.log("Message sent successfully via WebSocket");
+        return { id: `ws-${Date.now()}`, ...message };
       } catch (error) {
         console.error("Error sending message via WebSocket:", error);
         // Fall back to REST
@@ -188,6 +229,7 @@ export const messageService = {
   // REST API fallback for sending messages with improved error handling
   sendMessageREST: async (senderId, receiverId, content, chatId, createdAt, createdTime) => {
     try {
+      console.log(`Sending message via REST API to chat ${chatId}`);
       const response = await fetch(`${API_BASE_URL}/api/messages/send`, {
         method: 'POST',
         headers: {
@@ -214,7 +256,16 @@ export const messageService = {
       const responseText = await response.text();
       if (!responseText || responseText.trim() === '') {
         console.log("Empty response from server, treating as success");
-        return { success: true };
+        return { 
+          id: `rest-${Date.now()}`,
+          senderId,
+          receiverId,
+          content,
+          chatId,
+          createdAt,
+          createdTime,
+          success: true 
+        };
       }
       
       // Try to parse as JSON, return text if not valid JSON
@@ -222,7 +273,17 @@ export const messageService = {
         return JSON.parse(responseText);
       } catch (e) {
         console.log("Response is not valid JSON:", responseText);
-        return { success: true, text: responseText };
+        return { 
+          id: `rest-${Date.now()}`,
+          senderId,
+          receiverId, 
+          content,
+          chatId,
+          createdAt,
+          createdTime,
+          success: true, 
+          text: responseText 
+        };
       }
     } catch (error) {
       console.error("Error sending message via REST:", error);
@@ -234,12 +295,20 @@ export const messageService = {
   disconnect: () => {
     if (stompClient) {
       try {
-        if (stompClient.active) {
-          stompClient.deactivate();
-          console.log("WebSocket deactivated");
+        if (stompClient.connected) {
+          console.log("Disconnecting active STOMP client");
+          stompClient.disconnect();
         }
+        
+        if (stompClient.active) {
+          console.log("Deactivating active STOMP client");
+          stompClient.deactivate();
+        }
+        
         stompClient = null;
         connectionAttempts = 0;
+        pendingSubscriptions = [];
+        console.log("WebSocket disconnected and reset");
       } catch (error) {
         console.error("Error disconnecting WebSocket:", error);
       }
