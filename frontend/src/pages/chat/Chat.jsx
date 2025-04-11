@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef, useCallback } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { messageService } from "./messageService";
 import { chatService } from "./chatService";
-import { Button } from "@/components/ui/button"; 
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ArrowLeft, Send, Loader2, WifiOff } from "lucide-react";
 import ChatMessage from "./ChatMessage";
@@ -14,7 +14,9 @@ const Chat = ({ chatId: propChatId, onBackClick }) => {
   const queryParams = new URLSearchParams(location.search);
   const productId = queryParams.get("productId");
   const receiverIdFromQuery = queryParams.get("receiverId");
-  const [chatId, setChatId] = useState(propChatId || useParams().chatId || null);
+  const [chatId, setChatId] = useState(
+    propChatId || useParams().chatId || null
+  );
   const navigate = useNavigate();
   const [chat, setChat] = useState(null);
   const [messages, setMessages] = useState([]);
@@ -40,13 +42,13 @@ const Chat = ({ chatId: propChatId, onBackClick }) => {
 
   const groupMessagesByDate = (messages) => {
     if (!messages || messages.length === 0) return [];
-    
+
     const grouped = [];
     let lastDate = null;
 
     for (let msg of messages) {
       if (!msg) continue;
-      
+
       // Handle different message formats
       let messageDate;
       try {
@@ -57,7 +59,7 @@ const Chat = ({ chatId: propChatId, onBackClick }) => {
         } else {
           messageDate = new Date();
         }
-        
+
         if (isNaN(messageDate.getTime())) {
           messageDate = new Date();
         }
@@ -96,58 +98,73 @@ const Chat = ({ chatId: propChatId, onBackClick }) => {
       console.warn("Cannot connect WebSocket: No chat ID provided");
       return;
     }
-    
+
     console.log(`Initializing WebSocket connection for chat ${newChatId}`);
     websocketConnectionRef.current = true;
-  
+
     const onMessageReceived = (receivedMessage) => {
       console.log(`Message received for chat ${newChatId}:`, receivedMessage);
-      
+
       // Only process messages for the currently active chat
       if (newChatId !== currentChatIdRef.current) {
-        console.log(`Ignoring message for inactive chat: ${newChatId} vs current ${currentChatIdRef.current}`);
-        return;
-      }
-      
-      if (receivedMessage.chatId && receivedMessage.chatId.toString() !== newChatId.toString()) {
-        console.warn(`Received message for different chat ID: ${receivedMessage.chatId} vs ${newChatId}`);
-        return;
-      }
-      
-      setMessages(prevMessages => {
-        // Check if this message already exists
-        const messageExists = prevMessages.some(msg => 
-          msg.id === receivedMessage.id || 
-          (msg.content === receivedMessage.content && 
-           msg.senderId === receivedMessage.senderId &&
-           Math.abs(new Date(msg.timestamp || Date.now()) - new Date(receivedMessage.timestamp || Date.now())) < 5000)
+        console.log(
+          `Ignoring message for inactive chat: ${newChatId} vs current ${currentChatIdRef.current}`
         );
-        
+        return;
+      }
+
+      if (
+        receivedMessage.chatId &&
+        receivedMessage.chatId.toString() !== newChatId.toString()
+      ) {
+        console.warn(
+          `Received message for different chat ID: ${receivedMessage.chatId} vs ${newChatId}`
+        );
+        return;
+      }
+
+      setMessages((prevMessages) => {
+        // Check if this message already exists
+        const messageExists = prevMessages.some(
+          (msg) =>
+            msg.id === receivedMessage.id ||
+            (msg.content === receivedMessage.content &&
+              msg.senderId === receivedMessage.senderId &&
+              Math.abs(
+                new Date(msg.timestamp || Date.now()) -
+                  new Date(receivedMessage.timestamp || Date.now())
+              ) < 5000)
+        );
+
         if (messageExists) {
           console.log("Duplicate message detected, ignoring");
           return prevMessages;
         }
-        
+
         console.log("Adding new message to state");
         return [...prevMessages, receivedMessage];
       });
     };
-  
+
     const onConnected = () => {
       console.log(`WebSocket connected successfully for chat ${newChatId}`);
-      
+
       // Only update connection status if this is still the active chat
       if (newChatId === currentChatIdRef.current) {
         setIsWebsocketConnected(true);
         setUsingRESTFallback(false);
       } else {
-        console.log(`Connected to inactive chat ${newChatId}, current is ${currentChatIdRef.current}`);
+        console.log(
+          `Connected to inactive chat ${newChatId}, current is ${currentChatIdRef.current}`
+        );
       }
-      
+
       // Clean up any existing subscription
       if (stompSubscription.current) {
         try {
-          console.log("Cleaning up existing subscription before creating new one");
+          console.log(
+            "Cleaning up existing subscription before creating new one"
+          );
           stompSubscription.current.unsubscribe();
           stompSubscription.current = null;
         } catch (e) {
@@ -157,7 +174,10 @@ const Chat = ({ chatId: propChatId, onBackClick }) => {
 
       // Add a small delay to ensure WebSocket is ready
       setTimeout(() => {
-        if (websocketConnectionRef.current && newChatId === currentChatIdRef.current) {
+        if (
+          websocketConnectionRef.current &&
+          newChatId === currentChatIdRef.current
+        ) {
           console.log(`Now subscribing to topic for chat ${newChatId}`);
           stompSubscription.current = messageService.subscribeToChat(
             newChatId,
@@ -169,16 +189,16 @@ const Chat = ({ chatId: propChatId, onBackClick }) => {
         }
       }, 500);
     };
-  
+
     const onDisconnected = (error) => {
       console.log(`WebSocket disconnected for chat ${newChatId}:`, error);
-      
+
       // Only update UI state if this is still the active chat
       if (newChatId === currentChatIdRef.current) {
         setIsWebsocketConnected(false);
         setUsingRESTFallback(true);
       }
-  
+
       if (stompSubscription.current) {
         try {
           stompSubscription.current.unsubscribe();
@@ -188,7 +208,7 @@ const Chat = ({ chatId: propChatId, onBackClick }) => {
         }
       }
     };
-  
+
     messageService.connectWebSocket(onConnected, onDisconnected);
   }, []);
 
@@ -198,12 +218,12 @@ const Chat = ({ chatId: propChatId, onBackClick }) => {
       console.log("No chat ID available, skipping WebSocket setup");
       return;
     }
-  
+
     console.log(`Chat ID changed to ${chatId}, setting up WebSocket`);
-    
+
     // Reset connection flag
     websocketConnectionRef.current = false;
-    
+
     // Clean up any existing connection
     if (stompSubscription.current) {
       try {
@@ -214,12 +234,12 @@ const Chat = ({ chatId: propChatId, onBackClick }) => {
         console.error("Error unsubscribing from previous chat:", e);
       }
     }
-    
+
     messageService.disconnect();
-    
+
     // Reset connection status immediately for better UX
     setIsWebsocketConnected(false);
-    
+
     // Add a short delay before reconnecting
     const setupTimeout = setTimeout(() => {
       // Verify this is still the current chat before connecting
@@ -227,15 +247,17 @@ const Chat = ({ chatId: propChatId, onBackClick }) => {
         console.log(`Setting up new WebSocket connection for chat ${chatId}`);
         connectWebSocket(chatId);
       } else {
-        console.log(`Skipping WebSocket setup for old chat ${chatId}, current is ${currentChatIdRef.current}`);
+        console.log(
+          `Skipping WebSocket setup for old chat ${chatId}, current is ${currentChatIdRef.current}`
+        );
       }
     }, 500);
-    
+
     return () => {
       console.log(`Cleaning up WebSocket for chat ${chatId}`);
       websocketConnectionRef.current = false;
       clearTimeout(setupTimeout);
-      
+
       if (stompSubscription.current) {
         try {
           stompSubscription.current.unsubscribe();
@@ -244,11 +266,11 @@ const Chat = ({ chatId: propChatId, onBackClick }) => {
           console.error("Error unsubscribing on cleanup:", e);
         }
       }
-      
+
       messageService.disconnect();
     };
   }, [chatId, connectWebSocket]);
-  
+
   // Main effect for initializing chat data
   useEffect(() => {
     // Update chatId if it changes from props
@@ -257,23 +279,28 @@ const Chat = ({ chatId: propChatId, onBackClick }) => {
       setChatId(propChatId);
       return; // Let the next effect call handle loading the new chat
     }
-    
+
     const initializeChat = async () => {
       // Clear previous chat data immediately to prevent flicker
       if (chatId) {
         setIsLoading(true);
-        setMessages([]);  // Clear messages immediately when loading a new chat
-        setChat(null);    // Clear chat data
+        setMessages([]); // Clear messages immediately when loading a new chat
+        setChat(null); // Clear chat data
       }
-      
+
       try {
         let finalChatId = chatId;
-  
+
         if (!finalChatId && receiverIdFromQuery && productId) {
-          console.log("Creating new chat with receiverId:", receiverIdFromQuery, "and productId:", productId);
+          console.log(
+            "Creating new chat with receiverId:",
+            receiverIdFromQuery,
+            "and productId:",
+            productId
+          );
           const response = await chatService.createChat(
-            currentUserId, 
-            receiverIdFromQuery, 
+            currentUserId,
+            receiverIdFromQuery,
             productId
           );
           finalChatId = response.chatId || response.id;
@@ -282,36 +309,43 @@ const Chat = ({ chatId: propChatId, onBackClick }) => {
           navigate(`/chats/${finalChatId}`, { replace: true });
           return; // Let the effect triggered by setChatId handle loading
         }
-  
+
         if (!finalChatId) {
           throw new Error("Chat ID not found");
         }
-        
+
         // Verify this is still the current chat before loading data
         if (finalChatId !== currentChatIdRef.current) {
-          console.log(`Aborting load for old chat ${finalChatId}, current is ${currentChatIdRef.current}`);
+          console.log(
+            `Aborting load for old chat ${finalChatId}, current is ${currentChatIdRef.current}`
+          );
           return;
         }
-  
+
         console.log(`Fetching chat data for ID: ${finalChatId}`);
         const chatData = await chatService.getChatById(finalChatId);
-        
+
         // Final check to make sure we're still working with the current chat
         if (finalChatId !== currentChatIdRef.current) {
-          console.log(`Discarding data for old chat ${finalChatId}, current is ${currentChatIdRef.current}`);
+          console.log(
+            `Discarding data for old chat ${finalChatId}, current is ${currentChatIdRef.current}`
+          );
           return;
         }
-        
+
         setChat(chatData);
-  
-        const chatMessages = Array.isArray(chatData.messages) ? chatData.messages : [];
-        console.log(`Loaded ${chatMessages.length} messages for chat ${finalChatId}`);
+
+        const chatMessages = Array.isArray(chatData.messages)
+          ? chatData.messages
+          : [];
+        console.log(
+          `Loaded ${chatMessages.length} messages for chat ${finalChatId}`
+        );
         setMessages(chatMessages);
         setChatStarted(chatMessages.length > 0);
-  
       } catch (error) {
         console.error("Error initializing chat:", error);
-        
+
         // Only show error if this is still the current chat
         if (chatId === currentChatIdRef.current) {
           toast({
@@ -328,35 +362,46 @@ const Chat = ({ chatId: propChatId, onBackClick }) => {
         }
       }
     };
-  
+
     if (chatId || (receiverIdFromQuery && productId)) {
       initializeChat();
     }
-  
+
     // Setup polling for fallback
     const pollInterval = setInterval(() => {
       if (usingRESTFallback && chatId && chatId === currentChatIdRef.current) {
         console.log(`Polling for new messages in chat ${chatId}...`);
-        chatService.getChatById(chatId)
-          .then(chatData => {
+        chatService
+          .getChatById(chatId)
+          .then((chatData) => {
             // Verify this is still the current chat before updating
             if (chatId !== currentChatIdRef.current) {
               console.log(`Discarding polled data for old chat ${chatId}`);
               return;
             }
-            
+
             if (chatData && Array.isArray(chatData.messages)) {
               setMessages(chatData.messages);
             }
           })
-          .catch(err => console.error("Error polling messages:", err));
+          .catch((err) => console.error("Error polling messages:", err));
       }
     }, 10000);
-  
+
     return () => {
       clearInterval(pollInterval);
     };
-  }, [chatId, propChatId, currentUserId, receiverIdFromQuery, productId, navigate, toast, onBackClick, usingRESTFallback]);
+  }, [
+    chatId,
+    propChatId,
+    currentUserId,
+    receiverIdFromQuery,
+    productId,
+    navigate,
+    toast,
+    onBackClick,
+    usingRESTFallback,
+  ]);
 
   // Scroll to bottom when messages change
   useEffect(() => {
@@ -367,21 +412,26 @@ const Chat = ({ chatId: propChatId, onBackClick }) => {
     e.preventDefault();
     const trimmedMessage = messageInput.trim();
     if (!trimmedMessage || isSending) return;
-    
+
     // Verify we're still in the same chat
     if (chatId !== currentChatIdRef.current) {
-      console.log(`Aborting send for old chat ${chatId}, current is ${currentChatIdRef.current}`);
+      console.log(
+        `Aborting send for old chat ${chatId}, current is ${currentChatIdRef.current}`
+      );
       return;
     }
-    
+
     if (!chatStarted) setChatStarted(true);
-    
+
     setIsSending(true);
-    
+
     // Determine receiver ID
-    const receiverId = chat && chat.senderId ? 
-      (chat.senderId.toString() === currentUserId ? chat.receiverId : chat.senderId) :
-      receiverIdFromQuery;
+    const receiverId =
+      chat && chat.senderId
+        ? chat.senderId.toString() === currentUserId
+          ? chat.receiverId
+          : chat.senderId
+        : receiverIdFromQuery;
 
     if (!receiverId) {
       toast({
@@ -394,8 +444,8 @@ const Chat = ({ chatId: propChatId, onBackClick }) => {
     }
 
     const now = new Date();
-    const createdAt = now.toISOString().split('T')[0]; // Format as yyyy-MM-dd
-    const createdTime = now.toTimeString().split(' ')[0]; // Format as HH:mm:ss
+    const createdAt = now.toISOString().split("T")[0]; // Format as yyyy-MM-dd
+    const createdTime = now.toTimeString().split(" ")[0]; // Format as HH:mm:ss
 
     // Create temporary message for UI
     const tempMessage = {
@@ -411,7 +461,7 @@ const Chat = ({ chatId: propChatId, onBackClick }) => {
     };
 
     // Add to messages state immediately for responsive UI
-    setMessages(prev => [...prev, tempMessage]);
+    setMessages((prev) => [...prev, tempMessage]);
     setMessageInput("");
 
     try {
@@ -420,7 +470,7 @@ const Chat = ({ chatId: propChatId, onBackClick }) => {
         console.log(`Aborting message send for old chat ${chatId}`);
         return;
       }
-      
+
       console.log(`Sending message to chat ${chatId}`);
       // Try to send message (it will use WebSocket if available, otherwise REST)
       const result = await messageService.sendMessage(
@@ -429,34 +479,31 @@ const Chat = ({ chatId: propChatId, onBackClick }) => {
         trimmedMessage,
         parseInt(chatId)
       );
-      
+
       console.log("Message send result:", result);
-      
+
       // Update temp message status to sent only if we're still in the same chat
       if (chatId === currentChatIdRef.current) {
-        setMessages(prev => 
-          prev.map(msg => 
-            msg.id === tempMessage.id 
-              ? { ...msg, status: "sent", id: result.id || msg.id } 
+        setMessages((prev) =>
+          prev.map((msg) =>
+            msg.id === tempMessage.id
+              ? { ...msg, status: "sent", id: result.id || msg.id }
               : msg
           )
         );
       }
-      
     } catch (error) {
       console.error("Failed to send message:", error);
-      
+
       // Only update UI if still in the same chat
       if (chatId === currentChatIdRef.current) {
         // Update the temporary message to show error status
-        setMessages(prev => 
-          prev.map(msg => 
-            msg.id === tempMessage.id 
-              ? { ...msg, status: "error" } 
-              : msg
+        setMessages((prev) =>
+          prev.map((msg) =>
+            msg.id === tempMessage.id ? { ...msg, status: "error" } : msg
           )
         );
-        
+
         toast({
           title: "Error",
           description: "Failed to send message. Please try again.",
@@ -480,9 +527,12 @@ const Chat = ({ chatId: propChatId, onBackClick }) => {
   }
 
   // Determine other user's name
-  const otherUserName = chat && chat.senderId ? 
-    (chat.senderId.toString() === currentUserId ? chat.receiverName : chat.senderName) : 
-    "Chat";
+  const otherUserName =
+    chat && chat.senderId
+      ? chat.senderId.toString() === currentUserId
+        ? chat.receiverName
+        : chat.senderName
+      : "Chat";
 
   return (
     <div className="flex flex-col h-full w-full">
@@ -498,23 +548,28 @@ const Chat = ({ chatId: propChatId, onBackClick }) => {
             <ArrowLeft size={18} />
           </Button>
         )}
-        
+
         <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center mr-3 flex-shrink-0">
           <span className="text-lg font-semibold text-primary">
             {otherUserName.charAt(0).toUpperCase()}
           </span>
         </div>
-        
+
         <div className="flex-1 min-w-0">
-          <h2 className="font-medium truncate">{otherUserName}</h2>
-          
+          <div className="flex items-center">
+            <h2 className="font-medium truncate">{otherUserName}</h2>
+            <span className="text-xs px-2 py-0.5 rounded-full bg-muted/80 text-muted-foreground flex-shrink-0 ml-2">
+              {chat.senderId == currentUserId ? "Buyer" : "Seller"}
+            </span>
+          </div>
+
           {chat?.productName && (
-            <span className="text-xs text-muted-foreground truncate block">
+            <span className="text-xs text-muted-foreground truncate block mt-1">
               About: {chat.productName}
             </span>
           )}
         </div>
-        
+
         {/* Connection status indicator */}
         {usingRESTFallback ? (
           <div className="flex items-center text-xs text-amber-500 ml-2">
@@ -530,7 +585,7 @@ const Chat = ({ chatId: propChatId, onBackClick }) => {
       </div>
 
       {/* Chat messages - scrollable area */}
-      <div 
+      <div
         className="flex-1 overflow-y-auto bg-muted/30"
         ref={messagesContainerRef}
       >
@@ -556,8 +611,9 @@ const Chat = ({ chatId: propChatId, onBackClick }) => {
                   key={`msg-${index}`}
                   message={item.message}
                   isCurrentUser={
-                    item.message.senderId && currentUserId ? 
-                    item.message.senderId.toString() === currentUserId : false
+                    item.message.senderId && currentUserId
+                      ? item.message.senderId.toString() === currentUserId
+                      : false
                   }
                   status={item.message.status}
                 />
@@ -579,13 +635,17 @@ const Chat = ({ chatId: propChatId, onBackClick }) => {
             className="flex-1"
             disabled={isSending}
           />
-          <Button 
-            type="submit" 
-            size="icon" 
+          <Button
+            type="submit"
+            size="icon"
             className="rounded-full h-10 w-10 flex-shrink-0"
             disabled={isSending || !messageInput.trim()}
           >
-            {isSending ? <Loader2 className="animate-spin h-4 w-4" /> : <Send size={18} />}
+            {isSending ? (
+              <Loader2 className="animate-spin h-4 w-4" />
+            ) : (
+              <Send size={18} />
+            )}
           </Button>
         </form>
       </div>

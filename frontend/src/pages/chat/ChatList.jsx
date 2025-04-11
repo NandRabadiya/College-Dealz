@@ -30,9 +30,13 @@ const ChatList = ({ onChatSelect, selectedChatId }) => {
         const chatsData = await chatService.getUserChats(currentUserId);
         setChats(chatsData);
         setFilteredChats(chatsData);
-        
+
         // If we have chats but no selected chat, select the first one on large screens
-        if (chatsData.length > 0 && !activeChatId && window.innerWidth >= 1024) {
+        if (
+          chatsData.length > 0 &&
+          !activeChatId &&
+          window.innerWidth >= 1024
+        ) {
           onChatSelect && onChatSelect(chatsData[0].chatId);
         }
       } catch (error) {
@@ -55,8 +59,9 @@ const ChatList = ({ onChatSelect, selectedChatId }) => {
       setFilteredChats(chats);
     } else {
       const query = searchQuery.toLowerCase();
-      const filtered = chats.filter(chat => {
-        const otherUser = chat.senderId === currentUserId ? chat.receiverName : chat.senderName;
+      const filtered = chats.filter((chat) => {
+        const otherUser =
+          chat.senderId === currentUserId ? chat.receiverName : chat.senderName;
         return (
           otherUser.toLowerCase().includes(query) ||
           (chat.productName && chat.productName.toLowerCase().includes(query))
@@ -87,18 +92,18 @@ const ChatList = ({ onChatSelect, selectedChatId }) => {
       {/* Chat header - fixed at top */}
       <div className="p-3 border-b border-border/60 bg-card sticky top-0 z-10 flex-shrink-0">
         <h1 className="text-xl font-bold mb-3">Chats</h1>
-        <div className="relative">
+        {/* <div className="relative">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
-          <Input 
+          <Input
             type="text"
-            placeholder="Search chats..." 
+            placeholder="Search chats..."
             className="pl-10"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
-        </div>
+        </div> */}
       </div>
-      
+
       {/* Chat list - scrollable area */}
       <div className="flex-1 overflow-y-auto">
         {filteredChats.length === 0 ? (
@@ -111,13 +116,18 @@ const ChatList = ({ onChatSelect, selectedChatId }) => {
           </div>
         ) : (
           filteredChats.map((chat) => {
-            const isActive = activeChatId && chat.chatId.toString() === activeChatId.toString();
-            const otherUserName = chat.senderId == currentUserId ? chat.receiverName : chat.senderName;
+            const isActive =
+              activeChatId &&
+              chat.chatId.toString() === activeChatId.toString();
+            const otherUserName =
+              chat.senderId == currentUserId
+                ? chat.receiverName
+                : chat.senderName;
             const lastMessage = chat.lastMessage;
-            
+
             return (
-              <div 
-                key={chat.chatId} 
+              <div
+                key={chat.chatId}
                 className={cn(
                   "py-3 px-4 border-b border-border/30 cursor-pointer transition-colors duration-150",
                   isActive ? "bg-primary/10" : "hover:bg-muted/50"
@@ -130,17 +140,27 @@ const ChatList = ({ onChatSelect, selectedChatId }) => {
                       {otherUserName.charAt(0).toUpperCase()}
                     </span>
                   </div>
-                  
+
                   <div className="flex-1 min-w-0">
                     <div className="flex justify-between items-start">
-                      <h3 className="font-medium truncate">{otherUserName}</h3>
+                      <div className="flex items-center space-x-2">
+                        <h3 className="font-medium truncate">
+                          {otherUserName}
+                        </h3>
+                        <span className="text-xs px-2 py-0.5 rounded-full bg-muted/80 text-muted-foreground">
+                          {chat.senderId == currentUserId ? "Seller" : "Buyer"}
+                        </span>
+                      </div>
                       {lastMessage && (
                         <span className="text-xs text-muted-foreground whitespace-nowrap ml-2">
-                          {formatDistanceToNow(new Date(lastMessage.timestamp), { addSuffix: true })}
+                          {formatDistanceToNow(
+                            new Date(lastMessage.timestamp),
+                            { addSuffix: true }
+                          )}
                         </span>
                       )}
                     </div>
-                    
+
                     {lastMessage ? (
                       <p className="text-sm text-muted-foreground truncate mt-1">
                         {lastMessage.content}
@@ -150,10 +170,10 @@ const ChatList = ({ onChatSelect, selectedChatId }) => {
                         No messages yet
                       </p>
                     )}
-                    
+
                     {chat.productId && (
                       <div className="mt-2">
-                        <span className="text-xs bg-muted/60 dark:bg-muted/40 px-2 py-0.5 rounded-full max-w-[200px] truncate inline-block">
+                        <span className="text-xs bg-muted/90 dark:bg-muted/50 px-2 py-0.5 rounded-full max-w-[200px] truncate inline-block">
                           About: {chat.productName}
                         </span>
                       </div>
