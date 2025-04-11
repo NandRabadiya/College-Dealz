@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import ChatList from "./ChatList";
@@ -25,7 +24,7 @@ const ChatContainer = () => {
   const showChatOnMobile = isMobileView && selectedChatId;
 
   return (
-    <div className="h-[100vh] flex flex-col">
+    <div className="h-[90vh] flex flex-col">
       <div className="flex-1 flex overflow-hidden">
         <div className="h-full flex flex-col lg:flex-row w-full">
           {/* Chat list panel */}

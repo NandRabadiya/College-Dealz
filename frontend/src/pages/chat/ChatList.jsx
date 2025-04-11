@@ -83,8 +83,9 @@ const ChatList = ({ onChatSelect, selectedChatId }) => {
   }
 
   return (
-    <div className="flex flex-col h-full w-full overflow-hidden">
-      <div className="p-3 border-b border-border/60 bg-card sticky top-0 z-10">
+    <div className="flex flex-col h-full w-full">
+      {/* Chat header - fixed at top */}
+      <div className="p-3 border-b border-border/60 bg-card sticky top-0 z-10 flex-shrink-0">
         <h1 className="text-xl font-bold mb-3">Chats</h1>
         <div className="relative">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
@@ -98,6 +99,7 @@ const ChatList = ({ onChatSelect, selectedChatId }) => {
         </div>
       </div>
       
+      {/* Chat list - scrollable area */}
       <div className="flex-1 overflow-y-auto">
         {filteredChats.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-16 px-4 text-center">

@@ -485,9 +485,9 @@ const Chat = ({ chatId: propChatId, onBackClick }) => {
     "Chat";
 
   return (
-    <div className="flex flex-col h-full w-full overflow-hidden">
+    <div className="flex flex-col h-full w-full">
       {/* Chat header - fixed at top */}
-      <div className="p-3 border-b border-border/60 flex items-center bg-card">
+      <div className="p-3 border-b border-border/60 flex items-center bg-card sticky top-0 z-10 flex-shrink-0">
         {(onBackClick || window.innerWidth < 1024) && (
           <Button
             variant="ghost"
@@ -531,9 +531,8 @@ const Chat = ({ chatId: propChatId, onBackClick }) => {
 
       {/* Chat messages - scrollable area */}
       <div 
-        className="flex-1 overflow-y-auto bg-muted/30" 
+        className="flex-1 overflow-y-auto bg-muted/30"
         ref={messagesContainerRef}
-        style={{ height: "calc(100% - 120px)" }} // Adjust for header and footer height
       >
         <div className="p-3 space-y-1 min-h-full">
           {messages.length === 0 ? (
@@ -570,7 +569,7 @@ const Chat = ({ chatId: propChatId, onBackClick }) => {
       </div>
 
       {/* Chat input - fixed at bottom */}
-      <div className="p-3 border-t border-border/60 bg-card">
+      <div className="p-3 border-t border-border/60 bg-card sticky bottom-0 z-10 flex-shrink-0">
         <form onSubmit={handleSendMessage} className="flex w-full gap-2">
           <Input
             type="text"
