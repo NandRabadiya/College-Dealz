@@ -92,7 +92,13 @@ const Chat = ({ chatId: propChatId, onBackClick }) => {
     if (isYesterday(date)) return "Yesterday";
     return format(date, "dd MMMM yyyy");
   };
-
+  const getFullTimestamp = (msg) => {
+    if (msg.timestamp) return new Date(msg.timestamp);
+    if (msg.createdAt && msg.createdTime)
+      return new Date(`${msg.createdAt}T${msg.createdTime}`);
+    return new Date();
+  };
+  
   const connectWebSocket = useCallback((newChatId) => {
     if (!newChatId) {
       console.warn("Cannot connect WebSocket: No chat ID provided");
@@ -124,23 +130,39 @@ const Chat = ({ chatId: propChatId, onBackClick }) => {
       }
 
       setMessages((prevMessages) => {
-        // Check if this message already exists
-        const messageExists = prevMessages.some(
-          (msg) =>
-            msg.id === receivedMessage.id ||
-            (msg.content === receivedMessage.content &&
-              msg.senderId === receivedMessage.senderId &&
-              Math.abs(
-                new Date(msg.timestamp || Date.now()) -
-                  new Date(receivedMessage.timestamp || Date.now())
-              ) < 5000)
-        );
-
+        const messageExists = prevMessages.some((msg) => {
+          // Check if message IDs match (most reliable method)
+          if (msg.id && receivedMessage.id && msg.id === receivedMessage.id) {
+            return true;
+          }
+          
+          // If no ID match, check content + sender + approximate time
+          if (msg.content === receivedMessage.content && 
+              msg.senderId === receivedMessage.senderId) {
+            
+            try {
+              // Convert both timestamps to milliseconds for reliable comparison
+              const msgTime = getFullTimestamp(msg).getTime();
+              const receivedTime = getFullTimestamp(receivedMessage).getTime();
+              
+              // Check if timestamps are within 5 seconds of each other
+              return Math.abs(msgTime - receivedTime) < 5000;
+            } catch (e) {
+              // If time comparison fails, fall back to just content + sender match
+              // This is less ideal but prevents errors
+              console.error("Error comparing message timestamps:", e);
+              return true; // Consider it a duplicate if content+sender match but time comparison fails
+            }
+          }
+          
+          return false;
+        });
+      
         if (messageExists) {
           console.log("Duplicate message detected, ignoring");
           return prevMessages;
         }
-
+      
         console.log("Adding new message to state");
         return [...prevMessages, receivedMessage];
       });
