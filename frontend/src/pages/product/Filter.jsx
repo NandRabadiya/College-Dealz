@@ -15,11 +15,13 @@ const categories = [
   "Electronics",
   "Furniture",
   "Clothing",
-  "Sports Equipment",
+  "Sports",
   "Musical Instruments",
-  "Art Supplies",
+  "Stationery",
   "Lab Equipment",
   "Study Materials",
+  "Hostel Supplies",
+  "Vehicles",
   "Others",
 ];
 

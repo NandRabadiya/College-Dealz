@@ -20,13 +20,18 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import ChatInitiator from "../chat/ChatInitiator";
 
 const ProductDetails = () => {
   const { productId } = useParams();
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [sellerInfo, setSellerInfo] = useState({ name: "Unknown Seller", createdAt: new Date() });
+  const [sellerInfo, setSellerInfo] = useState({
+    name: "Unknown Seller",
+    createdAt: new Date(),
+  });
+  const currentUserId = localStorage.getItem("userId");
 
   useEffect(() => {
     let isMounted = true;
@@ -86,7 +91,7 @@ const ProductDetails = () => {
           };
 
           setProduct(transformedProduct);
-          
+
           // Fetch seller info if available
           if (productData.sellerId) {
             fetchSellerInfo(productData.sellerId, token);
@@ -105,18 +110,15 @@ const ProductDetails = () => {
         }
       }
     };
-    
+
     const fetchSellerInfo = async (sellerId, token) => {
       try {
-        const response = await fetch(
-          `${API_BASE_URL}/api/users/${sellerId}`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
-        
+        const response = await fetch(`${API_BASE_URL}/api/users/${sellerId}`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
         if (response.ok) {
           const userData = await response.json();
           if (isMounted) {
@@ -214,15 +216,15 @@ const ProductDetails = () => {
       .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
       .join(" ");
   };
-  
+
   // Format date
   const formatDate = (dateString) => {
     try {
       const date = new Date(dateString);
-      return date.toLocaleDateString('en-US', { 
-        year: 'numeric', 
-        month: 'short', 
-        day: 'numeric' 
+      return date.toLocaleDateString("en-US", {
+        year: "numeric",
+        month: "short",
+        day: "numeric",
       });
     } catch (e) {
       return "Unknown date";
@@ -239,7 +241,9 @@ const ProductDetails = () => {
         <div className="space-y-4 sm:space-y-6 px-2 md:px-0">
           {/* SECTION 1: Name, price, description */}
           <div>
-            <h1 className="text-2xl sm:text-3xl font-bold mb-1 sm:mb-2">{product.name}</h1>
+            <h1 className="text-2xl sm:text-3xl font-bold mb-1 sm:mb-2">
+              {product.name}
+            </h1>
             <div
               className={`text-xl sm:text-2xl font-bold mb-2 sm:mb-4 ${
                 product.price === 0 ? "text-green-600" : "text-primary"
@@ -267,14 +271,16 @@ const ProductDetails = () => {
 
             {product.monthsOld != null && (
               <div>
-                <h3 className="text-sm font-semibold mb-1">Product is used for</h3>
+                <h3 className="text-sm font-semibold mb-1">
+                  Product is used for
+                </h3>
                 <p className="text-sm text-muted-foreground">
                   {product.monthsOld} year(s)
                 </p>
               </div>
             )}
           </div>
-          
+
           {/* SECTION 3: Seller name and date */}
           <div className="border-t border-b py-3 my-3 grid grid-cols-2">
             <div className="flex items-center gap-1">
@@ -288,47 +294,66 @@ const ProductDetails = () => {
           </div>
 
           <div className="flex gap-3 pt-3">
-            <Button className="flex-1 py-2" onClick={handleChat}>
-              <MessageCircle className="mr-2 h-5 w-5" />
-              Chat with Seller
-            </Button>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
+            <div className="flex-1">
+              {String(currentUserId) !== String(product.sellerId) ? (
+                <ChatInitiator
+                  productId={product.id}
+                  sellerId={product.sellerId}
+                  currentUserId={currentUserId}
+                />
+              ) : (
                 <Button
                   variant="ghost"
-                  className="flex-1 py-2 text-foreground hover:bg-muted"
+                  size="sm"
+                  disabled
+                  className="w-full h-7 px-1 py-0 text-xs text-muted-foreground hover:bg-muted cursor-default"
                 >
-                  <Share2 className="mr-2 h-5 w-5" />
-                  Share
+                  <MessageCircle className="mr-1 h-3 w-3 text-inherit" />
+                  Your Product
                 </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-48">
-                <DropdownMenuItem
-                  onClick={(e) => handleShare(product, "whatsapp", e)}
-                >
-                  <MessageSquare className="mr-2 h-4 w-4" />
-                  WhatsApp
-                </DropdownMenuItem>
-                <DropdownMenuItem
-                  onClick={(e) => handleShare(product, "facebook", e)}
-                >
-                  <Facebook className="mr-2 h-4 w-4" />
-                  Facebook
-                </DropdownMenuItem>
-                <DropdownMenuItem
-                  onClick={(e) => handleShare(product, "email", e)}
-                >
-                  <Mail className="mr-2 h-4 w-4" />
-                  Email
-                </DropdownMenuItem>
-                <DropdownMenuItem
-                  onClick={(e) => handleShare(product, "copy", e)}
-                >
-                  <Link className="mr-2 h-4 w-4" />
-                  Copy Link
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+              )}
+            </div>
+            <div className="flex-1">
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="w-full h-7 px-1 py-0 text-xs text-foreground hover:bg-muted"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <Share2 className="mr-1 h-3 w-3 text-inherit" />
+                    Share
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-48">
+                  <DropdownMenuItem
+                    onClick={(e) => handleShare(product, "whatsapp", e)}
+                  >
+                    <MessageSquare className="mr-2 h-4 w-4" />
+                    WhatsApp
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    onClick={(e) => handleShare(product, "facebook", e)}
+                  >
+                    <Facebook className="mr-2 h-4 w-4" />
+                    Facebook
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    onClick={(e) => handleShare(product, "email", e)}
+                  >
+                    <Mail className="mr-2 h-4 w-4" />
+                    Email
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    onClick={(e) => handleShare(product, "copy", e)}
+                  >
+                    <Link className="mr-2 h-4 w-4" />
+                    Copy Link
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
           </div>
         </div>
       </div>
