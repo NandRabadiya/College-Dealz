@@ -292,71 +292,6 @@ const ProductCard = ({
     }
   };
 
-  useEffect(() => {
-    const fetchWishlistStatus = async () => {
-      if (!isAuthenticated) return;
-
-      try {
-        const token = localStorage.getItem("jwt");
-        const response = await fetch(`${API_BASE_URL}/api/wishlist`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-
-        if (!response.ok) throw new Error("Failed to fetch wishlist");
-
-        const wishlistItems = await response.json();
-        const wishlistSet = new Set(
-          wishlistItems.map((item) => item.productId)
-        );
-        setWishlistedItems(wishlistSet);
-
-        setProducts((prevProducts) =>
-          prevProducts.map((product) => ({
-            ...product,
-            isWishlisted: wishlistSet.has(product.id),
-          }))
-        );
-      } catch (error) {
-        console.error("Error fetching wishlist status:", error);
-      }
-    };
-
-    fetchWishlistStatus();
-  }, [isAuthenticated]);
-
-  // const handleChat =  (product, e) => {
-  //   console.log("Checking chat for product:", currentUser.id, product.sellerId, product.id);
-
-  //   handleProtectedAction(async () => {
-  //     try {
-  //       const response = await axios.post(`${API_BASE_URL}/chats/check`, {
-  //         senderId: currentUser.id,
-  //         receiverId: product.sellerId,
-  //         productId: product.id
-  //       });
-
-  //       if (response.data === true) {
-  //         // Existing chat - redirect to chat
-  //         const chatResponse = await axios.post(`${API_BASE_URL}/chats/create`, {
-  //           senderId: currentUser.id,
-  //           receiverId: product.sellerId,
-  //           productId: product.id
-  //         });
-  //         navigate(`/chats/${chatResponse.data.id}`);
-  //       } else {
-  //         // No existing chat - navigate to chat page without a chat selected
-  //         navigate('/chats/new', {
-  //           state: { receiverId: product.sellerId, productId: product.id }
-  //         });
-  //       }
-  //     } catch (err) {
-  //       console.error('Error checking or creating chat:', err);
-  //     }
-  //   }, e);
-  // };
-
   const handleShare = (product, platform, e) => {
     e.stopPropagation();
 
@@ -454,9 +389,9 @@ const ProductCard = ({
                       className="group relative overflow-hidden rounded-lg border bg-card transition-all hover:shadow-md cursor-pointer"
                       onClick={() => handleProductClick(product.id)}
                     >
-                      {console.log(
+                      {/* {console.log(
                         `Product ${product.id}: isWishlisted = ${product.isWishlisted}`
-                      )}
+                      )} */}
 
                       {/* Mobile view: horizontal card layout */}
                       <div className="block sm:hidden">
@@ -523,70 +458,78 @@ const ProductCard = ({
                               </div>
 
                               <div className="flex items-center justify-between gap-1 pt-1 border-t">
-                                {/* <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  className="text-xs px-1 py-0 h-7 text-foreground hover:bg-muted"
-                                  // onClick={(e) => handleChat(product, e)}
-                                >
-                                  <MessageCircle className="mr-1 h-3 w-3 text-inherit" /> */}
-                                <ChatInitiator
-                                  productId={product.id}
-                                  sellerId={product.sellerId}
-                                  currentUserId={currentUserId}
-                                />
-                                {/* Chat
-                                </Button> */}
-                                <DropdownMenu>
-                                  <DropdownMenuTrigger asChild>
+                                <div className="flex-1">
+                                  {String(currentUserId) !==
+                                  String(product.sellerId) ? (
+                                    <ChatInitiator
+                                      productId={product.id}
+                                      sellerId={product.sellerId}
+                                      currentUserId={currentUserId}
+                                    />
+                                  ) : (
                                     <Button
                                       variant="ghost"
                                       size="sm"
-                                      className="text-xs px-1 py-0 h-7 text-foreground hover:bg-muted"
-                                      onClick={(e) => e.stopPropagation()}
+                                      disabled
+                                      className="w-full h-7 px-1 py-0 text-xs text-muted-foreground hover:bg-muted cursor-default"
                                     >
-                                      <Share2 className="mr-1 h-3 w-3 text-inherit" />
-                                      Share
+                                      <MessageCircle className="mr-1 h-3 w-3 text-inherit" />
+                                      Your Product
                                     </Button>
-                                  </DropdownMenuTrigger>
-                                  <DropdownMenuContent
-                                    align="end"
-                                    className="w-48"
-                                  >
-                                    <DropdownMenuItem
-                                      onClick={(e) =>
-                                        handleShare(product, "whatsapp", e)
-                                      }
+                                  )}
+                                </div>
+                                <div className="flex-1">
+                                  <DropdownMenu>
+                                    <DropdownMenuTrigger asChild>
+                                      <Button
+                                        variant="ghost"
+                                        size="sm"
+                                        className="w-full h-7 px-1 py-0 text-xs text-foreground hover:bg-muted"
+                                        onClick={(e) => e.stopPropagation()}
+                                      >
+                                        <Share2 className="mr-1 h-3 w-3 text-inherit" />
+                                        Share
+                                      </Button>
+                                    </DropdownMenuTrigger>
+                                    <DropdownMenuContent
+                                      align="end"
+                                      className="w-48"
                                     >
-                                      <MessageSquare className="mr-2 h-4 w-4" />
-                                      WhatsApp
-                                    </DropdownMenuItem>
-                                    <DropdownMenuItem
-                                      onClick={(e) =>
-                                        handleShare(product, "facebook", e)
-                                      }
-                                    >
-                                      <Facebook className="mr-2 h-4 w-4" />
-                                      Facebook
-                                    </DropdownMenuItem>
-                                    <DropdownMenuItem
-                                      onClick={(e) =>
-                                        handleShare(product, "email", e)
-                                      }
-                                    >
-                                      <Mail className="mr-2 h-4 w-4" />
-                                      Email
-                                    </DropdownMenuItem>
-                                    <DropdownMenuItem
-                                      onClick={(e) =>
-                                        handleShare(product, "copy", e)
-                                      }
-                                    >
-                                      <Link className="mr-2 h-4 w-4" />
-                                      Copy Link
-                                    </DropdownMenuItem>
-                                  </DropdownMenuContent>
-                                </DropdownMenu>
+                                      <DropdownMenuItem
+                                        onClick={(e) =>
+                                          handleShare(product, "whatsapp", e)
+                                        }
+                                      >
+                                        <MessageSquare className="mr-2 h-4 w-4" />
+                                        WhatsApp
+                                      </DropdownMenuItem>
+                                      <DropdownMenuItem
+                                        onClick={(e) =>
+                                          handleShare(product, "facebook", e)
+                                        }
+                                      >
+                                        <Facebook className="mr-2 h-4 w-4" />
+                                        Facebook
+                                      </DropdownMenuItem>
+                                      <DropdownMenuItem
+                                        onClick={(e) =>
+                                          handleShare(product, "email", e)
+                                        }
+                                      >
+                                        <Mail className="mr-2 h-4 w-4" />
+                                        Email
+                                      </DropdownMenuItem>
+                                      <DropdownMenuItem
+                                        onClick={(e) =>
+                                          handleShare(product, "copy", e)
+                                        }
+                                      >
+                                        <Link className="mr-2 h-4 w-4" />
+                                        Copy Link
+                                      </DropdownMenuItem>
+                                    </DropdownMenuContent>
+                                  </DropdownMenu>
+                                </div>
                               </div>
                             </div>
                           </div>
@@ -651,67 +594,78 @@ const ProductCard = ({
                           </div>
 
                           <div className="flex items-center justify-between gap-2 pt-2 border-t">
-                            {/* <Button
-                              variant="ghost"
-                              size="sm"
-                              className="flex-1 text-foreground hover:bg-muted"
-                              onClick={(e) => handleChat(product, e)}
-                            >
-                              <MessageCircle className="mr-2 h-4 w-4 text-inherit" />
-                              Chat
-                            </Button> */}
-                            <ChatInitiator
-                              productId={product.id}
-                              sellerId={product.sellerId}
-                              currentUserId={currentUserId}
-                            />
-                            <DropdownMenu>
-                              <DropdownMenuTrigger asChild>
+                            <div className="flex-1">
+                              {String(currentUserId) !==
+                              String(product.sellerId) ? (
+                                <ChatInitiator
+                                  productId={product.id}
+                                  sellerId={product.sellerId}
+                                  currentUserId={currentUserId}
+                                />
+                              ) : (
                                 <Button
                                   variant="ghost"
                                   size="sm"
-                                  className="flex-1 text-foreground hover:bg-muted"
-                                  onClick={(e) => e.stopPropagation()}
+                                  disabled
+                                  className="w-full h-7 px-1 py-0 text-xs text-muted-foreground hover:bg-muted cursor-default"
                                 >
-                                  <Share2 className="mr-2 h-4 w-4 text-inherit" />
-                                  Share
+                                  <MessageCircle className="mr-1 h-3 w-3 text-inherit" />
+                                  Your Product
                                 </Button>
-                              </DropdownMenuTrigger>
-                              <DropdownMenuContent align="end" className="w-48">
-                                <DropdownMenuItem
-                                  onClick={(e) =>
-                                    handleShare(product, "whatsapp", e)
-                                  }
+                              )}
+                            </div>
+                            <div className="flex-1">
+                              <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    className="w-full h-7 px-1 py-0 text-xs text-foreground hover:bg-muted"
+                                    onClick={(e) => e.stopPropagation()}
+                                  >
+                                    <Share2 className="mr-1 h-3 w-3 text-inherit" />
+                                    Share
+                                  </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent
+                                  align="end"
+                                  className="w-48"
                                 >
-                                  <MessageSquare className="mr-2 h-4 w-4" />
-                                  WhatsApp
-                                </DropdownMenuItem>
-                                <DropdownMenuItem
-                                  onClick={(e) =>
-                                    handleShare(product, "facebook", e)
-                                  }
-                                >
-                                  <Facebook className="mr-2 h-4 w-4" />
-                                  Facebook
-                                </DropdownMenuItem>
-                                <DropdownMenuItem
-                                  onClick={(e) =>
-                                    handleShare(product, "email", e)
-                                  }
-                                >
-                                  <Mail className="mr-2 h-4 w-4" />
-                                  Email
-                                </DropdownMenuItem>
-                                <DropdownMenuItem
-                                  onClick={(e) =>
-                                    handleShare(product, "copy", e)
-                                  }
-                                >
-                                  <Link className="mr-2 h-4 w-4" />
-                                  Copy Link
-                                </DropdownMenuItem>
-                              </DropdownMenuContent>
-                            </DropdownMenu>
+                                  <DropdownMenuItem
+                                    onClick={(e) =>
+                                      handleShare(product, "whatsapp", e)
+                                    }
+                                  >
+                                    <MessageSquare className="mr-2 h-4 w-4" />
+                                    WhatsApp
+                                  </DropdownMenuItem>
+                                  <DropdownMenuItem
+                                    onClick={(e) =>
+                                      handleShare(product, "facebook", e)
+                                    }
+                                  >
+                                    <Facebook className="mr-2 h-4 w-4" />
+                                    Facebook
+                                  </DropdownMenuItem>
+                                  <DropdownMenuItem
+                                    onClick={(e) =>
+                                      handleShare(product, "email", e)
+                                    }
+                                  >
+                                    <Mail className="mr-2 h-4 w-4" />
+                                    Email
+                                  </DropdownMenuItem>
+                                  <DropdownMenuItem
+                                    onClick={(e) =>
+                                      handleShare(product, "copy", e)
+                                    }
+                                  >
+                                    <Link className="mr-2 h-4 w-4" />
+                                    Copy Link
+                                  </DropdownMenuItem>
+                                </DropdownMenuContent>
+                              </DropdownMenu>
+                            </div>
                           </div>
                         </div>
                       </div>
