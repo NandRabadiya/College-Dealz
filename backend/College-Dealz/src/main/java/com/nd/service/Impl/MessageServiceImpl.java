@@ -52,10 +52,9 @@ public class MessageServiceImpl implements MessageService {
         message.setCreatedAt(LocalDate.now());
         message.setCreatedTime(LocalTime.now());
        // message.setChat(chat);
-        Message savedMessage=messageRepository.save(message);
 
         //chat.getMessages().add(savedMessage);
-        return savedMessage;
+        return messageRepository.save(message);
     }
 
     @Override
