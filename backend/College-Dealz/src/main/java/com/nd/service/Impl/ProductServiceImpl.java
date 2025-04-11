@@ -13,6 +13,7 @@ import com.nd.repositories.*;
 import com.nd.service.ImageService;
 import com.nd.service.JwtService;
 import com.nd.service.ProductService;
+import com.nd.service.S3ImageService;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -27,6 +28,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.*;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import software.amazon.awssdk.core.sync.RequestBody;
+import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -59,11 +63,15 @@ public class ProductServiceImpl implements ProductService {
     @Autowired
     private JwtService jwtService;
 
+
     @Autowired
     private ArchivedProductsRepo archivedProductsRepo;
 
     @Autowired
     private ImageRepo imageRepo;
+
+    @Autowired
+    private S3ImageService s3Service;
 
     @Autowired
     private WishlistRepository wishlistRepository;
@@ -113,26 +121,32 @@ public class ProductServiceImpl implements ProductService {
 
         // Step 4: Save associated images
         List<Image> images = new ArrayList<>();
+
+// Inside createProductWithImages()
         if (productDto.getImages() != null) {
-            for (MultipartFile file : productDto.getImages()) {
+            List<String> s3Urls = s3Service.uploadImages(productDto.getImages());
+
+            for (int i = 0; i < productDto.getImages().size(); i++) {
+                MultipartFile file = productDto.getImages().get(i);
+                String s3Url = s3Urls.get(i);
+
                 Image image = new Image();
                 image.setProduct(savedProduct);
                 image.setFileName(file.getOriginalFilename());
                 image.setContentType(file.getContentType());
-                image.setImageData(file.getBytes());
+                image.setS3Url(s3Url);
                 image.setCreatedAt(Instant.now());
-                image.setUpdatedAt(Instant.now());// Save image as byte array
+                image.setUpdatedAt(Instant.now());
 
-               System.out.println(image.getImageData() + image.getFileName());
                 images.add(image);
-
             }
+
             imageRepo.saveAll(images);
-        }else {
-            throw new ResourceNotFoundException("Images are not submited with product");
+        } else {
+            throw new ResourceNotFoundException("Images are not submitted with product");
         }
 
-       savedProduct.setImages(images);
+        savedProduct.setImages(images);
 
         // Step 5: Save the updated product to ensure images are linked
      Product savedProductwithImage =  productRepo.save(savedProduct);
@@ -177,36 +191,51 @@ public class ProductServiceImpl implements ProductService {
             List<Image> imagesToRemove = existingProduct.getImages().stream()
                     .filter(image -> removedImageIds.contains(image.getId()))
                     .collect(Collectors.toList());
+
+
             if (!imagesToRemove.isEmpty()) {
                 System.out.println("Removing images: " + imagesToRemove);
-                // Remove associations from the product's collection.
+
+
+                List<String> s3FileNamesToDelete = imagesToRemove.stream()
+                        .filter(img -> img.getS3Url() != null)
+                        .map(Image::getFileName)
+                        .collect(Collectors.toList());
+
+                s3Service.deleteImages(s3FileNamesToDelete);
+
+                // Remove associations from the product's collection
                 existingProduct.getImages().removeAll(imagesToRemove);
-                // Optionally, if orphanRemoval isn't enabled, delete them explicitly:
-                // imageRepo.deleteAll(imagesToRemove);
+
+                // Delete from DB explicitly (if orphanRemoval is not enabled)
+                imageRepo.deleteAll(imagesToRemove);
             }
         }
 
         // 4. Add new images (if provided)
         List<MultipartFile> newFiles = productDto.getImages();
         if (newFiles != null && !newFiles.isEmpty()) {
+            List<String> s3Urls = s3Service.uploadImages(newFiles);  // Upload to S3 and get URLs
             List<Image> newImages = new ArrayList<>();
-            for (MultipartFile file : newFiles) {
+
+            for (int i = 0; i < newFiles.size(); i++) {
+                MultipartFile file = newFiles.get(i);
+                String s3Url = s3Urls.get(i);
+
                 Image image = new Image();
-                image.setProduct(existingProduct);
+                image.setProduct(existingProduct);  // Or savedProduct in create
                 image.setFileName(file.getOriginalFilename());
                 image.setContentType(file.getContentType());
-                image.setImageData(file.getBytes());
+                image.setS3Url(s3Url);
                 image.setCreatedAt(Instant.now());
                 image.setUpdatedAt(Instant.now());
-                newImages.add(image);
-                System.out.println("Adding new image: " + image.getFileName());
-            }
-            // Save new images first (if your mapping requires it)
-            imageRepo.saveAll(newImages);
-            // Append new images to the existing collection
-            existingProduct.getImages().addAll(newImages);
-        }
 
+                newImages.add(image);
+                System.out.println("Uploaded and adding image: " + image.getFileName());
+            }
+            imageRepo.saveAll(newImages);
+            existingProduct.getImages().addAll(newImages); // Attach to product if needed
+        }
         // 5. Save the updated product
         Product savedProduct = productRepo.save(existingProduct);
         return mapToDto(savedProduct);
