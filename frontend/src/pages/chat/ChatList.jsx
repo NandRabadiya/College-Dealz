@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { chatService } from "./chatService";
-import { Search, MessageCircle, Loader2 } from "lucide-react";
+import { MessageCircle, Loader2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { formatDistanceToNow } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
@@ -28,16 +28,24 @@ const ChatList = ({ onChatSelect, selectedChatId }) => {
         }
 
         const chatsData = await chatService.getUserChats(currentUserId);
-        setChats(chatsData);
-        setFilteredChats(chatsData);
 
-        // If we have chats but no selected chat, select the first one on large screens
+        // Add lastMessage from the messages array
+        const chatsWithLastMessage = chatsData.map((chat) => {
+          const messages = chat.messages || [];
+          const lastMessage = messages.length > 0 ? messages[messages.length - 1] : null;
+          return { ...chat, lastMessage };
+        });
+
+        setChats(chatsWithLastMessage);
+        setFilteredChats(chatsWithLastMessage);
+
+        // Auto-select first chat on large screens if no chat selected
         if (
-          chatsData.length > 0 &&
+          chatsWithLastMessage.length > 0 &&
           !activeChatId &&
           window.innerWidth >= 1024
         ) {
-          onChatSelect && onChatSelect(chatsData[0].chatId);
+          onChatSelect && onChatSelect(chatsWithLastMessage[0].chatId);
         }
       } catch (error) {
         console.error("Error fetching chats:", error);
@@ -89,10 +97,10 @@ const ChatList = ({ onChatSelect, selectedChatId }) => {
 
   return (
     <div className="flex flex-col h-full w-full">
-      {/* Chat header - fixed at top */}
       <div className="p-3 border-b border-border/60 bg-card sticky top-0 z-10 flex-shrink-0">
         <h1 className="text-xl font-bold mb-3">Chats</h1>
-        {/* <div className="relative">
+        {/* Optional Search Feature
+        <div className="relative">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
           <Input
             type="text"
@@ -104,7 +112,6 @@ const ChatList = ({ onChatSelect, selectedChatId }) => {
         </div> */}
       </div>
 
-      {/* Chat list - scrollable area */}
       <div className="flex-1 overflow-y-auto">
         {filteredChats.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-16 px-4 text-center">
@@ -154,7 +161,7 @@ const ChatList = ({ onChatSelect, selectedChatId }) => {
                       {lastMessage && (
                         <span className="text-xs text-muted-foreground whitespace-nowrap ml-2">
                           {formatDistanceToNow(
-                            new Date(lastMessage.timestamp),
+                            new Date(`${lastMessage.createdAt}T${lastMessage.createdTime}`),
                             { addSuffix: true }
                           )}
                         </span>

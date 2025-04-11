@@ -49,7 +49,7 @@ const ChatMessage = ({ message, isCurrentUser, status }) => {
           >
             {formattedTime}
           </span>
-          {renderStatusIndicator()}
+          {/* {renderStatusIndicator()} */}
         </div>
       </div>
     </div>

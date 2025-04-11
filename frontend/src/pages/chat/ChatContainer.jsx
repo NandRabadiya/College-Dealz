@@ -24,14 +24,14 @@ const ChatContainer = () => {
   const showChatOnMobile = isMobileView && selectedChatId;
 
   return (
-    <div className="h-[90vh] flex flex-col">
+    <div className="h-[88vh] flex flex-col">
       <div className="flex-1 flex overflow-hidden">
         <div className="h-full flex flex-col lg:flex-row w-full">
           {/* Chat list panel */}
           <div
             className={`
               ${showChatOnMobile ? "hidden" : "h-full"} 
-              lg:flex lg:w-1/3 lg:max-w-sm 
+              lg:flex lg:w-2/5 lg:max-w-md 
               border-r border-border/60 overflow-hidden
             `}
           >
