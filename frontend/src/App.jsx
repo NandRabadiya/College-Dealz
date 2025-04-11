@@ -42,10 +42,16 @@ const AppRoutes = ({
   selectedUniversity, 
 }) => {
   const location = useLocation();
+  const hideFeedbackWidgetRoutes = [
+    "/dashboard",
+    "/chats",
+  ];
+  const isChatPage = location.pathname.startsWith("/chats");
+  const shouldShowFeedback = !hideFeedbackWidgetRoutes.includes(location.pathname) && !isChatPage;
 
   return (
     <>
-    <FeedbackWidget/>      
+      {shouldShowFeedback && <FeedbackWidget />}
       
       {location.pathname === '/wantlist' && (
         <WantlistPageTour />
