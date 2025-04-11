@@ -49,8 +49,6 @@ public class ArchivedProductsServiceImpl implements ArchivedProductsService {
         existingProduct.setStatusChangeDate(archivedProduct.getStatusChangeDate());
         existingProduct.setStatus(archivedProduct.getStatus());
         existingProduct.setReasonForRemoval(archivedProduct.getReasonForRemoval());
-        existingProduct.setConfirmationStatus(archivedProduct.getConfirmationStatus());
-        existingProduct.setInterestedBuyers(archivedProduct.getInterestedBuyers());
         existingProduct.setDealCompletionTime(archivedProduct.getDealCompletionTime());
         existingProduct.setUniversityId(archivedProduct.getUniversityId());
         // Note: createdAt is usually not updated

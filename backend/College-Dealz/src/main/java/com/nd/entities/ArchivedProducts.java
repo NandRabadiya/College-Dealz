@@ -1,12 +1,10 @@
 package com.nd.entities;
 
 import com.nd.enums.Category;
-import com.nd.enums.ConfirmationStatus;
 import com.nd.enums.ProductStatus;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.math.BigDecimal;
@@ -56,15 +54,8 @@ public class ArchivedProducts {
     @Column
     private String reasonForRemoval;
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private ConfirmationStatus confirmationStatus=ConfirmationStatus.PENDING;
-
     @Column
     private boolean SoldToCollegeStudent;
-
-    @Column
-    private int interestedBuyers;
 
     @Column(nullable = false)
     private Long dealCompletionTime;
