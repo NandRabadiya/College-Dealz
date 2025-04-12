@@ -24,9 +24,6 @@ import PublicProductDetails from "./pages/product/PublicProductDetails";
 import ErrorPage from "./pages/ErrorPage";
 import OAuthCallback from "./pages/authentication/OAuthCallback";
 import FeedbackWidget from "./pages/FeedbackWidget";
-import { useSelector } from "react-redux";
-import Chat from "./pages/chat/Chat";
-import ChatList from "./pages/chat/ChatList";
 import ChatContainer from "./pages/chat/ChatContainer";
 
 // PrivateRoute component
@@ -35,22 +32,19 @@ const PrivateRoute = ({ element, isLoggedIn, redirectTo }) => {
 };
 
 // Tour Handler component (moved outside of App)
-const AppRoutes = ({ 
-  searchQuery, 
-  sortField, 
-  sortDir, 
-  selectedUniversity, 
-}) => {
+const AppRoutes = ({ searchQuery, sortField, sortDir, selectedUniversity }) => {
   const location = useLocation();
+  const hideFeedbackWidgetRoutes = ["/dashboard", "/chats"];
+  const isChatPage = location.pathname.startsWith("/chats");
+  const shouldShowFeedback =
+    !hideFeedbackWidgetRoutes.includes(location.pathname) && !isChatPage;
 
   return (
     <>
-    <FeedbackWidget/>      
-      
-      {location.pathname === '/wantlist' && (
-        <WantlistPageTour />
-      )}
-      
+      {shouldShowFeedback && <FeedbackWidget />}
+
+      {location.pathname === "/wantlist" && <WantlistPageTour />}
+
       {/* Main routes */}
       <Routes>
         {/* Public Route */}
@@ -65,16 +59,12 @@ const AppRoutes = ({
             />
           }
         />
-         <Route path="/chats" element={<ChatContainer />} />
-         <Route path="/chats/:chatId" element={<ChatContainer />} />
-         {/* <Route path="/chats" element={<ChatList />} />
-         <Route path="/chats/:chatId" element={<Chat />} /> */}
+        <Route path="/chats" element={<ChatContainer />} />
+        <Route path="/chats/:chatId" element={<ChatContainer />} />
+
         {/* Login/Register Route */}
         <Route path="/oauth-callback" element={<OAuthCallback />} />
-        <Route
-          path="/Authenticate"
-          element={<Authenticate isOpen={true} />}
-        />
+        <Route path="/Authenticate" element={<Authenticate isOpen={true} />} />
         <Route path="/admin" element={<AdminDashboard />} />
         <Route
           path="/product/public/:productId"
@@ -130,10 +120,10 @@ const AppRoutes = ({
 
 function App() {
   const dispatch = useDispatch();
-  
+
   // Tour state
   const [hasSeenTour, setHasSeenTour] = useState(false);
-  
+
   // Search and sort state
   const [searchQuery, setSearchQuery] = useState("");
   const [sortField, setSortField] = useState("postDate");
@@ -160,7 +150,6 @@ function App() {
     console.log("App.js useEffect", { token });
   }, [dispatch]);
 
-
   const handleUniversitySelect = (universityId) => {
     setSelectedUniversity(universityId);
     localStorage.setItem("selectedUniversity", universityId);
@@ -176,14 +165,13 @@ function App() {
         onOpenChange={setShowUniversitySelector}
         onUniversitySelect={handleUniversitySelect}
       />
-      <AppRoutes 
+      <AppRoutes
         searchQuery={searchQuery}
         sortField={sortField}
         sortDir={sortDir}
         selectedUniversity={selectedUniversity}
         hasSeenTour={hasSeenTour}
       />
-    
     </Router>
   );
 }

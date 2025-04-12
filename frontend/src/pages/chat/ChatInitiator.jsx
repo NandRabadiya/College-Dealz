@@ -34,35 +34,7 @@ const ChatInitiator = ({ productId, sellerId, currentUserId }) => {
     }
 
     setIsLoading(true);
-    // try {
-    //   // Check if a chat already exists
-    //   const chatExists = await chatService.checkChatExists(
-    //     currentUserId,
-    //     sellerId,
-    //     productId
-    //   );
-
-    //   if (chatExists) {
-    //     // Get the existing chat
-    //     const chats = await chatService.getUserChats(currentUserId);
-    //     const existingChat = chats.find(
-    //       (chat) => 
-    //         (chat.productId === productId) && 
-    //         ((chat.senderId === currentUserId && chat.receiverId === sellerId) || 
-    //          (chat.senderId === sellerId && chat.receiverId === currentUserId))
-    //     );
-
-    //     if (existingChat) {
-    //       navigate(`/chats/${existingChat.chatId}`);
-    //     } else {
-    //       // Create a new chat if somehow it exists but we can't find it
-    //       const newChat = await chatService.createChat(currentUserId, sellerId, productId);
-    //       navigate(`/chats/${newChat.chatId}`);
-    //     }
-    //   } else {
-    //     // Create a new chat
-    //   }
-      
+  
     try{
       const chat = await chatService.createChat(currentUserId, sellerId, productId);
       navigate(`/chats/${chat.chatId}`);
@@ -80,13 +52,17 @@ const ChatInitiator = ({ productId, sellerId, currentUserId }) => {
 
   return (
     <Button
-      onClick={handleChatClick}
-      className="flex items-center gap-2"
-      disabled={isLoading}
-    >
-      <MessageCircle size={18} />
-      {isLoading ? "Loading..." : "Chat with Seller"}
-    </Button>
+    variant="ghost"
+    size="sm"
+    onClick={handleChatClick}
+    className="w-full h-7 px-1 py-0 text-xs text-foreground hover:bg-muted"
+    disabled={isLoading}
+  >
+    <MessageCircle className="mr-1 h-3 w-3 text-inherit" />
+    {isLoading ? "Loading..." : "Chat with Seller"}
+  </Button>
+  
+  
   );
 };
 

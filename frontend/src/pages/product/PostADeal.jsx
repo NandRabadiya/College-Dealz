@@ -23,13 +23,33 @@ import { useLocation, useNavigate } from "react-router-dom";
 
 // Define enums to match backend
 const CATEGORY_ENUM = {
-  ELECTRONICS: "ELECTRONICS",
   FURNITURE: "FURNITURE",
-  CLOTHING: "CLOTHING",
+  ELECTRONICS: "ELECTRONICS",
+  LAB_EQUIPMENT: "LAB_EQUIPMENT",
   BOOKS: "BOOKS",
+  SPORTS: "SPORTS",
+  STATIONERY: "STATIONERY",
+  CLOTHING: "CLOTHING",
+  HOSTEL_SUPPLIES: "HOSTEL_SUPPLIES",
+  MUSICAL_INSTRUMENTS: "MUSICAL_INSTRUMENTS",
+  VEHICLES: "VEHICLES",
   OTHER: "OTHER",
+  STUDY_MATERIALS: "STUDY_MATERIALS",
 };
-
+const categoryLabels = {
+  FURNITURE: "Furniture",
+  ELECTRONICS: "Electronics",
+  LAB_EQUIPMENT: "Lab Equipment",
+  BOOKS: "Books",
+  SPORTS: "Sports",
+  STATIONERY: "Stationery",
+  CLOTHING: "Clothing",
+  HOSTEL_SUPPLIES: "Hostel Supplies",
+  MUSICAL_INSTRUMENTS: "Musical Instruments",
+  VEHICLES: "Vehicles",
+  OTHER: "Other",
+  STUDY_MATERIALS: "Study Materials",
+};
 const CONDITION_ENUM = {
   NEW: "NEW",
   LIKE_NEW: "LIKE_NEW",
@@ -444,21 +464,11 @@ const PostADeal = ({ onClose, editDeal }) => {
                         <SelectValue placeholder="Select a category" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value={CATEGORY_ENUM.ELECTRONICS}>
-                          Electronics
-                        </SelectItem>
-                        <SelectItem value={CATEGORY_ENUM.FURNITURE}>
-                          Furniture
-                        </SelectItem>
-                        <SelectItem value={CATEGORY_ENUM.CLOTHING}>
-                          Clothing
-                        </SelectItem>
-                        <SelectItem value={CATEGORY_ENUM.BOOKS}>
-                          Books
-                        </SelectItem>
-                        <SelectItem value={CATEGORY_ENUM.OTHER}>
-                          Other
-                        </SelectItem>
+                        {Object.entries(CATEGORY_ENUM).map(([key, value]) => (
+                          <SelectItem key={value} value={value}>
+                            {categoryLabels[key] || value}
+                          </SelectItem>
+                        ))}
                       </SelectContent>
                     </Select>
                     {errors.category && (
