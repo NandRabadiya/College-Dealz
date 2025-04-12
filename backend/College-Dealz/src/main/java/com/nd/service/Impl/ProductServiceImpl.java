@@ -10,7 +10,6 @@ import com.nd.enums.ProductStatus;
 import com.nd.exceptions.ProductException;
 import com.nd.exceptions.ResourceNotFoundException;
 import com.nd.repositories.*;
-import com.nd.service.ImageService;
 import com.nd.service.JwtService;
 import com.nd.service.ProductService;
 import com.nd.service.S3ImageService;
@@ -20,17 +19,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-import jakarta.persistence.criteria.Predicate;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.*;
-import org.springframework.data.jpa.domain.Specification;
-import org.springframework.stereotype.Service;
-import software.amazon.awssdk.core.sync.RequestBody;
-import software.amazon.awssdk.services.s3.S3Client;
-import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -41,12 +31,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import java.io.IOException;
-import java.math.BigDecimal;
 import java.time.Instant;
-import java.util.ArrayList;
 import java.util.Base64;
-import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 public class ProductServiceImpl implements ProductService {
@@ -186,11 +172,12 @@ public class ProductServiceImpl implements ProductService {
         existingProduct.setUpdatedAt(Instant.now());
 
         // 3. Remove images marked for deletion (if provided)
-        List<Integer> removedImageIds = productDto.getRemoveImageIds();
-        if (removedImageIds != null && !removedImageIds.isEmpty()) {
+        List<String> removedImageUrls = productDto.getRemoveImagesUrls();
+        if (removedImageUrls != null && !removedImageUrls.isEmpty()) {
             List<Image> imagesToRemove = existingProduct.getImages().stream()
-                    .filter(image -> removedImageIds.contains(image.getId()))
+                    .filter(image -> removedImageUrls.contains(image.getS3Url()))
                     .collect(Collectors.toList());
+
 
 
             if (!imagesToRemove.isEmpty()) {
@@ -243,10 +230,19 @@ public class ProductServiceImpl implements ProductService {
 
 
     @Override
-    public ProductDto getProductById(Integer productId) {
+    public ProductDto getProductById(Integer productId , String token) {
+
+        Integer userId= jwtService.getUserIdFromToken(token);
+
+        boolean isWishlisted=wishlistRepository.existsByUserIdAndProductId(userId,productId);
+
         Product product = productRepo.findById(productId)
                 .orElseThrow(() -> new RuntimeException("Product with ID " + productId + " not found."));
-        return mapToDto(product);
+
+        ProductDto finalDto = mapToDto(product);
+        finalDto.setWishlisted(isWishlisted);
+
+        return finalDto;
     }
 
     @Override
@@ -270,9 +266,6 @@ public class ProductServiceImpl implements ProductService {
     public List<ProductDto> getProductsBySellerId(String authHeader) {
 
         int sellerId= jwtService.getUserIdFromToken(authHeader);
-
-
-
         return productRepo.findBySellerId(sellerId).stream()
                 .map(this::mapToDto)
                 .collect(Collectors.toList());
@@ -457,8 +450,6 @@ public class ProductServiceImpl implements ProductService {
         productDto.setMonthsOld(product.getMonthsOld());
         productDto.setSellerId(product.getSeller().getId());
         productDto.setUniversityId(product.getUniversity().getId());
-        productDto.setWishlisted(wishlistRepository.existsByUserIdAndProductId(product.getSeller().getId(),product.getId()));
-
         productDto.setSellerName(product.getSeller().getName());
         productDto.setPostDate(product.getPostDate());
 

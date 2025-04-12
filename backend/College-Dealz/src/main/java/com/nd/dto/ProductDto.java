@@ -52,10 +52,9 @@ public class ProductDto {
 
     private List<MultipartFile> images;
 
-    private List<Integer> removeImageIds;
+    private List<String> removeImagesUrls;
 
     private List<String> imageUrls;
-    private boolean isWishlisted;
-
+    private boolean isWishlisted = false;
 
 }

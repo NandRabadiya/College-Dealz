@@ -20,7 +20,7 @@ public interface ProductService {
     ProductDto createProduct(ProductDto productDto, String authHeader);
     ProductDto mapToDto(Product product);
     ProductDto updateProduct(Integer productId, ProductDto productDto) throws IOException;
-    ProductDto getProductById(Integer productId);
+    ProductDto getProductById(Integer productId, String token);
     List<ProductDto> getAllProducts(String authHeader);
     List<ProductDto> getProductsByCategory(String category);
     List<ProductDto> getProductsBySellerId(String authHeader);
