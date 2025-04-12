@@ -12,6 +12,7 @@ public enum Category {
     HOSTEL_SUPPLIES,
     MUSICAL_INSTRUMENTS,
     VEHICLES,
+    STUDY_MATERIALS,
     OTHER;
 
     @Override
