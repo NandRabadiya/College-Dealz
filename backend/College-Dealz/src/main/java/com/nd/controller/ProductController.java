@@ -37,8 +37,8 @@ public class ProductController {
     private NotificationService notificationService;
 
     @GetMapping("/{productId}")
-    public ResponseEntity<ProductDto> getProductById(@PathVariable Integer productId) {
-        ProductDto productDto = productService.getProductById(productId);
+    public ResponseEntity<ProductDto> getProductById(@RequestHeader("Authorization") String token,@PathVariable Integer productId) {
+        ProductDto productDto = productService.getProductById(productId,token);
         return ResponseEntity.ok(productDto);
     }
 
