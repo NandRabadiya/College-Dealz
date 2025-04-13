@@ -5,16 +5,10 @@ import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 
 const MobileSearchAndFilter = ({ 
-  isFilterOpen, 
-  setIsFilterOpen, 
   handleSearch, 
-  handleSort, 
-  handleFilterChange, 
   isAuthenticated, 
   isLoading, 
   currentSearch, 
-  currentSort, 
-  currentFilters 
 }) => {
   return (
     <div className="lg:hidden bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b">

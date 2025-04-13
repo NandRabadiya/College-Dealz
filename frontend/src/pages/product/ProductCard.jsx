@@ -63,13 +63,13 @@ const ProductCard = ({
   const placeholderImage = "/api/placeholder/400/320";
   const navigate = useNavigate();
   const location = useLocation();
-  
+
   // Updated sort state management
   const [sortField, setSortField] = useState(initialSortField || "postDate");
   const [sortDir, setSortDir] = useState(initialSortDir || "desc");
   const [currentSort, setCurrentSort] = useState(`${sortField}-${sortDir}`);
   const [currentSearch, setCurrentSearch] = useState(searchQuery || "");
-  
+
   // Default filter values
   const [filters, setFilters] = useState({
     minPrice: 0,
@@ -82,31 +82,45 @@ const ProductCard = ({
   );
 
   // Memoize fetch products function for better performance
-  const fetchProducts = useCallback(async (
-    page = currentPage,
-    query = searchQuery,
-    field = sortField,
-    direction = sortDir,
-    filterValues = filters
-  ) => {
-    try {
-      setLoading(true);
-      const token = localStorage.getItem("jwt");
-      const headers = token ? { Authorization: `Bearer ${token}` } : {};
+  const fetchProducts = useCallback(
+    async (
+      page = currentPage,
+      query = searchQuery,
+      field = sortField,
+      direction = sortDir,
+      filterValues = filters
+    ) => {
+      try {
+        setLoading(true);
+        const token = localStorage.getItem("jwt");
+        const headers = token ? { Authorization: `Bearer ${token}` } : {};
 
-      let endpoint;
-      let method = "POST";
-      let body;
+        let endpoint;
+        let method = "POST";
+        let body;
 
-      if (token) {
-        if (query) {
-          // Use search endpoint for authenticated users when there's a search query
-          endpoint = `${API_BASE_URL}/api/products/search/${query}`;
-          method = "GET";
-          body = null;
+        if (token) {
+          if (query) {
+            // Use search endpoint for authenticated users when there's a search query
+            endpoint = `${API_BASE_URL}/api/products/search/${query}`;
+            method = "GET";
+            body = null;
+          } else {
+            // Use regular endpoint for normal listing
+            endpoint = `${API_BASE_URL}/api/products/university`;
+            body = {
+              page: page,
+              size: pageSize,
+              sortField: field || "postDate",
+              sortDir: direction || "desc",
+              category: filterValues.categories,
+              minPrice: filterValues.minPrice,
+              maxPrice: filterValues.maxPrice,
+            };
+          }
         } else {
-          // Use regular endpoint for normal listing
-          endpoint = `${API_BASE_URL}/api/products/university`;
+          // For non-authenticated users, always use the public endpoint
+          endpoint = `${API_BASE_URL}/api/products/public/university/${selectedUniversity}`;
           body = {
             page: page,
             size: pageSize,
@@ -117,84 +131,81 @@ const ProductCard = ({
             maxPrice: filterValues.maxPrice,
           };
         }
-      } else {
-        // For non-authenticated users, always use the public endpoint
-        endpoint = `${API_BASE_URL}/api/products/public/university/${selectedUniversity}`;
-        body = {
-          page: page,
-          size: pageSize,
-          sortField: field || "postDate",
-          sortDir: direction || "desc",
-          category: filterValues.categories,
-          minPrice: filterValues.minPrice,
-          maxPrice: filterValues.maxPrice,
-        };
+
+        console.log("Fetching from endpoint:", endpoint);
+        console.log("Request body:", body);
+
+        const response = await fetch(endpoint, {
+          method: method,
+          headers: {
+            ...(method === "POST" && { "Content-Type": "application/json" }),
+            ...headers,
+          },
+          ...(body && { body: JSON.stringify(body) }),
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => null);
+          throw new Error(
+            errorData?.message || `HTTP error! status: ${response.status}`
+          );
+        }
+
+        const responseData = await response.json();
+        console.log("Received response:", responseData);
+
+        // Handle both paginated and non-paginated responses
+        const content = responseData.content || responseData;
+        const productsWithImages = (
+          Array.isArray(content) ? content : [content]
+        ).map((product) => ({
+          ...product,
+          images:
+            product.imageUrls?.length > 0
+              ? product.imageUrls.map((url, index) => ({
+                  id: `${product.id}-${index}`,
+                  url: url,
+                  fileName: `image-${index}`,
+                }))
+              : [
+                  {
+                    id: product.id,
+                    url: placeholderImage,
+                    fileName: "placeholder",
+                  },
+                ],
+        }));
+
+        setProducts(productsWithImages);
+        if (responseData.totalPages) {
+          setTotalPages(responseData.totalPages);
+          setTotalElements(responseData.totalElements);
+          setCurrentPage(responseData.number);
+        } else {
+          // If it's a search response without pagination
+          setTotalPages(1);
+          setTotalElements(productsWithImages.length);
+          setCurrentPage(0);
+        }
+        setError(null);
+      } catch (err) {
+        console.error("Error fetching products:", err);
+        setError(err.message);
+        setProducts([]);
+      } finally {
+        setLoading(false);
       }
-
-      console.log("Fetching from endpoint:", endpoint);
-      console.log("Request body:", body);
-
-      const response = await fetch(endpoint, {
-        method: method,
-        headers: {
-          ...(method === "POST" && { "Content-Type": "application/json" }),
-          ...headers,
-        },
-        ...(body && { body: JSON.stringify(body) }),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => null);
-        throw new Error(
-          errorData?.message || `HTTP error! status: ${response.status}`
-        );
-      }
-
-      const responseData = await response.json();
-      console.log("Received response:", responseData);
-
-      // Handle both paginated and non-paginated responses
-      const content = responseData.content || responseData;
-      const productsWithImages = (
-        Array.isArray(content) ? content : [content]
-      ).map((product) => ({
-        ...product,
-        images:
-          product.imageUrls?.length > 0
-            ? product.imageUrls.map((url, index) => ({
-                id: `${product.id}-${index}`,
-                url: url,
-                fileName: `image-${index}`,
-              }))
-            : [
-                {
-                  id: product.id,
-                  url: placeholderImage,
-                  fileName: "placeholder",
-                },
-              ],
-      }));
-
-      setProducts(productsWithImages);
-      if (responseData.totalPages) {
-        setTotalPages(responseData.totalPages);
-        setTotalElements(responseData.totalElements);
-        setCurrentPage(responseData.number);
-      } else {
-        // If it's a search response without pagination
-        setTotalPages(1);
-        setTotalElements(productsWithImages.length);
-        setCurrentPage(0);
-      }
-      setError(null);
-    } catch (err) {
-      console.error("Error fetching products:", err);
-      setError(err.message);
-      setProducts([]);
-    } finally {
-      setLoading(false);
-    }
-  }, [currentPage, sortField, sortDir, filters, pageSize, searchQuery, selectedUniversity]);
+    },
+    [
+      currentPage,
+      sortField,
+      sortDir,
+      filters,
+      pageSize,
+      searchQuery,
+      selectedUniversity,
+    ]
+  );
 
   // Main effect for fetching products
   useEffect(() => {
@@ -204,41 +215,56 @@ const ProductCard = ({
     }
   }, [fetchProducts, selectedUniversity, isAuthenticated]);
 
-  // Handle filter changes 
-  const handleFilterChange = useCallback((newFilters) => {
-    setFilters(newFilters);
-    setCurrentPage(0);
-    fetchProducts(0, currentSearch, sortField, sortDir, newFilters);
-  }, [currentSearch, sortField, sortDir, fetchProducts]);
+  // Handle filter changes
+  const handleFilterChange = useCallback(
+    (newFilters) => {
+      setFilters(newFilters);
+      setCurrentPage(0);
+      fetchProducts(0, currentSearch, sortField, sortDir, newFilters);
+    },
+    [currentSearch, sortField, sortDir, fetchProducts]
+  );
 
   // Handle sort changes
-  const handleSort = useCallback((value) => {
-    const [field, dir] = value.split("-");
-    setSortField(field);
-    setSortDir(dir);
-    setCurrentSort(value);
-    fetchProducts(currentPage, currentSearch, field, dir, filters);
-  }, [currentPage, currentSearch, filters, fetchProducts]);
+  const handleSort = useCallback(
+    (value) => {
+      const [field, dir] = value.split("-");
+      setSortField(field);
+      setSortDir(dir);
+      setCurrentSort(value);
+      fetchProducts(currentPage, currentSearch, field, dir, filters);
+    },
+    [currentPage, currentSearch, filters, fetchProducts]
+  );
 
-  const handleSearch = useCallback((query) => {
-    setCurrentSearch(query);
-    setCurrentPage(0);
-    fetchProducts(0, query, sortField, sortDir, filters);
-  }, [sortField, sortDir, filters, fetchProducts]);
+  const handleSearch = useCallback(
+    (query) => {
+      setCurrentSearch(query);
+      setCurrentPage(0);
+      fetchProducts(0, query, sortField, sortDir, filters);
+    },
+    [sortField, sortDir, filters, fetchProducts]
+  );
 
-  const handleProtectedAction = useCallback((action, e) => {
-    if (e) e.stopPropagation();
-    if (!isAuthenticated) {
-      console.log("User not authenticated");
-      setOpen(true);
-    } else {
-      action();
-    }
-  }, [isAuthenticated]);
+  const handleProtectedAction = useCallback(
+    (action, e) => {
+      if (e) e.stopPropagation();
+      if (!isAuthenticated) {
+        console.log("User not authenticated");
+        setOpen(true);
+      } else {
+        action();
+      }
+    },
+    [isAuthenticated]
+  );
 
-  const handleProductClick = useCallback((productId) => {
-    navigate(`/product/${productId}`);
-  }, [navigate]);
+  const handleProductClick = useCallback(
+    (productId) => {
+      navigate(`/product/${productId}`);
+    },
+    [navigate]
+  );
 
   const handleShare = useCallback((product, platform, e) => {
     e.stopPropagation();
@@ -282,11 +308,14 @@ const ProductCard = ({
     }
   }, []);
 
-  const handlePageChange = useCallback((newPage) => {
-    if (newPage >= 0 && newPage < totalPages) {
-      setCurrentPage(newPage);
-    }
-  }, [totalPages]);
+  const handlePageChange = useCallback(
+    (newPage) => {
+      if (newPage >= 0 && newPage < totalPages) {
+        setCurrentPage(newPage);
+      }
+    },
+    [totalPages]
+  );
 
   const formatDate = useCallback((dateString) => {
     try {
@@ -302,14 +331,17 @@ const ProductCard = ({
   }, []);
 
   // Memoize sort options
-  const sortOptions = useMemo(() => [
-    { value: "postDate-desc", label: "Newest First" },
-    { value: "postDate-asc", label: "Oldest First" },
-    { value: "price-asc", label: "Price: Low to High" },
-    { value: "price-desc", label: "Price: High to Low" },
-    { value: "name-asc", label: "Name: A-Z" },
-    { value: "name-desc", label: "Name: Z-A" },
-  ], []);
+  const sortOptions = useMemo(
+    () => [
+      { value: "postDate-desc", label: "Newest First" },
+      { value: "postDate-asc", label: "Oldest First" },
+      { value: "price-asc", label: "Price: Low to High" },
+      { value: "price-desc", label: "Price: High to Low" },
+      { value: "name-asc", label: "Name: A-Z" },
+      { value: "name-desc", label: "Name: Z-A" },
+    ],
+    []
+  );
 
   if (loading && products.length === 0) {
     return (
@@ -324,22 +356,24 @@ const ProductCard = ({
       <div className="container mx-auto px-4">
         {/* Mobile filter and sort buttons */}
         <div className="flex lg:hidden gap-2 mb-4">
-          <Button 
-            variant="outline" 
-            size="sm" 
+          <Button
+            variant="outline"
+            size="sm"
             className="flex-1 justify-center"
             onClick={() => setIsMobileFilterOpen(true)}
           >
             <SlidersHorizontal className="h-4 w-4 mr-2" />
             Filters
-            {filters.categories || filters.minPrice > 0 || filters.maxPrice < 5000 ? (
+            {filters.categories ||
+            filters.minPrice > 0 ||
+            filters.maxPrice < 5000 ? (
               <Badge variant="secondary" className="ml-2">
-                {(filters.categories ? 1 : 0) + 
-                 ((filters.minPrice > 0 || filters.maxPrice < 5000) ? 1 : 0)}
+                {(filters.categories ? 1 : 0) +
+                  (filters.minPrice > 0 || filters.maxPrice < 5000 ? 1 : 0)}
               </Badge>
             ) : null}
           </Button>
-          
+
           <Select value={currentSort} onValueChange={handleSort}>
             <SelectTrigger className="flex-1 h-9">
               <div className="flex items-center">
@@ -348,7 +382,7 @@ const ProductCard = ({
               </div>
             </SelectTrigger>
             <SelectContent>
-              {sortOptions.map(option => (
+              {sortOptions.map((option) => (
                 <SelectItem key={option.value} value={option.value}>
                   {option.label}
                 </SelectItem>
@@ -377,9 +411,11 @@ const ProductCard = ({
               </div>
             ) : products.length === 0 ? (
               <div className="text-center py-8 bg-muted/30 rounded-lg">
-                <p className="text-muted-foreground">No products found matching your criteria.</p>
-                <Button 
-                  variant="outline" 
+                <p className="text-muted-foreground">
+                  No products found matching your criteria.
+                </p>
+                <Button
+                  variant="outline"
                   className="mt-4"
                   onClick={() => {
                     handleFilterChange({
@@ -446,6 +482,13 @@ const ProductCard = ({
                                     <span className="text-xs">
                                       {formatDate(product.postDate)}
                                     </span>
+                                    <span className="text-xs">•</span>
+                                    <Badge
+                                      variant="secondary"
+                                      className="font-normal text-xs"
+                                    >
+                                      {product.category}
+                                    </Badge>
                                   </div>
                                 </div>
                               </div>
@@ -569,6 +612,13 @@ const ProductCard = ({
                               <span className="text-xs">
                                 {formatDate(product.postDate)}
                               </span>
+                              <span className="text-xs">•</span>
+                              <Badge
+                                variant="secondary"
+                                className="font-normal text-xs"
+                              >
+                                {product.category}
+                              </Badge>
                             </div>
                           </div>
 

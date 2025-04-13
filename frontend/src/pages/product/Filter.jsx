@@ -2,9 +2,7 @@ import React, { useState, useMemo } from "react";
 import * as SliderPrimitive from "@radix-ui/react-slider";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Filter as FilterIcon } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
@@ -68,12 +66,6 @@ const FilterComponent = ({
     currentFilters?.minPrice || 0,
     currentFilters?.maxPrice || 5000,
   ]);
-  const [minInputValue, setMinInputValue] = useState(
-    (currentFilters?.minPrice || 0).toString()
-  );
-  const [maxInputValue, setMaxInputValue] = useState(
-    (currentFilters?.maxPrice || 5000).toString()
-  );
   const [selectedCategory, setSelectedCategory] = useState(
     currentFilters?.categories || "All"
   );
@@ -94,44 +86,6 @@ const FilterComponent = ({
 
   const handleSliderChange = (value) => {
     setPriceRange(value);
-    setMinInputValue(value[0].toString());
-    setMaxInputValue(value[1].toString());
-  };
-
-  const handleMinInputChange = (e) => {
-    setMinInputValue(e.target.value);
-  };
-
-  const handleMaxInputChange = (e) => {
-    setMaxInputValue(e.target.value);
-  };
-
-  const handleMinInputBlur = () => {
-    setTimeout(() => {
-      let value = minInputValue;
-      if (value === "" || isNaN(Number(value))) {
-        value = "0";
-        setMinInputValue(value);
-      }
-
-      const numValue = Math.max(0, Math.min(5000, Number(value)));
-      setMinInputValue(numValue.toString());
-      setPriceRange([numValue, Math.max(numValue, priceRange[1])]);
-    }, 1000); // Wait for 1000ms before updating
-  };
-
-  const handleMaxInputBlur = () => {
-    setTimeout(() => {
-      let value = maxInputValue;
-      if (value === "" || isNaN(Number(value))) {
-        value = "5000";
-        setMaxInputValue(value);
-      }
-
-      const numValue = Math.max(0, Math.min(5000, Number(value)));
-      setMaxInputValue(numValue.toString());
-      setPriceRange([Math.min(numValue, priceRange[0]), numValue]);
-    }, 1000); // Wait for 1000ms before updating
   };
 
   const handleCategoryChange = (category) => {
@@ -141,8 +95,8 @@ const FilterComponent = ({
   const applyFilters = (e) => {
     if (e) e.preventDefault();
     onFilterChange({
-      minPrice: parseInt(minInputValue, 10),
-      maxPrice: parseInt(maxInputValue, 10),
+      minPrice: priceRange[0],
+      maxPrice: priceRange[1],
       categories: selectedCategory === "All" ? "" : selectedCategory,
     });
     // Close mobile filter sheet if it's open
@@ -154,8 +108,6 @@ const FilterComponent = ({
   const clearFilters = () => {
     // Reset filters
     setPriceRange([0, 5000]);
-    setMinInputValue("0");
-    setMaxInputValue("5000");
     setSelectedCategory("All");
     
     // Apply filter changes
@@ -199,38 +151,10 @@ const FilterComponent = ({
       {/* Divider */}
       <div className="h-px bg-border" />
 
-      {/* Price Range Section */}
+      {/* Price Range Section - Simplified with just the slider */}
       <div>
         <h3 className="font-medium mb-4">Price Range</h3>
         <div className="space-y-4">
-          <div className="flex gap-4 mb-4">
-            <div className="flex-1">
-              <Label htmlFor="min-price-desktop">Min Price</Label>
-              <Input
-                id="min-price-desktop"
-                type="number"
-                value={minInputValue}
-                onChange={handleMinInputChange}
-                onBlur={handleMinInputBlur}
-                min={0}
-                max={5000}
-                className="mt-1"
-              />
-            </div>
-            <div className="flex-1">
-              <Label htmlFor="max-price-desktop">Max Price</Label>
-              <Input
-                id="max-price-desktop"
-                type="number"
-                value={maxInputValue}
-                onChange={handleMaxInputChange}
-                onBlur={handleMaxInputBlur}
-                min={0}
-                max={5000}
-                className="mt-1"
-              />
-            </div>
-          </div>
           <CustomSlider
             value={priceRange}
             min={0}
@@ -239,6 +163,11 @@ const FilterComponent = ({
             onValueChange={handleSliderChange}
             className="w-full"
           />
+          {/* Display current price range values */}
+          <div className="flex justify-between text-sm text-muted-foreground">
+            <span>₹{priceRange[0]}</span>
+            <span>₹{priceRange[1]}</span>
+          </div>
         </div>
       </div>
 
@@ -278,38 +207,10 @@ const FilterComponent = ({
   // Mobile filter panel that includes ONLY filters (not sort)
   const MobileFilterPanel = () => (
     <div className="space-y-6">
-      {/* Price Range Section */}
+      {/* Price Range Section - Simplified with just the slider */}
       <div>
         <h3 className="font-medium mb-4">Price Range</h3>
         <div className="space-y-4">
-          <div className="flex gap-4 mb-4">
-            <div className="flex-1">
-              <Label htmlFor="min-price-mobile">Min Price</Label>
-              <Input
-                id="min-price-mobile"
-                type="number"
-                value={minInputValue}
-                onChange={handleMinInputChange}
-                onBlur={handleMinInputBlur}
-                min={0}
-                max={5000}
-                className="mt-1"
-              />
-            </div>
-            <div className="flex-1">
-              <Label htmlFor="max-price-mobile">Max Price</Label>
-              <Input
-                id="max-price-mobile"
-                type="number"
-                value={maxInputValue}
-                onChange={handleMaxInputChange}
-                onBlur={handleMaxInputBlur}
-                min={0}
-                max={5000}
-                className="mt-1"
-              />
-            </div>
-          </div>
           <CustomSlider
             value={priceRange}
             min={0}
@@ -318,6 +219,11 @@ const FilterComponent = ({
             onValueChange={handleSliderChange}
             className="w-full"
           />
+          {/* Display current price range values */}
+          <div className="flex justify-between text-sm text-muted-foreground">
+            <span>₹{priceRange[0]}</span>
+            <span>₹{priceRange[1]}</span>
+          </div>
         </div>
       </div>
 
