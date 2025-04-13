@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useParams } from "react-router-dom";
 import {
   Share2,
@@ -9,6 +9,7 @@ import {
   MessageSquare,
   Clock,
   User,
+  Heart,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -31,7 +32,38 @@ const ProductDetails = () => {
     name: "Unknown Seller",
     createdAt: new Date(),
   });
+  const [isWishlisted, setIsWishlisted] = useState(false);
   const currentUserId = localStorage.getItem("userId");
+  const [isAuthenticated, setIsAuthenticated] = useState(
+    Boolean(localStorage.getItem("jwt"))
+  );
+  const [open, setOpen] = useState(false);
+
+  // Function to check if product is in wishlist
+  const checkWishlistStatus = useCallback(async (productId) => {
+    try {
+      const token = localStorage.getItem("jwt");
+      if (!token) return false;
+
+      const response = await fetch(
+        `${API_BASE_URL}/api/wishlist/${productId}/check`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (response.ok) {
+        const isInWishlist = await response.json();
+        return isInWishlist;
+      }
+      return false;
+    } catch (error) {
+      console.error("Error checking wishlist status:", error);
+      return false;
+    }
+  }, []);
 
   useEffect(() => {
     let isMounted = true;
@@ -92,6 +124,10 @@ const ProductDetails = () => {
 
           setProduct(transformedProduct);
 
+          // Check if product is wishlisted
+          const wishlistStatus = productData.wishlisted || await checkWishlistStatus(productData.id);
+          setIsWishlisted(wishlistStatus);
+
           // Fetch seller info if available
           if (productData.sellerId) {
             fetchSellerInfo(productData.sellerId, token);
@@ -140,12 +176,66 @@ const ProductDetails = () => {
     return () => {
       isMounted = false;
     };
-  }, [productId]);
+  }, [productId, checkWishlistStatus]);
+  
+  const handleWishlist = useCallback(async (productId, e) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
 
-  const handleChat = async () => {
-    // Implement chat functionality using sellerId
-    console.log("Starting chat with seller:", product.sellerId);
-  };
+    if (!isAuthenticated) {
+      setOpen(true);
+      return;
+    }
+
+    try {
+      const token = localStorage.getItem("jwt");
+      
+      // If already wishlisted, remove from wishlist
+      if (isWishlisted) {
+        const response = await fetch(
+          `${API_BASE_URL}/api/wishlist/${productId}`,
+          {
+            method: "DELETE",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+
+        if (!response.ok) {
+          throw new Error("Failed to remove from wishlist");
+        }
+        
+        setIsWishlisted(false);
+      } 
+      // Otherwise, add to wishlist
+      else {
+        const response = await fetch(
+          `${API_BASE_URL}/api/wishlist/${productId}`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+
+        if (!response.ok) {
+          throw new Error("Failed to add to wishlist");
+        }
+        
+        setIsWishlisted(true);
+      }
+    } catch (error) {
+      console.error("Error updating wishlist:", error);
+    }
+  }, [isAuthenticated, isWishlisted]);
+
+
 
   const handleShare = (product, platform, e) => {
     e.preventDefault();
@@ -241,9 +331,24 @@ const ProductDetails = () => {
         <div className="space-y-4 sm:space-y-6 px-2 md:px-0">
           {/* SECTION 1: Name, price, description */}
           <div>
-            <h1 className="text-2xl sm:text-3xl font-bold mb-1 sm:mb-2">
-              {product.name}
-            </h1>
+            <div className="flex items-center justify-between mb-1 sm:mb-2">
+              <h1 className="text-2xl sm:text-3xl font-bold">{product.name}</h1>
+              <Button
+                variant="ghost"
+                onClick={(e) => handleWishlist(product.id, e)}
+                className="ml-2 p-0 hover:bg-muted rounded-full h-12 w-12 flex items-center justify-center"
+              >
+                <Heart
+                  className={`transition-colors duration-200 ${
+                    isWishlisted
+                      ? "fill-primary text-primary"
+                      : "text-primary hover:fill-primary/20"
+                  }`}
+                  size={32}
+                />
+              </Button>
+            </div>
+
             <div
               className={`text-xl sm:text-2xl font-bold mb-2 sm:mb-4 ${
                 product.price === 0 ? "text-green-600" : "text-primary"
@@ -295,7 +400,7 @@ const ProductDetails = () => {
 
           <div className="flex gap-3 pt-3">
             <div className="flex-1">
-              {String(currentUserId) !== String(product.sellerId) ? (
+              {String(currentUserId) != String(product.sellerId) ? (
                 <ChatInitiator
                   productId={product.id}
                   sellerId={product.sellerId}

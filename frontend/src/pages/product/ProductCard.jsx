@@ -242,55 +242,6 @@ const ProductCard = ({
     navigate(`/product/${productId}`);
   };
 
-  const handleWishlist = async (productId, e) => {
-    if (e) {
-      e.preventDefault();
-      e.stopPropagation();
-    }
-
-    if (!isAuthenticated) {
-      setOpen(true);
-      return;
-    }
-
-    try {
-      const token = localStorage.getItem("jwt");
-      const response = await fetch(
-        `${API_BASE_URL}/api/wishlist/${productId}`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-
-      if (!response.ok) {
-        throw new Error("Failed to add to wishlist");
-      }
-
-      setWishlistedItems((prev) => {
-        const newSet = new Set(prev);
-        if (newSet.has(productId)) {
-          newSet.delete(productId);
-        } else {
-          newSet.add(productId);
-        }
-        return newSet;
-      });
-
-      setProducts((prevProducts) =>
-        prevProducts.map((product) =>
-          product.id === productId
-            ? { ...product, isWishlisted: !product.isWishlisted }
-            : product
-        )
-      );
-    } catch (error) {
-      console.error("Error updating wishlist:", error);
-    }
-  };
 
   const handleShare = (product, platform, e) => {
     e.stopPropagation();
@@ -403,20 +354,6 @@ const ProductCard = ({
                               alt={product.name}
                               className="h-full w-full object-cover"
                             />
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="absolute right-1 top-1 bg-background/80 backdrop-blur-sm hover:bg-background/90 z-10 h-6 w-6 p-1"
-                              onClick={(e) => handleWishlist(product.id, e)}
-                            >
-                              <Heart
-                                className={`h-4 w-4 transition-colors duration-200 ${
-                                  product.isWishlisted
-                                    ? "fill-primary text-primary"
-                                    : "text-primary hover:fill-primary/20"
-                                }`}
-                              />
-                            </Button>
                           </div>
 
                           {/* Right side: Content */}
@@ -544,20 +481,6 @@ const ProductCard = ({
                             alt={product.name}
                             className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
                           />
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="absolute right-2 top-2 bg-background/80 backdrop-blur-sm hover:bg-background/90 z-10"
-                            onClick={(e) => handleWishlist(product.id, e)}
-                          >
-                            <Heart
-                              className={`h-6 w-6 transition-colors duration-200 ${
-                                product.isWishlisted
-                                  ? "fill-primary text-primary"
-                                  : "text-primary hover:fill-primary/20"
-                              }`}
-                            />
-                          </Button>
                         </div>
 
                         <div className="p-4">
