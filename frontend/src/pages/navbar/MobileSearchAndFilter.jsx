@@ -1,9 +1,8 @@
 import React from "react";
 import { Filter, X } from "lucide-react";
-import { ProductSearch, ProductSort } from "./SearchSortComponents";
+import { ProductSearch } from "./SearchSortComponents";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import FilterComponent from "../product/Filter";
 
 const MobileSearchAndFilter = ({ 
   isFilterOpen, 
@@ -29,14 +28,6 @@ const MobileSearchAndFilter = ({
               currentSearch={currentSearch}
               className="w-full"
               placeholder="Search products..."
-            />
-          </div>
-          <div className="flex space-x-1 sm:space-x-2 md:space-x-3">
-            <ProductSort
-              onSort={handleSort}
-              currentSort={currentSort}
-              isLoading={isLoading}
-              triggerClassName="w-auto"
             />
           </div>
         </div>

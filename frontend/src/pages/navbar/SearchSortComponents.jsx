@@ -68,46 +68,6 @@ export const ProductSearch = ({ onSearch, isAuthenticated, isLoading, currentSea
   );
 };
 
-export const ProductSort = ({ onSort, currentSort, isLoading }) => {
-  const location = useLocation();
-  const defaultSort = "postDate-desc";
-
-  // Don't render on non-home pages
-  if (location.pathname !== '/') return null;
-
-  return (
-    <Select
-      value={currentSort?.toString() || defaultSort?.toString()}
-      onValueChange={onSort}
-      disabled={isLoading}
-    >
-      <SelectTrigger className="w-[180px]">
-        {isLoading ? (
-          <div className="flex items-center">
-            <Loader2 className="h-4 w-4 animate-spin mr-2" />
-            <span>Sorting...</span>
-          </div>
-        ) : (
-          <SelectValue placeholder="Sort" />
-        )}
-      </SelectTrigger>
-      <SelectContent>
-        {[
-          { id: "postDate-desc", name: "Latest First" },
-          { id: "postDate-asc", name: "Oldest First" },
-          { id: "price-asc", name: "Price: Low to High" },
-          { id: "price-desc", name: "Price: High to Low" },
-          { id: "name-asc", name: "Name: A to Z" },
-          { id: "name-desc", name: "Name: Z to A" },
-        ].map((data) => (
-          <SelectItem key={data.id} value={data.id.toString()}>
-            {data.name}
-          </SelectItem>
-        ))}
-      </SelectContent>
-    </Select>
-  );
-};
 
 // Export a loader component for reuse
 export const LoadingSpinner = () => (
@@ -118,6 +78,5 @@ export const LoadingSpinner = () => (
 
 export default {
   ProductSearch,
-  ProductSort,
   LoadingSpinner
 };
