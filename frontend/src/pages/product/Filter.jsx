@@ -16,19 +16,19 @@ import {
 
 // Categories array, no change
 const categories = [
-  "All",
-  "Books",
-  "Electronics",
-  "Furniture",
-  "Clothing",
-  "Sports",
-  "Musical Instruments",
-  "Stationery",
-  "Lab Equipment",
-  "Study Materials",
-  "Hostel Supplies",
-  "Vehicles",
-  "Others",
+  { value: "All", label: "All" },
+  { value: "Books", label: "Books" },
+  { value: "Electronics", label: "Electronics" },
+  { value: "Furniture", label: "Furniture" },
+  { value: "Clothing", label: "Clothing" },
+  { value: "Sports", label: "Sports" },
+  { value: "Musical_Instruments", label: "Musical Instruments" },
+  { value: "Stationery", label: "Stationery" },
+  { value: "Lab_Equipment", label: "Lab Equipment" },
+  { value: "Study_Materials", label: "Study Materials" },
+  { value: "Hostel_Supplies", label: "Hostel Supplies" },
+  { value: "Vehicles", label: "Vehicles" },
+  { value: "Others", label: "Others" },
 ];
 
 // Custom Slider Component, no change
@@ -109,19 +109,19 @@ const FilterComponent = ({
     // Reset filters
     setPriceRange([0, 5000]);
     setSelectedCategory("All");
-    
+
     // Apply filter changes
     onFilterChange({
       minPrice: 0,
       maxPrice: 5000,
       categories: "",
     });
-    
+
     // Reset sort to "Newest First"
     if (onSortChange) {
       onSortChange("postDate-desc");
     }
-    
+
     // Close mobile filter sheet
     if (setIsFilterOpen) {
       setIsFilterOpen(false);
@@ -181,10 +181,16 @@ const FilterComponent = ({
             className="space-y-2"
           >
             {categories.map((category) => (
-              <div key={category} className="flex items-center space-x-2">
-                <RadioGroupItem value={category} id={`desktop-${category}`} />
-                <Label htmlFor={`desktop-${category}`} className="text-sm cursor-pointer">
-                  {category}
+              <div key={category.value} className="flex items-center space-x-2">
+                <RadioGroupItem
+                  value={category.value}
+                  id={`desktop-${category.value}`}
+                />
+                <Label
+                  htmlFor={`desktop-${category.value}`}
+                  className="text-sm cursor-pointer"
+                >
+                  {category.label}
                 </Label>
               </div>
             ))}
@@ -237,10 +243,16 @@ const FilterComponent = ({
             className="space-y-2"
           >
             {categories.map((category) => (
-              <div key={category} className="flex items-center space-x-2">
-                <RadioGroupItem value={category} id={`mobile-${category}`} />
-                <Label htmlFor={`mobile-${category}`} className="text-sm cursor-pointer">
-                  {category}
+              <div key={category.value} className="flex items-center space-x-2">
+                <RadioGroupItem
+                  value={category.value}
+                  id={`mobile-${category.value}`}
+                />
+                <Label
+                  htmlFor={`mobile-${category.value}`}
+                  className="text-sm cursor-pointer"
+                >
+                  {category.label}
                 </Label>
               </div>
             ))}
