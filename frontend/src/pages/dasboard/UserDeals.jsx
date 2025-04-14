@@ -51,7 +51,7 @@ import { Badge } from "@/components/ui/badge";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import PostADeal from ".././product/PostADeal";
 import { API_BASE_URL } from "../../pages/Api/api";
-import { set } from "lodash";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const UserDeals = () => {
   const [deals, setDeals] = useState([]);
@@ -82,6 +82,32 @@ const UserDeals = () => {
   const [confirmSoldDialogOpen, setConfirmSoldDialogOpen] = useState(false);
   const [tempSoldType, setTempSoldType] = useState(null);
 
+  const SkeletonCard = () => (
+    <Card className="flex flex-col h-full">
+      <div className="p-0">
+        <Skeleton className="w-full h-48 rounded-t-lg" />
+      </div>
+      <CardContent className="flex-grow space-y-4 pt-4">
+        <Skeleton className="h-5 w-3/4" />
+        <Skeleton className="h-6 w-1/4" />
+        <Skeleton className="h-4 w-full" />
+        <div className="flex flex-wrap gap-2">
+          <Skeleton className="h-5 w-20" />
+          <Skeleton className="h-5 w-24" />
+        </div>
+      </CardContent>
+      <CardFooter className="flex flex-col space-y-2 p-4">
+        <div className="flex flex-col sm:flex-row w-full gap-2">
+          <Skeleton className="h-10 w-full" />
+          <Skeleton className="h-10 w-full" />
+        </div>
+        <div className="flex justify-between w-full mt-2">
+          <Skeleton className="h-8 w-8" />
+          <Skeleton className="h-8 w-8" />
+        </div>
+      </CardFooter>
+    </Card>
+  );
   useEffect(() => {
     fetchUserDeals();
   }, []);
@@ -772,8 +798,8 @@ const UserDeals = () => {
       </CardContent>
 
       <CardFooter className="flex flex-col space-y-2 p-4">
-      <div className="flex flex-col sm:flex-row w-full gap-2">
-      <DropdownMenu>
+        <div className="flex flex-col sm:flex-row w-full gap-2">
+          <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button
                 variant="secondary"
@@ -1070,7 +1096,11 @@ const UserDeals = () => {
       </div>
 
       {loading ? (
-        <div className="text-center py-8">Loading...</div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {[...Array(6)].map((_, index) => (
+            <SkeletonCard key={index} />
+          ))}
+        </div>
       ) : deals.length === 0 ? (
         <Card className="text-center py-8">
           <CardContent>
