@@ -21,8 +21,8 @@ public class S3ImageService {
     private final S3Client s3Client;
     private final ImageRepo imageRepository;
 
-    private final String bucketName = "college-dealz-images";
-    private final String region = "ap-south-1"; // used in URL
+    private final String bucketName = "college-dealz-imagess";
+    private final String region = "us-east-1"; // used in URL
 
 
     public void migrateImagesToS3() {
