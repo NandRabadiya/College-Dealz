@@ -25,6 +25,7 @@ import ErrorPage from "./pages/ErrorPage";
 import OAuthCallback from "./pages/authentication/OAuthCallback";
 import FeedbackWidget from "./pages/FeedbackWidget";
 import ChatContainer from "./pages/chat/ChatContainer";
+import { initApi } from "./pages/Api/api";
 
 // PrivateRoute component
 const PrivateRoute = ({ element, isLoggedIn, redirectTo }) => {
@@ -121,6 +122,7 @@ const AppRoutes = ({ searchQuery, sortField, sortDir, selectedUniversity }) => {
 function App() {
   const dispatch = useDispatch();
 
+  
   // Tour state
   const [hasSeenTour, setHasSeenTour] = useState(false);
 
@@ -141,13 +143,21 @@ function App() {
 
   // Check auth on mount
   useEffect(() => {
-    const token = localStorage.getItem("jwt");
-    if (token) {
-      dispatch(getUser(token));
-    } else {
-      setShowUniversitySelector(true);
-    }
-    console.log("App.js useEffect", { token });
+    
+    const initialize = async () => {
+      await initApi(); // Initialization logic
+  
+      const token = localStorage.getItem("jwt");
+      if (token) {
+        dispatch(getUser(token));
+      } else {
+        setShowUniversitySelector(true);
+      }
+  
+      console.log("App.js useEffect", { token });
+    };
+  
+    initialize();
   }, [dispatch]);
 
   const handleUniversitySelect = (universityId) => {

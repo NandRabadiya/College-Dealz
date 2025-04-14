@@ -1,18 +1,32 @@
 
+// api.js
 import axios from 'axios';
-const LOCALHOST='http://localhost:8080'
+import { getApiBaseUrl } from './autoServer';
 
-//const LOCALHOST='https://college-dealz.up.railway.app'
-export const API_BASE_URL = LOCALHOST
+let API_BASE_URL = null;
+let api = null;
 
-const api = axios.create({
-  baseURL: API_BASE_URL,
-});
+// Call this ONCE at app startup
+export const initApi = async () => {
+  API_BASE_URL = await getApiBaseUrl();
 
-const token = localStorage.getItem('jwt');
+  api = axios.create({
+    baseURL: API_BASE_URL,
+  });
 
-api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+  const token = localStorage.getItem('jwt');
+    api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+  api.defaults.headers.post['Content-Type'] = 'application/json';
+};
 
-api.defaults.headers.post['Content-Type'] = 'application/json';
+// Access the API instance safely after initialization
+// export const getApi = () => {
+//   if (!api) {
+//     throw new Error('API not initialized. Call initApi() before using getApi().');
+//   }
+//   return api;
+// };
 
-export default api;
+export { API_BASE_URL };
+
+export default api
