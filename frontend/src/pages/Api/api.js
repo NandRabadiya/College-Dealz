@@ -3,12 +3,12 @@
 import axios from 'axios';
 import { getApiBaseUrl } from './autoServer';
 
-let API_BASE_URL = null;
+let API_BASE_URL = 'https://ec2-13-217-130-65.compute-1.amazonaws.com:8080';
 let api = null;
 
 // Call this ONCE at app startup
 export const initApi = async () => {
-  API_BASE_URL = await getApiBaseUrl();
+ // API_BASE_URL = await getApiBaseUrl();
 
   api = axios.create({
     baseURL: API_BASE_URL,
