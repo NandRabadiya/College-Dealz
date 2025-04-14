@@ -25,20 +25,9 @@ int countByRolesContaining(Role role);
     @EntityGraph(attributePaths = "roles")
     Optional<User> findWithRolesByEmail(String email);
 
-    //below is same just in query formate
-//    @Query("SELECT u FROM User u JOIN FETCH u.roles WHERE u.email = :email")
-//    Optional<User> findWithRolesByEmail(@Param("email") String email);
-
-
-
-    // int getUserByEmail(String email);
-
     @Query("SELECT u.id FROM User u WHERE u.email = :email")
     Optional<Integer> getUserIdByEmail(@Param("email") String email);
-
-
-    // Add a custom fetch method if you often need roles with users by role
-    @EntityGraph(attributePaths = "roles")
+@EntityGraph(attributePaths = "roles")
     List<User> findByRolesContaining(Role role);
 
     List<User> findAllByUniversity(University university);

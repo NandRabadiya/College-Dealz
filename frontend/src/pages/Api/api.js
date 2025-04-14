@@ -1,7 +1,7 @@
 
 // api.js
 import axios from 'axios';
-import { getApiBaseUrl } from './autoserver';
+import { getApiBaseUrl } from './autoServer';
 
 let API_BASE_URL = null;
 let api = null;
