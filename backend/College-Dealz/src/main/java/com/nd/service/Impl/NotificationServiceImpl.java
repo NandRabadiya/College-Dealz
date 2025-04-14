@@ -19,6 +19,7 @@ import java.time.Instant;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.stream.Collectors;
 @Service
 public class NotificationServiceImpl implements NotificationService {
@@ -58,10 +59,8 @@ public class NotificationServiceImpl implements NotificationService {
 
         Notification notification = new Notification();
         notification.setType(NotificationType.ITEM_INTEREST);
-        notification.setTitle("New Item in Wantlist");
-        notification.setMessage("New item " +
-                wantlist.getProductName()+
-                 "added in wantlist ");
+        notification.setTitle(wantlist.getProductName().toUpperCase()+" added in Wantlist");
+        notification.setMessage(" Click to visit ");
         notification.setIsRead(false);
         notification.setCreatedAt(Instant.now());
         notification.setReferenceId(itemId);
