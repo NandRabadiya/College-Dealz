@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { login } from "../../redux/Auth/actions"; // Import login action
 
-const allowedDomains = ["ddu.ac.in", "gtu.ac.in"];
+const allowedDomains = ["ddu.ac.in", "gtu.ac.in", "gmail.com"];
 const loginSchema = z.object({
   email: z
     .string()
