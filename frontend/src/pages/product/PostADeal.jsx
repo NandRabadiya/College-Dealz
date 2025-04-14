@@ -66,6 +66,7 @@ const PostADeal = ({ onClose, editDeal }) => {
   const [feedbackMessage, setFeedbackMessage] = useState("");
   const [feedbackType, setFeedbackType] = useState(""); // "success" or "error"
   const [showFeedback, setShowFeedback] = useState(false);
+  const [removedImages, setRemovedImages] = useState([]);
 
   const [formData, setFormData] = useState({
     name: "",
@@ -172,6 +173,13 @@ const PostADeal = ({ onClose, editDeal }) => {
   };
 
   const removeImage = (index) => {
+    const imageToRemove = formData.images[index];
+    
+    // If this is an existing image (has existingUrl), track it for backend deletion
+    if (imageToRemove.existingUrl) {
+      setRemovedImages(prev => [...prev, imageToRemove.existingUrl]);
+    }
+    
     setFormData((prevData) => ({
       ...prevData,
       images: prevData.images.filter((_, i) => i !== index),
@@ -218,7 +226,7 @@ const PostADeal = ({ onClose, editDeal }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSubmitError("");
-
+  
     if (!validate()) return;
     // Additional validation for edit mode
     if (editDeal && !editDeal.id) {
@@ -226,7 +234,7 @@ const PostADeal = ({ onClose, editDeal }) => {
       console.error("Edit mode active but no product ID provided:", editDeal);
       return;
     }
-
+  
     try {
       setIsSubmitting(true);
       const token = localStorage.getItem("jwt");
@@ -235,7 +243,7 @@ const PostADeal = ({ onClose, editDeal }) => {
         return;
       }
       const formDataToSend = new FormData();
-
+  
       // Append basic product details
       formDataToSend.append("name", formData.name);
       formDataToSend.append("description", formData.description);
@@ -243,25 +251,32 @@ const PostADeal = ({ onClose, editDeal }) => {
       formDataToSend.append("condition", formData.condition);
       formDataToSend.append("category", formData.category);
       formDataToSend.append("monthsOld", formData.monthsOld);
-
+  
       // Handle new image files
       formData.images
         .filter((img) => img.file)
         .forEach((image) => {
           formDataToSend.append("images", image.file);
         });
-
+  
       // Handle existing images
       const existingImages = formData.images
         .filter((img) => img.existingUrl)
         .map((img) => img.existingUrl);
-
+  
       formDataToSend.append("existingImages", JSON.stringify(existingImages));
-
+      
+      // Add removed images to be deleted from S3
+      if (removedImages.length > 0) {
+        removedImages.forEach((url) =>
+          formDataToSend.append("removeImagesUrls", url)
+        );
+              }
+  
       // Construct URL based on mode (edit, create, or create-from-wantlist)
       let url;
       let method = "POST";
-
+  
       if (formData.id) {
         // Edit mode
         url = `${API_BASE_URL}/api/products/${formData.id}`;
@@ -274,12 +289,12 @@ const PostADeal = ({ onClose, editDeal }) => {
         // Regular create mode
         url = `${API_BASE_URL}/api/products/create`;
       }
-
+  
       console.log("Making request to:", url);
       console.log("Method:", method);
       console.log("Form data ID:", formData.id);
       if (wantlistId) console.log("Wantlist ID:", wantlistId);
-
+  
       const response = await fetch(url, {
         method,
         headers: {
@@ -287,7 +302,7 @@ const PostADeal = ({ onClose, editDeal }) => {
         },
         body: formDataToSend,
       });
-
+  
       // Try to parse JSON response, but handle non-JSON responses gracefully
       if (!response.ok) {
         let errorMessage = `HTTP error! status: ${response.status}`;
@@ -299,7 +314,7 @@ const PostADeal = ({ onClose, editDeal }) => {
         }
         throw new Error(errorMessage);
       }
-
+  
       // If we get here, the request was successful
       // Clean up any object URLs we created
       formData.images.forEach((image) => {
@@ -307,7 +322,7 @@ const PostADeal = ({ onClose, editDeal }) => {
           URL.revokeObjectURL(image.preview);
         }
       });
-
+  
       // Show success message and auto-close
       setFeedbackMessage(
         formData.id
@@ -318,14 +333,22 @@ const PostADeal = ({ onClose, editDeal }) => {
       );
       setFeedbackType("success");
       setShowFeedback(true);
-
+  
       // Auto close after 2.5 seconds
       setTimeout(() => {
         if (onClose) {
-          onClose(true); // Pass true to indicate successful submission
+          onClose(true);
         }
-        navigate(-1);
+      
+        if (formData.id) {
+          // Edit mode
+          navigate("/dashboard");
+        } else {
+          // Post (create) mode
+          navigate("/");
+        }
       }, 2500);
+      
     } catch (error) {
       console.error("Error submitting deal:", error);
       setFeedbackMessage(
@@ -333,7 +356,7 @@ const PostADeal = ({ onClose, editDeal }) => {
       );
       setFeedbackType("error");
       setShowFeedback(true);
-
+  
       // Clear feedback after 2.5 seconds
       setTimeout(() => {
         setShowFeedback(false);
