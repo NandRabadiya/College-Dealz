@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -60,12 +60,18 @@ const CONDITION_ENUM = {
 
 const PostADeal = ({ onClose, editDeal }) => {
   const location = useLocation();
-  const queryParams = new URLSearchParams(location.search);
-  const wantlistId = queryParams.get("wantlistId");
   const navigate = useNavigate();
+  
+  // Use useMemo for query param extraction to avoid recalculation on re-renders
+  const wantlistId = useMemo(() => {
+    const queryParams = new URLSearchParams(location.search);
+    return queryParams.get("wantlistId");
+  }, [location.search]);
+  
   const [feedbackMessage, setFeedbackMessage] = useState("");
   const [feedbackType, setFeedbackType] = useState(""); // "success" or "error"
   const [showFeedback, setShowFeedback] = useState(false);
+  const [removedImages, setRemovedImages] = useState([]);
 
   const [formData, setFormData] = useState({
     name: "",
@@ -103,8 +109,8 @@ const PostADeal = ({ onClose, editDeal }) => {
     }
   }, [editDeal]);
 
-  // All the handlers remain exactly the same...
-  const validate = () => {
+  // Use useCallback for form validation to prevent recreation on re-renders
+  const validate = useCallback(() => {
     const newErrors = {};
     if (!formData.name.trim()) newErrors.name = "Name is required.";
     if (formData.price === "" || formData.price < 0)
@@ -116,15 +122,18 @@ const PostADeal = ({ onClose, editDeal }) => {
       newErrors.images = "At least one image is required.";
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
-  };
-  const handleClose = () => {
+  }, [formData]);
+  
+  // Use useCallback for event handlers to prevent recreation on re-renders
+  const handleClose = useCallback(() => {
     if (onClose) {
       onClose(); // Call the existing onClose function if provided
     }
     // Navigate back to the previous page
     navigate(-1);
-  };
-  const handleChange = (e) => {
+  }, [onClose, navigate]);
+  
+  const handleChange = useCallback((e) => {
     const { name, value } = e.target;
     const sanitizedValue = name === "monthsOld" ? Math.max(0, value) : value;
 
@@ -140,17 +149,17 @@ const PostADeal = ({ onClose, editDeal }) => {
         return newErrors;
       });
     }
-  };
+  }, [errors]);
 
-  const handleImageUpload = (e) => {
+  const handleImageUpload = useCallback((e) => {
     const files = Array.from(e.target.files);
     const totalImages = formData.images.length + files.length;
 
     if (totalImages > 7) {
-      setErrors({
-        ...errors,
+      setErrors((prev) => ({
+        ...prev,
         images: "Maximum 7 images allowed",
-      });
+      }));
       return;
     }
 
@@ -165,20 +174,29 @@ const PostADeal = ({ onClose, editDeal }) => {
     }));
 
     if (errors.images) {
-      const updatedErrors = { ...errors };
-      delete updatedErrors.images;
-      setErrors(updatedErrors);
+      setErrors((prev) => {
+        const updatedErrors = { ...prev };
+        delete updatedErrors.images;
+        return updatedErrors;
+      });
     }
-  };
+  }, [formData.images.length, errors.images]);
 
-  const removeImage = (index) => {
+  const removeImage = useCallback((index) => {
+    const imageToRemove = formData.images[index];
+    
+    // If this is an existing image (has existingUrl), track it for backend deletion
+    if (imageToRemove.existingUrl) {
+      setRemovedImages(prev => [...prev, imageToRemove.existingUrl]);
+    }
+    
     setFormData((prevData) => ({
       ...prevData,
       images: prevData.images.filter((_, i) => i !== index),
     }));
-  };
+  }, [formData.images]);
 
-  const handleConditionChange = (value) => {
+  const handleConditionChange = useCallback((value) => {
     setFormData((prev) => ({
       ...prev,
       condition: value,
@@ -190,9 +208,9 @@ const PostADeal = ({ onClose, editDeal }) => {
         return newErrors;
       });
     }
-  };
+  }, [errors.condition]);
 
-  const handleCategoryChange = (value) => {
+  const handleCategoryChange = useCallback((value) => {
     setFormData((prev) => ({
       ...prev,
       category: value,
@@ -204,8 +222,9 @@ const PostADeal = ({ onClose, editDeal }) => {
         return newErrors;
       });
     }
-  };
-  const handleSubmitSuccess = () => {
+  }, [errors.category]);
+  
+  const handleSubmitSuccess = useCallback(() => {
     setFeedbackMessage("Deal posted successfully!");
     setFeedbackType("success");
     setShowFeedback(true);
@@ -214,11 +233,30 @@ const PostADeal = ({ onClose, editDeal }) => {
     setTimeout(() => {
       handleClose();
     }, 2500);
-  };
-  const handleSubmit = async (e) => {
+  }, [handleClose]);
+  
+  // Calculate remaining images with useMemo
+  const remainingImages = useMemo(() => 7 - formData.images.length, [formData.images.length]);
+  
+  // Create title text with useMemo
+  const titleText = useMemo(() => {
+    if (editDeal) return "Edit Deal";
+    if (wantlistId) return "Post a Deal for Wantlist";
+    return "Post a Deal";
+  }, [editDeal, wantlistId]);
+  
+  // Submit button text with useMemo
+  const submitButtonText = useMemo(() => {
+    if (isSubmitting) return "Saving...";
+    if (editDeal) return "Save Changes";
+    if (wantlistId) return "Post Deal for Wantlist";
+    return "Post Deal";
+  }, [isSubmitting, editDeal, wantlistId]);
+  
+  const handleSubmit = useCallback(async (e) => {
     e.preventDefault();
     setSubmitError("");
-
+  
     if (!validate()) return;
     // Additional validation for edit mode
     if (editDeal && !editDeal.id) {
@@ -226,7 +264,7 @@ const PostADeal = ({ onClose, editDeal }) => {
       console.error("Edit mode active but no product ID provided:", editDeal);
       return;
     }
-
+  
     try {
       setIsSubmitting(true);
       const token = localStorage.getItem("jwt");
@@ -235,7 +273,7 @@ const PostADeal = ({ onClose, editDeal }) => {
         return;
       }
       const formDataToSend = new FormData();
-
+  
       // Append basic product details
       formDataToSend.append("name", formData.name);
       formDataToSend.append("description", formData.description);
@@ -243,25 +281,32 @@ const PostADeal = ({ onClose, editDeal }) => {
       formDataToSend.append("condition", formData.condition);
       formDataToSend.append("category", formData.category);
       formDataToSend.append("monthsOld", formData.monthsOld);
-
+  
       // Handle new image files
       formData.images
         .filter((img) => img.file)
         .forEach((image) => {
           formDataToSend.append("images", image.file);
         });
-
+  
       // Handle existing images
       const existingImages = formData.images
         .filter((img) => img.existingUrl)
         .map((img) => img.existingUrl);
-
+  
       formDataToSend.append("existingImages", JSON.stringify(existingImages));
-
+      
+      // Add removed images to be deleted from S3
+      if (removedImages.length > 0) {
+        removedImages.forEach((url) =>
+          formDataToSend.append("removeImagesUrls", url)
+        );
+      }
+  
       // Construct URL based on mode (edit, create, or create-from-wantlist)
       let url;
       let method = "POST";
-
+  
       if (formData.id) {
         // Edit mode
         url = `${API_BASE_URL}/api/products/${formData.id}`;
@@ -269,17 +314,16 @@ const PostADeal = ({ onClose, editDeal }) => {
       } else if (wantlistId) {
         // Create from wantlist mode
         url = `${API_BASE_URL}/api/products/create-from-wantlist?WantlistId=${wantlistId}`;
-        //formDataToSend.append("wantlistId", wantlistId);
       } else {
         // Regular create mode
         url = `${API_BASE_URL}/api/products/create`;
       }
-
+  
       console.log("Making request to:", url);
       console.log("Method:", method);
       console.log("Form data ID:", formData.id);
       if (wantlistId) console.log("Wantlist ID:", wantlistId);
-
+  
       const response = await fetch(url, {
         method,
         headers: {
@@ -287,7 +331,7 @@ const PostADeal = ({ onClose, editDeal }) => {
         },
         body: formDataToSend,
       });
-
+  
       // Try to parse JSON response, but handle non-JSON responses gracefully
       if (!response.ok) {
         let errorMessage = `HTTP error! status: ${response.status}`;
@@ -299,7 +343,7 @@ const PostADeal = ({ onClose, editDeal }) => {
         }
         throw new Error(errorMessage);
       }
-
+  
       // If we get here, the request was successful
       // Clean up any object URLs we created
       formData.images.forEach((image) => {
@@ -307,7 +351,7 @@ const PostADeal = ({ onClose, editDeal }) => {
           URL.revokeObjectURL(image.preview);
         }
       });
-
+  
       // Show success message and auto-close
       setFeedbackMessage(
         formData.id
@@ -318,14 +362,22 @@ const PostADeal = ({ onClose, editDeal }) => {
       );
       setFeedbackType("success");
       setShowFeedback(true);
-
+  
       // Auto close after 2.5 seconds
       setTimeout(() => {
         if (onClose) {
-          onClose(true); // Pass true to indicate successful submission
+          onClose(true);
         }
-        navigate(-1);
+      
+        if (formData.id) {
+          // Edit mode
+          navigate("/dashboard");
+        } else {
+          // Post (create) mode
+          navigate("/");
+        }
       }, 2500);
+      
     } catch (error) {
       console.error("Error submitting deal:", error);
       setFeedbackMessage(
@@ -333,7 +385,7 @@ const PostADeal = ({ onClose, editDeal }) => {
       );
       setFeedbackType("error");
       setShowFeedback(true);
-
+  
       // Clear feedback after 2.5 seconds
       setTimeout(() => {
         setShowFeedback(false);
@@ -341,7 +393,17 @@ const PostADeal = ({ onClose, editDeal }) => {
     } finally {
       setIsSubmitting(false);
     }
-  };
+  }, [validate, editDeal, formData, removedImages, wantlistId, navigate, onClose]);
+
+  // Memoize the category options to prevent recreation on re-renders
+  const categoryOptions = useMemo(() => 
+    Object.entries(CATEGORY_ENUM).map(([key, value]) => (
+      <SelectItem key={value} value={value}>
+        {categoryLabels[key] || value}
+      </SelectItem>
+    )), 
+    []
+  );
 
   return (
     <div className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm flex items-center justify-center">
@@ -350,11 +412,7 @@ const PostADeal = ({ onClose, editDeal }) => {
           <CardHeader className="sticky top-0 z-10 bg-background border-b">
             <div className="flex justify-between items-center">
               <CardTitle className="text-2xl font-bold">
-                {editDeal
-                  ? "Edit Deal"
-                  : wantlistId
-                  ? "Post a Deal for Wantlist"
-                  : "Post a Deal"}
+                {titleText}
               </CardTitle>
               <Button
                 variant="ghost"
@@ -464,11 +522,7 @@ const PostADeal = ({ onClose, editDeal }) => {
                         <SelectValue placeholder="Select a category" />
                       </SelectTrigger>
                       <SelectContent>
-                        {Object.entries(CATEGORY_ENUM).map(([key, value]) => (
-                          <SelectItem key={value} value={value}>
-                            {categoryLabels[key] || value}
-                          </SelectItem>
-                        ))}
+                        {categoryOptions}
                       </SelectContent>
                     </Select>
                     {errors.category && (
@@ -535,7 +589,7 @@ const PostADeal = ({ onClose, editDeal }) => {
                       <p className="text-sm text-red-500">{errors.images}</p>
                     )}
                     <span className="text-sm text-muted-foreground">
-                      {7 - formData.images.length} images remaining
+                      {remainingImages} images remaining
                     </span>
                   </div>
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-4 pb-3">
@@ -606,13 +660,7 @@ const PostADeal = ({ onClose, editDeal }) => {
               className="w-full"
               disabled={isSubmitting || showFeedback}
             >
-              {isSubmitting
-                ? "Saving..."
-                : editDeal
-                ? "Save Changes"
-                : wantlistId
-                ? "Post Deal for Wantlist"
-                : "Post Deal"}
+              {submitButtonText}
             </Button>
           </CardFooter>
         </Card>

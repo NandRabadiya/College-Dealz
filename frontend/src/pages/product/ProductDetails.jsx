@@ -22,6 +22,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import ChatInitiator from "../chat/ChatInitiator";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const ProductDetails = () => {
   const { productId } = useParams();
@@ -282,11 +283,48 @@ const ProductDetails = () => {
   if (loading) {
     return (
       <div className="container mx-auto px-3 py-4 flex items-center justify-center min-h-[300px]">
-        <div className="text-lg">Loading...</div>
+        <div className="grid gap-4 sm:gap-6 md:gap-8 md:grid-cols-2 w-full max-w-5xl">
+          {/* Left side - Image gallery skeleton */}
+          <div className="flex justify-center px-2 md:px-0">
+            <Skeleton className="w-full aspect-square rounded-lg" />
+          </div>
+          
+          {/* Right side - Product information skeleton */}
+          <div className="space-y-4 sm:space-y-6 px-2 md:px-0">
+            <div>
+              <div className="flex items-center justify-between mb-1 sm:mb-2">
+                <Skeleton className="h-8 w-3/4" />
+                <Skeleton className="h-12 w-12 rounded-full" />
+              </div>
+              <Skeleton className="h-7 w-1/3 mb-4" />
+              <div className="mt-3">
+                <Skeleton className="h-6 w-1/4 mb-2" />
+                <Skeleton className="h-4 w-full mb-1" />
+                <Skeleton className="h-4 w-full mb-1" />
+                <Skeleton className="h-4 w-2/3" />
+              </div>
+            </div>
+            
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 pt-3">
+              <Skeleton className="h-10 w-full" />
+              <Skeleton className="h-10 w-full" />
+              <Skeleton className="h-10 w-full" />
+            </div>
+            
+            <div className="border-t border-b py-3 my-3 grid grid-cols-2">
+              <Skeleton className="h-5 w-1/2" />
+              <Skeleton className="h-5 w-1/2 ml-auto" />
+            </div>
+            
+            <div className="flex gap-3 pt-3">
+              <Skeleton className="h-8 w-full" />
+              <Skeleton className="h-8 w-full" />
+            </div>
+          </div>
+        </div>
       </div>
     );
   }
-
   if (error || !product) {
     return (
       <div className="container mx-auto px-3 py-4 flex items-center justify-center min-h-[300px]">

@@ -13,7 +13,7 @@ import {
   resendOtp,
 } from "../../redux/Auth/actions";
 
-const allowedDomains = ["ddu.ac.in", "gtu.ac.in"];
+const allowedDomains = ["ddu.ac.in", "gtu.ac.in", "gmail.com"];
 const signupSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
   email: z

@@ -46,7 +46,12 @@ const UniversitySelector = ({ onUniversitySelect, isOpen, onOpenChange }) => {
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={onOpenChange}>
+<Dialog open={isOpen} onOpenChange={(open) => {
+  // Only allow closing if a university is selected
+  if (open || selectedUniversity) {
+    onOpenChange(open);
+  }
+}}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>Select Your Community</DialogTitle>

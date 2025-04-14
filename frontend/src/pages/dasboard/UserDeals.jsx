@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback, useMemo } from "react";
 import {
   Pencil,
   Trash2,
@@ -51,7 +51,7 @@ import { Badge } from "@/components/ui/badge";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import PostADeal from ".././product/PostADeal";
 import { API_BASE_URL } from "../../pages/Api/api";
-import { set } from "lodash";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const UserDeals = () => {
   const [deals, setDeals] = useState([]);
@@ -63,6 +63,8 @@ const UserDeals = () => {
   const [soldDialogOpen, setSoldDialogOpen] = useState(false);
   const [selectedDeal, setSelectedDeal] = useState(null);
   const [soldType, setSoldType] = useState(null);
+  const [isRemoving, setIsRemoving] = useState(false);
+  const [isReposting, setIsReposting] = useState(false);
   const [soldFormData, setSoldFormData] = useState({
     buyerEmail: "",
     soldPrice: "",
@@ -82,11 +84,37 @@ const UserDeals = () => {
   const [confirmSoldDialogOpen, setConfirmSoldDialogOpen] = useState(false);
   const [tempSoldType, setTempSoldType] = useState(null);
 
+  const SkeletonCard = () => (
+    <Card className="flex flex-col h-full">
+      <div className="p-0">
+        <Skeleton className="w-full h-48 rounded-t-lg" />
+      </div>
+      <CardContent className="flex-grow space-y-4 pt-4">
+        <Skeleton className="h-5 w-3/4" />
+        <Skeleton className="h-6 w-1/4" />
+        <Skeleton className="h-4 w-full" />
+        <div className="flex flex-wrap gap-2">
+          <Skeleton className="h-5 w-20" />
+          <Skeleton className="h-5 w-24" />
+        </div>
+      </CardContent>
+      <CardFooter className="flex flex-col space-y-2 p-4">
+        <div className="flex flex-col sm:flex-row w-full gap-2">
+          <Skeleton className="h-10 w-full" />
+          <Skeleton className="h-10 w-full" />
+        </div>
+        <div className="flex justify-between w-full mt-2">
+          <Skeleton className="h-8 w-8" />
+          <Skeleton className="h-8 w-8" />
+        </div>
+      </CardFooter>
+    </Card>
+  );
   useEffect(() => {
     fetchUserDeals();
   }, []);
 
-  const fetchUserDeals = async () => {
+  const fetchUserDeals = useCallback(async () => {
     try {
       const token = localStorage.getItem("jwt");
       if (!token) {
@@ -172,7 +200,7 @@ const UserDeals = () => {
     } finally {
       setLoading(false);
     }
-  };
+  },[]);
 
   const fetchInterestedBuyers = async (dealId) => {
     try {
@@ -194,9 +222,9 @@ const UserDeals = () => {
     }
   };
 
-  const handleRepost = async () => {
-    if (!understoodRepost || isSubmitting) return;
-    setIsSubmitting(true);
+  const handleRepost = useCallback( async () => {
+    if (!understoodRepost || isReposting) return;
+    setIsReposting(true);
 
     try {
       const token = localStorage.getItem("jwt");
@@ -219,6 +247,7 @@ const UserDeals = () => {
         setTimeout(async () => {
           await fetchUserDeals();
           setRepostDialogOpen(false);
+          setRemoveDialogOpen(false);
           setUnderstoodRepost(false);
           setFeedback({ type: "", message: "" });
         }, 2000);
@@ -234,14 +263,14 @@ const UserDeals = () => {
         setFeedback({ type: "", message: "" });
       }, 3000);
     } finally {
-      setIsSubmitting(false);
+      setIsReposting(false);
     }
-  };
+  }, [understoodRepost, isReposting, currentDealId, fetchUserDeals]);
 
-  const handleRemove = async () => {
-    if (!removalReason || isSubmitting) return;
+  const handleRemove = useCallback( async () => {
+    if (!removalReason || isRemoving) return;
 
-    setIsSubmitting(true);
+    setIsRemoving(true);
     try {
       const token = localStorage.getItem("jwt");
       const response = await fetch(
@@ -263,7 +292,7 @@ const UserDeals = () => {
             "Deal removed successfully! The page will refresh in a moment.",
         });
         setTimeout(() => {
-          setDeals(deals.filter((deal) => deal.id !== currentDealId));
+          setDeals((prevDeals) => prevDeals.filter((deal) => deal.id !== currentDealId));
           setRemoveDialogOpen(false);
           setRemovalReason("");
           setFeedback({ type: "", message: "" });
@@ -280,9 +309,9 @@ const UserDeals = () => {
         setFeedback({ type: "", message: "" });
       }, 3000);
     } finally {
-      setIsSubmitting(false);
+      setIsRemoving(false);
     }
-  };
+  }, [removalReason, isRemoving, currentDealId, deals]);
 
   const FeedbackAlert = ({ type, message }) => {
     if (!message) return null;
@@ -300,7 +329,7 @@ const UserDeals = () => {
     );
   };
 
-  const handleShare = (deal, platform, e) => {
+  const handleShare = useCallback((deal, platform, e) => {
     e.preventDefault();
     e.stopPropagation();
 
@@ -340,9 +369,9 @@ const UserDeals = () => {
       default:
         break;
     }
-  };
+  }, []);
 
-  const handleEditDeal = (deal, e) => {
+  const handleEditDeal =useCallback( (deal, e) => {
     e.preventDefault();
     e.stopPropagation();
     const editDeal = {
@@ -351,7 +380,7 @@ const UserDeals = () => {
     };
     setEditingDeal(editDeal);
     setIsAddingDeal(true);
-  };
+  }, []);
 
   const handleSoldButtonClick = (deal, e) => {
     e.preventDefault();
@@ -524,7 +553,7 @@ const UserDeals = () => {
     );
   };
 
-  const handleSoldFormSubmit = async (e) => {
+  const handleSoldFormSubmit = useCallback( async (e) => {
     e.preventDefault();
     if (isSubmitting) return;
 
@@ -599,7 +628,8 @@ const UserDeals = () => {
     } finally {
       setIsSubmitting(false);
     }
-  };
+  }, [isSubmitting, soldType, selectedDeal, soldFormData, selectedBuyer, fetchUserDeals]);
+
 
   const renderSoldForm = () => {
     if (soldType === "platform") {
@@ -772,8 +802,8 @@ const UserDeals = () => {
       </CardContent>
 
       <CardFooter className="flex flex-col space-y-2 p-4">
-      <div className="flex flex-col sm:flex-row w-full gap-2">
-      <DropdownMenu>
+        <div className="flex flex-col sm:flex-row w-full gap-2">
+          <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button
                 variant="secondary"
@@ -927,7 +957,7 @@ const UserDeals = () => {
         </DialogContent>
       </Dialog>
 
-      <Dialog open={removeDialogOpen} onOpenChange={setRemoveDialogOpen}>
+      <Dialog open={removeDialogOpen} onOpenChange={setRemoveDialogOpen}  key={removeDialogOpen ? "open" : "closed"}  >
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Deal Options</DialogTitle>
@@ -962,10 +992,10 @@ const UserDeals = () => {
               </div>
               <Button
                 onClick={handleRepost}
-                disabled={!understoodRepost || isSubmitting}
+                disabled={!understoodRepost || isReposting || isRemoving}
                 className="w-full"
               >
-                {isSubmitting ? "Reposting..." : "Post Again"}
+                {isReposting ? "Reposting..." : "Post Again"}
               </Button>
             </div>
 
@@ -989,10 +1019,10 @@ const UserDeals = () => {
               <Button
                 onClick={handleRemove}
                 variant="destructive"
-                disabled={!removalReason || isSubmitting}
+                disabled={!removalReason || isRemoving || isReposting}
                 className="w-full"
               >
-                {isSubmitting ? "Removing..." : "Remove Deal"}
+                {isRemoving ? "Removing..." : "Remove Deal"}
               </Button>
             </div>
           </div>
@@ -1038,10 +1068,10 @@ const UserDeals = () => {
 
             <Button
               onClick={handleRepost}
-              disabled={!understoodRepost || isSubmitting}
+              disabled={!understoodRepost || isReposting}
               className="w-full"
             >
-              {isSubmitting ? "Reposting..." : "Post Again"}
+              {isReposting ? "Reposting..." : "Post Again"}
             </Button>
           </div>
         </DialogContent>
@@ -1070,7 +1100,11 @@ const UserDeals = () => {
       </div>
 
       {loading ? (
-        <div className="text-center py-8">Loading...</div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {[...Array(6)].map((_, index) => (
+            <SkeletonCard key={index} />
+          ))}
+        </div>
       ) : deals.length === 0 ? (
         <Card className="text-center py-8">
           <CardContent>

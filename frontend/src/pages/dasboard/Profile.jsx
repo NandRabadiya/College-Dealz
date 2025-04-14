@@ -18,7 +18,9 @@ import { useNavigate } from "react-router-dom";
 import { Switch } from "@/components/ui/switch";
 import AdminDashboard from "../admin/AdminDashboard";
 import axios from "axios";
+import { Skeleton } from "@/components/ui/skeleton";
 import { API_BASE_URL } from "../Api/api"; // Adjust the import path as necessary
+import { set } from "lodash";
 const Dashboard = () => {
   const { user, isAuthenticated } = useSelector((state) => state.auth);
   const [localUser, setLocalUser] = useState({
@@ -41,12 +43,9 @@ const Dashboard = () => {
   useEffect(() => {
     localStorage.setItem("isAdminView", isAdminView);
   }, [isAdminView]);
-  
-    const [isAdmin, setIsAdmin] = useState(false);
 
-  const [deals, setDeals] = useState([]); // Replace with fetched data if applicable
-  const [isEditingDeal, setIsEditingDeal] = useState(false);
-  const [currentDeal, setCurrentDeal] = useState(null);
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     console.log("Dashboard - User from Redux:", user);
@@ -57,51 +56,61 @@ const Dashboard = () => {
     if (user) {
       setLocalUser({
         profilePicture: user.profilePicture || "account.png",
-        name: user.username, 
+        name: user.username,
         email: user.email,
-        university: user.universityName || "N/A", 
+        university: user.universityName || "N/A",
       });
-  
+
       setIsAdmin(user.roles?.includes("ADMIN"));
-      
-      console.log("User roles:", user.roles); 
+      setIsLoading(false); // Set loading to false after user data is set
+      console.log("User roles:", user.roles);
     }
   }, [user]);
-  
-  // Format price to currency (example for future deal use)
-  const formatPrice = (price) =>
-    new Intl.NumberFormat("en-IN", {
-      style: "currency",
-      currency: "INR",
-    }).format(price);
 
+  // Format price to currency (example for future deal use)
+  const ProfileSkeleton = () => (
+    <Card className="shadow-lg rounded-xl bg-background">
+      <CardContent className="p-6">
+        <div className="relative mb-6">
+          <div className="relative w-24 h-24 md:w-32 md:h-32 mx-auto">
+            <Skeleton className="w-full h-full rounded-full" />
+          </div>
+        </div>
+        <div className="text-center space-y-3">
+          <Skeleton className="h-6 w-3/4 mx-auto" />
+          <Skeleton className="h-4 w-2/4 mx-auto" />
+          <Skeleton className="h-5 w-1/4 mx-auto" />
+          <Skeleton className="h-10 w-full mt-4" />
+        </div>
+      </CardContent>
+    </Card>
+  );
   // Handle profile update
   const handleProfileUpdate = async () => {
     const authToken = localStorage.getItem("jwt");
     if (!authToken) {
-        console.error("No auth token found");
-        return; 
+      console.error("No auth token found");
+      return;
     }
     try {
-        const response = await axios.put(
-            `${API_BASE_URL}/api/dashboard/update`, // ✅ Send user's ID in the URL
-            {
-                username: editedName, // ✅ Use correct key from API response
-                profilePicture: editedImage || localUser.profilePicture,
-            },
-            {
-                headers: { Authorization: `Bearer ${authToken}` }, // ✅ Pass token in headers
-            }
-        );
+      const response = await axios.put(
+        `${API_BASE_URL}/api/dashboard/update`, // ✅ Send user's ID in the URL
+        {
+          username: editedName, // ✅ Use correct key from API response
+          profilePicture: editedImage || localUser.profilePicture,
+        },
+        {
+          headers: { Authorization: `Bearer ${authToken}` }, // ✅ Pass token in headers
+        }
+      );
 
-        setLocalUser(response.data); // ✅ Update state with new user data
-        setIsEditingProfile(false);
-        console.log("Profile updated successfully:", response.data);
+      setLocalUser(response.data); // ✅ Update state with new user data
+      setIsEditingProfile(false);
+      console.log("Profile updated successfully:", response.data);
     } catch (error) {
-        console.error("Error updating profile:", error);
+      console.error("Error updating profile:", error);
     }
-};
-
+  };
 
   // Handle image change for profile
   const handleImageChange = (e) => {
@@ -126,62 +135,77 @@ const Dashboard = () => {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {/* Profile Section */}
           <div className="md:col-span-1">
-            <Card className="shadow-lg rounded-xl bg-background">
-              <CardContent className="p-6">
-                <div className="relative mb-6">
-                  <div className="relative w-24 h-24 md:w-32 md:h-32 mx-auto">
-                    <img
-                      src={localUser.profilePicture}
-                      alt="Profile"
-                      className="w-full h-full rounded-full object-cover border-4 border-gray-100 shadow-md"
-                    />
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="absolute -bottom-2 -right-2 bg-background shadow-lg rounded-full"
-                      onClick={() => setIsEditingProfile(true)}
+            {isLoading ? (
+              <ProfileSkeleton />
+            ) : (
+              <Card className="shadow-lg rounded-xl bg-background">
+                <CardContent className="p-6">
+                  <div className="relative mb-6">
+                    <div className="relative w-24 h-24 md:w-32 md:h-32 mx-auto">
+                      <img
+                        src={localUser.profilePicture}
+                        alt="Profile"
+                        className="w-full h-full rounded-full object-cover border-4 border-gray-100 shadow-md"
+                      />
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="absolute -bottom-2 -right-2 bg-background shadow-lg rounded-full"
+                        onClick={() => setIsEditingProfile(true)}
+                      >
+                        <Pencil className="h-4 w-4 text-primary" />
+                      </Button>
+                    </div>
+                  </div>
+                  <div className="text-center space-y-3">
+                    <h2 className="text-xl font-semibold text-foreground">
+                      {localUser.name}
+                    </h2>
+                    <p className="text-sm text-gray-500">{localUser.email}</p>
+                    <Badge
+                      variant="secondary"
+                      className="bg-blue-100 text-blue-600"
                     >
-                      <Pencil className="h-4 w-4 text-primary" />
+                      {typeof localUser.university === "object"
+                        ? localUser.university.name
+                        : localUser.university}
+                    </Badge>
+                    {console.log("isAdmin", isAdmin)}
+                    {isAdmin ? (
+                      // {true ? (
+                      <div className="flex items-center justify-center space-x-2 mt-4">
+                        <span className="text-sm">User</span>
+                        <Switch
+                          checked={isAdminView}
+                          onCheckedChange={setIsAdminView}
+                        />
+                        <span className="text-sm">Admin</span>
+                      </div>
+                    ) : null}
+                    <Button className="w-full mt-4" onClick={handleLogout}>
+                      Logout
                     </Button>
                   </div>
-                </div>
-                <div className="text-center space-y-3">
-                  <h2 className="text-xl font-semibold text-foreground">
-                    {localUser.name}
-                  </h2>
-                  <p className="text-sm text-gray-500">{localUser.email}</p>
-                  <Badge
-                    variant="secondary"
-                    className="bg-blue-100 text-blue-600"
-                  >
-                    {typeof localUser.university === "object"
-                      ? localUser.university.name
-                      : localUser.university}
-                  </Badge>
-                      {console.log("isAdmin", isAdmin)}
-                  {isAdmin ? (
-                  // {true ? (
-                    <div className="flex items-center justify-center space-x-2 mt-4">
-                      <span className="text-sm">User</span>
-                      <Switch
-                        checked={isAdminView}
-                        onCheckedChange={setIsAdminView}
-                      />
-                      <span className="text-sm">Admin</span>
-                    </div>
-                  ) : null}
-                  <Button className="w-full mt-4" onClick={handleLogout}>
-                    Logout
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
+            )}
           </div>
           <div className="md:col-span-2">
             {/* <UserDeals /> */}
-            <div className="md:col-span-2">
-              {isAdminView ? <AdminDashboard /> : <UserDeals />}
-            </div>
+            {isLoading ? (
+              <div className="space-y-4">
+                <Skeleton className="h-8 w-1/3" />
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
+                  {[...Array(4)].map((_, index) => (
+                    <Skeleton key={index} className="h-36 w-full rounded-lg" />
+                  ))}
+                </div>
+              </div>
+            ) : (
+              <div className="md:col-span-2">
+                {isAdminView ? <AdminDashboard /> : <UserDeals />}
+              </div>
+            )}
           </div>
         </div>
       </div>
