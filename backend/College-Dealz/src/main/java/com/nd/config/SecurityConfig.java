@@ -135,6 +135,10 @@ public class SecurityConfig {
                 "https://college-dealz-nands-projects-9a72e00e.vercel.app",
                 "https://college-dealz.vercel.app",
                 "https://college-dealz-mdtgfjzaa-nands-projects-9a72e00e.vercel.app",
+                "http://college-dealz-nands-projects-9a72e00e.vercel.app",
+                "http://college-dealz.vercel.app",
+                "http://college-dealz-mdtgfjzaa-nands-projects-9a72e00e.vercel.app",
+
                 "https://college-dealz-git-main-nands-projects-9a72e00e.vercel.app"
         ));// Frontend origin
 
