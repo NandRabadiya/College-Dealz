@@ -34,7 +34,7 @@ public class User implements UserDetails {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "university_id")
-    @Fetch(FetchMode.JOIN)
+
     private University university;
 
     @Column(nullable = false)
@@ -43,8 +43,8 @@ public class User implements UserDetails {
     @Column(nullable = false, unique = true)
     private String email;
 
-    @ManyToMany(mappedBy = "users", fetch = FetchType.LAZY)
-    @Fetch(FetchMode.JOIN)
+    @ManyToMany(mappedBy = "users")
+    //@Fetch(FetchMode.JOIN)
     private Set<Notification> notifications = new HashSet<>();
 
     @Column
@@ -63,9 +63,6 @@ public class User implements UserDetails {
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private List<Token> tokens;
-
-//    @Transient
-//    private String otp;
 
     @Column(name = "email_verified")
     private boolean emailVerified = false;
