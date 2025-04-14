@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect, useMemo, useCallback } from "react";
 import {
   Heart,
   Share2,
@@ -9,12 +9,14 @@ import {
   Mail,
   Link,
   MessageSquare,
+  Loader2,
+  SlidersHorizontal,
+  ArrowDownAZ,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useNavigate, useLocation } from "react-router-dom";
 import { API_BASE_URL } from "../Api/api";
-import { useEffect, useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -37,13 +39,13 @@ import {
 import debounce from "lodash/debounce";
 import FilterComponent from "./Filter";
 import { useSelector } from "react-redux";
-import { Loader2 } from "lucide-react";
 import axios from "axios";
 import ChatInitiator from "../chat/ChatInitiator";
+
 const ProductCard = ({
   searchQuery,
-  sortField,
-  sortDir,
+  sortField: initialSortField,
+  sortDir: initialSortDir,
   selectedUniversity,
 }) => {
   console.log("ProductCard mounted with university:", selectedUniversity);
@@ -54,17 +56,22 @@ const ProductCard = ({
   const [wishlistedItems, setWishlistedItems] = useState(new Set());
   const [currentPage, setCurrentPage] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
-  const [pageSize, setPageSize] = useState();
+  const [pageSize, setPageSize] = useState(12); // Set default page size
   const [totalElements, setTotalElements] = useState(0);
   const [open, setOpen] = useState(false);
+  const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false);
   const placeholderImage = "/api/placeholder/400/320";
   const navigate = useNavigate();
   const location = useLocation();
-  const [currentSort, setCurrentSort] = useState(
-    `${sortField || "postDate"}-${sortDir || "desc"}`
-  );
+
+  // Updated sort state management
+  const [sortField, setSortField] = useState(initialSortField || "postDate");
+  const [sortDir, setSortDir] = useState(initialSortDir || "desc");
+  const [currentSort, setCurrentSort] = useState(`${sortField}-${sortDir}`);
   const [currentSearch, setCurrentSearch] = useState(searchQuery || "");
-  const [currentFilters, setCurrentFilters] = useState({
+
+  // Default filter values
+  const [filters, setFilters] = useState({
     minPrice: 0,
     maxPrice: 5000,
     categories: "",
@@ -74,38 +81,46 @@ const ProductCard = ({
     Boolean(localStorage.getItem("jwt"))
   );
 
-  const [filters, setFilters] = useState({
-    minPrice: 0,
-    maxPrice: 5000,
-    categories: "",
-  });
+  // Memoize fetch products function for better performance
+  const fetchProducts = useCallback(
+    async (
+      page = currentPage,
+      query = searchQuery,
+      field = sortField,
+      direction = sortDir,
+      filterValues = filters
+    ) => {
+      try {
+        setLoading(true);
+        const token = localStorage.getItem("jwt");
+        const headers = token ? { Authorization: `Bearer ${token}` } : {};
 
-  // Modified fetchProducts function in ProductCard.jsx
-  const fetchProducts = async (
-    page = currentPage,
-    query = searchQuery,
-    field = sortField,
-    direction = sortDir,
-    filterValues = filters
-  ) => {
-    try {
-      setLoading(true);
-      const token = localStorage.getItem("jwt");
-      const headers = token ? { Authorization: `Bearer ${token}` } : {};
+        let endpoint;
+        let method = "POST";
+        let body;
 
-      let endpoint;
-      let method = "POST";
-      let body;
-
-      if (token) {
-        if (query) {
-          // Use search endpoint for authenticated users when there's a search query
-          endpoint = `${API_BASE_URL}/api/products/search/${query}`;
-          method = "GET";
-          body = null;
+        if (token) {
+          if (query) {
+            // Use search endpoint for authenticated users when there's a search query
+            endpoint = `${API_BASE_URL}/api/products/search/${query}`;
+            method = "GET";
+            body = null;
+          } else {
+            // Use regular endpoint for normal listing
+            endpoint = `${API_BASE_URL}/api/products/university`;
+            body = {
+              page: page,
+              size: pageSize,
+              sortField: field || "postDate",
+              sortDir: direction || "desc",
+              category: filterValues.categories,
+              minPrice: filterValues.minPrice,
+              maxPrice: filterValues.maxPrice,
+            };
+          }
         } else {
-          // Use regular endpoint for normal listing
-          endpoint = `${API_BASE_URL}/api/products/university`;
+          // For non-authenticated users, always use the public endpoint
+          endpoint = `${API_BASE_URL}/api/products/public/university/${selectedUniversity}`;
           body = {
             page: page,
             size: pageSize,
@@ -116,84 +131,81 @@ const ProductCard = ({
             maxPrice: filterValues.maxPrice,
           };
         }
-      } else {
-        // For non-authenticated users, always use the public endpoint
-        endpoint = `${API_BASE_URL}/api/products/public/university/${selectedUniversity}`;
-        body = {
-          page: page,
-          size: pageSize,
-          sortField: field || "postDate",
-          sortDir: direction || "desc",
-          category: filterValues.categories,
-          minPrice: filterValues.minPrice,
-          maxPrice: filterValues.maxPrice,
-        };
+
+        console.log("Fetching from endpoint:", endpoint);
+        console.log("Request body:", body);
+
+        const response = await fetch(endpoint, {
+          method: method,
+          headers: {
+            ...(method === "POST" && { "Content-Type": "application/json" }),
+            ...headers,
+          },
+          ...(body && { body: JSON.stringify(body) }),
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => null);
+          throw new Error(
+            errorData?.message || `HTTP error! status: ${response.status}`
+          );
+        }
+
+        const responseData = await response.json();
+        console.log("Received response:", responseData);
+
+        // Handle both paginated and non-paginated responses
+        const content = responseData.content || responseData;
+        const productsWithImages = (
+          Array.isArray(content) ? content : [content]
+        ).map((product) => ({
+          ...product,
+          images:
+            product.imageUrls?.length > 0
+              ? product.imageUrls.map((url, index) => ({
+                  id: `${product.id}-${index}`,
+                  url: url,
+                  fileName: `image-${index}`,
+                }))
+              : [
+                  {
+                    id: product.id,
+                    url: placeholderImage,
+                    fileName: "placeholder",
+                  },
+                ],
+        }));
+
+        setProducts(productsWithImages);
+        if (responseData.totalPages) {
+          setTotalPages(responseData.totalPages);
+          setTotalElements(responseData.totalElements);
+          setCurrentPage(responseData.number);
+        } else {
+          // If it's a search response without pagination
+          setTotalPages(1);
+          setTotalElements(productsWithImages.length);
+          setCurrentPage(0);
+        }
+        setError(null);
+      } catch (err) {
+        console.error("Error fetching products:", err);
+        setError(err.message);
+        setProducts([]);
+      } finally {
+        setLoading(false);
       }
-
-      console.log("Fetching from endpoint:", endpoint);
-      console.log("Request body:", body);
-
-      const response = await fetch(endpoint, {
-        method: method,
-        headers: {
-          ...(method === "POST" && { "Content-Type": "application/json" }),
-          ...headers,
-        },
-        ...(body && { body: JSON.stringify(body) }),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => null);
-        throw new Error(
-          errorData?.message || `HTTP error! status: ${response.status}`
-        );
-      }
-
-      const responseData = await response.json();
-      console.log("Received response:", responseData);
-
-      // Handle both paginated and non-paginated responses
-      const content = responseData.content || responseData;
-      const productsWithImages = (
-        Array.isArray(content) ? content : [content]
-      ).map((product) => ({
-        ...product,
-        images:
-          product.imageUrls?.length > 0
-            ? product.imageUrls.map((url, index) => ({
-                id: `${product.id}-${index}`,
-                url: url,
-                fileName: `image-${index}`,
-              }))
-            : [
-                {
-                  id: product.id,
-                  url: placeholderImage,
-                  fileName: "placeholder",
-                },
-              ],
-      }));
-
-      setProducts(productsWithImages);
-      if (responseData.totalPages) {
-        setTotalPages(responseData.totalPages);
-        setTotalElements(responseData.totalElements);
-        setCurrentPage(responseData.number);
-      } else {
-        // If it's a search response without pagination
-        setTotalPages(1);
-        setTotalElements(productsWithImages.length);
-        setCurrentPage(0);
-      }
-      setError(null);
-    } catch (err) {
-      console.error("Error fetching products:", err);
-      setError(err.message);
-      setProducts([]);
-    } finally {
-      setLoading(false);
-    }
-  };
+    },
+    [
+      currentPage,
+      sortField,
+      sortDir,
+      filters,
+      pageSize,
+      searchQuery,
+      selectedUniversity,
+    ]
+  );
 
   // Main effect for fetching products
   useEffect(() => {
@@ -201,98 +213,60 @@ const ProductCard = ({
       console.log("Triggering product fetch. University:", selectedUniversity);
       fetchProducts();
     }
-  }, [
-    searchQuery,
-    sortField,
-    sortDir,
-    currentPage,
-    selectedUniversity,
-    isAuthenticated,
-    filters,
-  ]);
+  }, [fetchProducts, selectedUniversity, isAuthenticated]);
 
-  const handleFilterChange = (newFilters) => {
-    setCurrentFilters(newFilters);
-    setCurrentPage(0);
-    fetchProducts(0, currentSearch, sortField, sortDir, newFilters);
-  };
-  const handleSort = (value) => {
-    const [field, dir] = value.split("-");
-    setCurrentSort(value);
-    fetchProducts(currentPage, currentSearch, field, dir, currentFilters);
-  };
+  // Handle filter changes
+  const handleFilterChange = useCallback(
+    (newFilters) => {
+      setFilters(newFilters);
+      setCurrentPage(0);
+      fetchProducts(0, currentSearch, sortField, sortDir, newFilters);
+    },
+    [currentSearch, sortField, sortDir, fetchProducts]
+  );
 
-  const handleSearch = (query) => {
-    setCurrentSearch(query);
-    setCurrentPage(0);
-    fetchProducts(0, query, sortField, sortDir, currentFilters);
-  };
+  // Handle sort changes
+  const handleSort = useCallback(
+    (value) => {
+      const [field, dir] = value.split("-");
+      setSortField(field);
+      setSortDir(dir);
+      setCurrentSort(value);
+      fetchProducts(currentPage, currentSearch, field, dir, filters);
+    },
+    [currentPage, currentSearch, filters, fetchProducts]
+  );
 
-  const handleProtectedAction = (action, e) => {
-    if (e) e.stopPropagation();
-    if (!isAuthenticated) {
-      console.log("User not authenticated");
-      setOpen(true);
-    } else {
-      action();
-    }
-  };
+  const handleSearch = useCallback(
+    (query) => {
+      setCurrentSearch(query);
+      setCurrentPage(0);
+      fetchProducts(0, query, sortField, sortDir, filters);
+    },
+    [sortField, sortDir, filters, fetchProducts]
+  );
 
-  const handleProductClick = (productId) => {
-    navigate(`/product/${productId}`);
-  };
-
-  const handleWishlist = async (productId, e) => {
-    if (e) {
-      e.preventDefault();
-      e.stopPropagation();
-    }
-
-    if (!isAuthenticated) {
-      setOpen(true);
-      return;
-    }
-
-    try {
-      const token = localStorage.getItem("jwt");
-      const response = await fetch(
-        `${API_BASE_URL}/api/wishlist/${productId}`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-
-      if (!response.ok) {
-        throw new Error("Failed to add to wishlist");
+  const handleProtectedAction = useCallback(
+    (action, e) => {
+      if (e) e.stopPropagation();
+      if (!isAuthenticated) {
+        console.log("User not authenticated");
+        setOpen(true);
+      } else {
+        action();
       }
+    },
+    [isAuthenticated]
+  );
 
-      setWishlistedItems((prev) => {
-        const newSet = new Set(prev);
-        if (newSet.has(productId)) {
-          newSet.delete(productId);
-        } else {
-          newSet.add(productId);
-        }
-        return newSet;
-      });
+  const handleProductClick = useCallback(
+    (productId) => {
+      navigate(`/product/${productId}`);
+    },
+    [navigate]
+  );
 
-      setProducts((prevProducts) =>
-        prevProducts.map((product) =>
-          product.id === productId
-            ? { ...product, isWishlisted: !product.isWishlisted }
-            : product
-        )
-      );
-    } catch (error) {
-      console.error("Error updating wishlist:", error);
-    }
-  };
-
-  const handleShare = (product, platform, e) => {
+  const handleShare = useCallback((product, platform, e) => {
     e.stopPropagation();
 
     const productUrl = `${window.location.origin}/product/public/${product.id}`;
@@ -332,15 +306,18 @@ const ProductCard = ({
       default:
         break;
     }
-  };
+  }, []);
 
-  const handlePageChange = (newPage) => {
-    if (newPage >= 0 && newPage < totalPages) {
-      setCurrentPage(newPage);
-    }
-  };
+  const handlePageChange = useCallback(
+    (newPage) => {
+      if (newPage >= 0 && newPage < totalPages) {
+        setCurrentPage(newPage);
+      }
+    },
+    [totalPages]
+  );
 
-  const formatDate = (dateString) => {
+  const formatDate = useCallback((dateString) => {
     try {
       const date = new Date(dateString);
       return date.toLocaleDateString("en-US", {
@@ -351,34 +328,105 @@ const ProductCard = ({
     } catch (e) {
       return "Unknown date";
     }
-  };
+  }, []);
 
-  if (loading) {
-    return <div className="m-4 text-center">Loading products...</div>;
-  }
+  // Memoize sort options
+  const sortOptions = useMemo(
+    () => [
+      { value: "postDate-desc", label: "Newest First" },
+      { value: "postDate-asc", label: "Oldest First" },
+      { value: "price-asc", label: "Price: Low to High" },
+      { value: "price-desc", label: "Price: High to Low" },
+      { value: "name-asc", label: "Name: A-Z" },
+      { value: "name-desc", label: "Name: Z-A" },
+    ],
+    []
+  );
 
-  if (error) {
-    return <div className="m-4 text-center text-red-500">Error: {error}</div>;
+  if (loading && products.length === 0) {
+    return (
+      <div className="flex justify-center items-center min-h-[300px]">
+        <Loader2 className="h-12 w-12 animate-spin text-primary" />
+      </div>
+    );
   }
 
   return (
     <>
       <div className="container mx-auto px-4">
+        {/* Mobile filter and sort buttons */}
+        <div className="flex lg:hidden gap-2 mb-4">
+          <Button
+            variant="outline"
+            size="sm"
+            className="flex-1 justify-center"
+            onClick={() => setIsMobileFilterOpen(true)}
+          >
+            <SlidersHorizontal className="h-4 w-4 mr-2" />
+            Filters
+            {filters.categories ||
+            filters.minPrice > 0 ||
+            filters.maxPrice < 5000 ? (
+              <Badge variant="secondary" className="ml-2">
+                {(filters.categories ? 1 : 0) +
+                  (filters.minPrice > 0 || filters.maxPrice < 5000 ? 1 : 0)}
+              </Badge>
+            ) : null}
+          </Button>
+
+          <Select value={currentSort} onValueChange={handleSort}>
+            <SelectTrigger className="flex-1 h-9">
+              <div className="flex items-center">
+                <ArrowDownAZ className="h-4 w-4 mr-2" />
+                <span className="truncate">Sort</span>
+              </div>
+            </SelectTrigger>
+            <SelectContent>
+              {sortOptions.map((option) => (
+                <SelectItem key={option.value} value={option.value}>
+                  {option.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
         <div className="flex flex-col lg:flex-row gap-6">
+          {/* FilterComponent passing isMobileFilterOpen state */}
           <FilterComponent
             onFilterChange={handleFilterChange}
-            currentFilters={currentFilters}
+            currentFilters={filters}
+            isFilterOpen={isMobileFilterOpen}
+            setIsFilterOpen={setIsMobileFilterOpen}
+            sortOptions={sortOptions}
+            currentSort={currentSort}
+            onSortChange={handleSort}
             className="lg:sticky lg:top-4"
           />
 
           <div className="flex-1">
-            {loading ? (
+            {loading && products.length > 0 ? (
               <div className="flex justify-center items-center min-h-[200px]">
                 <Loader2 className="h-8 w-8 animate-spin" />
               </div>
             ) : products.length === 0 ? (
-              <div className="text-center py-8">
-                <p className="text-muted-foreground">No products found.</p>
+              <div className="text-center py-8 bg-muted/30 rounded-lg">
+                <p className="text-muted-foreground">
+                  No products found matching your criteria.
+                </p>
+                <Button
+                  variant="outline"
+                  className="mt-4"
+                  onClick={() => {
+                    handleFilterChange({
+                      minPrice: 0,
+                      maxPrice: 5000,
+                      categories: "",
+                    });
+                  }}
+                >
+                  Clear Filters
+                </Button>
               </div>
             ) : (
               <>
@@ -389,10 +437,6 @@ const ProductCard = ({
                       className="group relative overflow-hidden rounded-lg border bg-card transition-all hover:shadow-md cursor-pointer"
                       onClick={() => handleProductClick(product.id)}
                     >
-                      {/* {console.log(
-                        `Product ${product.id}: isWishlisted = ${product.isWishlisted}`
-                      )} */}
-
                       {/* Mobile view: horizontal card layout */}
                       <div className="block sm:hidden">
                         <div className="flex flex-row">
@@ -403,20 +447,6 @@ const ProductCard = ({
                               alt={product.name}
                               className="h-full w-full object-cover"
                             />
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="absolute right-1 top-1 bg-background/80 backdrop-blur-sm hover:bg-background/90 z-10 h-6 w-6 p-1"
-                              onClick={(e) => handleWishlist(product.id, e)}
-                            >
-                              <Heart
-                                className={`h-4 w-4 transition-colors duration-200 ${
-                                  product.isWishlisted
-                                    ? "fill-primary text-primary"
-                                    : "text-primary hover:fill-primary/20"
-                                }`}
-                              />
-                            </Button>
                           </div>
 
                           {/* Right side: Content */}
@@ -451,8 +481,14 @@ const ProductCard = ({
                                     <span className="text-xs">•</span>
                                     <span className="text-xs">
                                       {formatDate(product.postDate)}
-                                      {/* {new Date(product.postDate).toLocaleDateString()} */}
                                     </span>
+                                    <span className="text-xs">•</span>
+                                    <Badge
+                                      variant="secondary"
+                                      className="font-normal text-xs"
+                                    >
+                                      {product.category}
+                                    </Badge>
                                   </div>
                                 </div>
                               </div>
@@ -544,20 +580,6 @@ const ProductCard = ({
                             alt={product.name}
                             className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
                           />
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="absolute right-2 top-2 bg-background/80 backdrop-blur-sm hover:bg-background/90 z-10"
-                            onClick={(e) => handleWishlist(product.id, e)}
-                          >
-                            <Heart
-                              className={`h-6 w-6 transition-colors duration-200 ${
-                                product.isWishlisted
-                                  ? "fill-primary text-primary"
-                                  : "text-primary hover:fill-primary/20"
-                              }`}
-                            />
-                          </Button>
                         </div>
 
                         <div className="p-4">
@@ -590,6 +612,13 @@ const ProductCard = ({
                               <span className="text-xs">
                                 {formatDate(product.postDate)}
                               </span>
+                              <span className="text-xs">•</span>
+                              <Badge
+                                variant="secondary"
+                                className="font-normal text-xs"
+                              >
+                                {product.category}
+                              </Badge>
                             </div>
                           </div>
 

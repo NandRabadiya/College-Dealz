@@ -1,5 +1,5 @@
 import React from "react";
-import { ProductSearch, ProductSort } from "./SearchSortComponents";
+import { ProductSearch } from "./SearchSortComponents";
 
 const NavigationItems = ({ 
   isMobile = false, 
@@ -15,14 +15,6 @@ const NavigationItems = ({
 
   return (
     <div className="flex items-center space-x-6">
-      <ProductSort
-        onSort={(value) => {
-          handleSort(value);
-          onItemClick && onItemClick();
-        }}
-        currentSort={currentSort}
-        isLoading={isLoading}
-      />
       <ProductSearch
         onSearch={(query) => {
           handleSearch(query);
