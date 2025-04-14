@@ -485,9 +485,12 @@ public class ProductServiceImpl implements ProductService {
         return productDto;
     }
 
-    public ShareProductDto getsharedProduct(int id ){
+    public ShareProductDto getsharedProduct(int productId ){
 
-        ProductDto product =getProductById(id);
+        Product productt = productRepo.findById(productId)
+                .orElseThrow(() -> new RuntimeException("Product with ID " + productId + " not found."));
+
+        ProductDto product = mapToDto(productt);
 
         ShareProductDto shareProductDto = new ShareProductDto();
 
