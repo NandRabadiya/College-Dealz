@@ -2,7 +2,7 @@
 
 const SERVER_PREFERENCES = [
     'http://localhost:8080',
-    'http://ec2-3-238-116-245.compute-1.amazonaws.com:8080',
+    'http://ec2-13-217-130-65.compute-1.amazonaws.com:8080',
     'https://college-dealz.up.railway.app'
   ];
   

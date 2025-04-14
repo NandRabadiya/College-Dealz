@@ -8,7 +8,7 @@ let api = null;
 
 // Call this ONCE at app startup
 export const initApi = async () => {
- // API_BASE_URL = await getApiBaseUrl();
+ API_BASE_URL = await getApiBaseUrl();
 
   api = axios.create({
     baseURL: API_BASE_URL,
