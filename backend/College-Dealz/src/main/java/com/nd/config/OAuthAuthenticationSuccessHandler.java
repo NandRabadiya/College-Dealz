@@ -80,6 +80,7 @@ public class OAuthAuthenticationSuccessHandler implements AuthenticationSuccessH
         final String frontendRedirectUrl = "http://localhost:5173/oauth-callback";
 
         final String vercelRedirectUrl = "https://college-dealz.vercel.app/oauth-callback";
+        final String duckRedirectUrl = "https://college-dealz.duckdns.org/oauth-callback";
 
         logger.info("OAuthAuthenicationSuccessHandler");
 
@@ -196,7 +197,8 @@ logger.info("OAuthAuthenicationSuccessHandler: Google New user check before user
         }
 
    //     response.sendRedirect(frontendRedirectUrl + "?token=" + accessToken);
-     response.sendRedirect(vercelRedirectUrl + "?token=" + accessToken);
+ //    response.sendRedirect(vercelRedirectUrl + "?token=" + accessToken);
+        response.sendRedirect(duckRedirectUrl + "?token=" + accessToken);
 
 
     }
