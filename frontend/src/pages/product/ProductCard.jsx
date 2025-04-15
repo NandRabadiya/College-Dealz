@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useNavigate, useLocation } from "react-router-dom";
 import { API_BASE_URL } from "../Api/api";
 import {
@@ -80,6 +81,13 @@ const ProductCard = ({
   const [isAuthenticated, setIsAuthenticated] = useState(
     Boolean(localStorage.getItem("jwt"))
   );
+
+  // Memoize filter state
+  const filterState = useMemo(() => ({
+    minPrice: filters.minPrice,
+    maxPrice: filters.maxPrice,
+    categories: filters.categories,
+  }), [filters.minPrice, filters.maxPrice, filters.categories]);
 
   // Memoize fetch products function for better performance
   const fetchProducts = useCallback(
@@ -343,10 +351,354 @@ const ProductCard = ({
     []
   );
 
+  // Memoize the product cards
+  const renderedProducts = useMemo(() => {
+    return products.map((product) => (
+      <div
+        key={product.id}
+        className="group relative overflow-hidden rounded-lg border bg-card transition-all hover:shadow-md cursor-pointer"
+        onClick={() => handleProductClick(product.id)}
+      >
+        {/* Mobile view: horizontal card layout */}
+        <div className="block sm:hidden">
+          <div className="flex flex-row">
+            {/* Left side: Image */}
+            <div className="relative w-32 h-32">
+              <img
+                src={product.images?.[0]?.url}
+                alt={product.name}
+                className="h-full w-full object-cover"
+              />
+            </div>
+
+            {/* Right side: Content */}
+            <div className="flex-1 p-3">
+              <div className="flex flex-col h-full justify-between">
+                <div>
+                  <div className="flex items-start justify-between gap-2 mb-1">
+                    <h3 className="font-semibold leading-tight text-foreground text-base line-clamp-2">
+                      {product.name}
+                    </h3>
+                    <div
+                      className={`text-base font-bold whitespace-nowrap ${
+                        product.price === 0
+                          ? "text-green-500"
+                          : "text-primary"
+                      }`}
+                    >
+                      {product.price === 0
+                        ? "Free"
+                        : `₹${product.price}`}
+                    </div>
+                  </div>
+
+                  <div className="text-xs text-muted-foreground mb-2">
+                    <div className="flex items-center gap-1 flex-wrap">
+                      <Badge
+                        variant="secondary"
+                        className="font-normal text-xs"
+                      >
+                        {product.sellerName || "Unknown Seller"}
+                      </Badge>
+                      <span className="text-xs">•</span>
+                      <span className="text-xs">
+                        {formatDate(product.postDate)}
+                      </span>
+                      <span className="text-xs">•</span>
+                      <Badge
+                        variant="secondary"
+                        className="font-normal text-xs"
+                      >
+                        {product.category}
+                      </Badge>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-between gap-1 pt-1 border-t">
+                  <div className="flex-1">
+                    {String(currentUserId) !==
+                    String(product.sellerId) ? (
+                      <ChatInitiator
+                        productId={product.id}
+                        sellerId={product.sellerId}
+                        currentUserId={currentUserId}
+                      />
+                    ) : (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        disabled
+                        className="w-full h-7 px-1 py-0 text-xs text-muted-foreground hover:bg-muted cursor-default"
+                      >
+                        <MessageCircle className="mr-1 h-3 w-3 text-inherit" />
+                        Your Product
+                      </Button>
+                    )}
+                  </div>
+                  <div className="flex-1">
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="w-full h-7 px-1 py-0 text-xs text-foreground hover:bg-muted"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          <Share2 className="mr-1 h-3 w-3 text-inherit" />
+                          Share
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent
+                        align="end"
+                        className="w-48"
+                      >
+                        <DropdownMenuItem
+                          onClick={(e) =>
+                            handleShare(product, "whatsapp", e)
+                          }
+                        >
+                          <MessageSquare className="mr-2 h-4 w-4" />
+                          WhatsApp
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          onClick={(e) =>
+                            handleShare(product, "facebook", e)
+                          }
+                        >
+                          <Facebook className="mr-2 h-4 w-4" />
+                          Facebook
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          onClick={(e) =>
+                            handleShare(product, "email", e)
+                          }
+                        >
+                          <Mail className="mr-2 h-4 w-4" />
+                          Email
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          onClick={(e) =>
+                            handleShare(product, "copy", e)
+                          }
+                        >
+                          <Link className="mr-2 h-4 w-4" />
+                          Copy Link
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Tablet and Desktop view: original card layout */}
+        <div className="hidden sm:block">
+          <div className="relative h-64 overflow-hidden">
+            <img
+              src={product.images?.[0]?.url}
+              alt={product.name}
+              className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+            />
+          </div>
+
+          <div className="p-4">
+            <div className="mb-2 flex items-start justify-between gap-2">
+              <h3 className="font-semibold leading-tight text-foreground text-xl line-clamp-2">
+                {product.name}
+              </h3>
+              <div
+                className={`text-xl font-bold whitespace-nowrap ${
+                  product.price === 0
+                    ? "text-green-500"
+                    : "text-primary"
+                }`}
+              >
+                {product.price === 0
+                  ? "Free"
+                  : `₹${product.price}`}
+              </div>
+            </div>
+
+            <div className="mb-3 text-sm text-muted-foreground">
+              <div className="flex items-center gap-2">
+                <Badge
+                  variant="secondary"
+                  className="font-normal"
+                >
+                  {product.sellerName || "Unknown Seller"}
+                </Badge>
+                <span className="text-xs">•</span>
+                <span className="text-xs">
+                  {formatDate(product.postDate)}
+                </span>
+                <span className="text-xs">•</span>
+                <Badge
+                  variant="secondary"
+                  className="font-normal text-xs"
+                >
+                  {product.category}
+                </Badge>
+              </div>
+            </div>
+
+            <div className="flex items-center justify-between gap-2 pt-2 border-t">
+              <div className="flex-1">
+                {String(currentUserId) !==
+                String(product.sellerId) ? (
+                  <ChatInitiator
+                    productId={product.id}
+                    sellerId={product.sellerId}
+                    currentUserId={currentUserId}
+                  />
+                ) : (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    disabled
+                    className="w-full h-7 px-1 py-0 text-xs text-muted-foreground hover:bg-muted cursor-default"
+                  >
+                    <MessageCircle className="mr-1 h-3 w-3 text-inherit" />
+                    Your Product
+                  </Button>
+                )}
+              </div>
+              <div className="flex-1">
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="w-full h-7 px-1 py-0 text-xs text-foreground hover:bg-muted"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <Share2 className="mr-1 h-3 w-3 text-inherit" />
+                      Share
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent
+                    align="end"
+                    className="w-48"
+                  >
+                    <DropdownMenuItem
+                      onClick={(e) =>
+                        handleShare(product, "whatsapp", e)
+                      }
+                    >
+                      <MessageSquare className="mr-2 h-4 w-4" />
+                      WhatsApp
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      onClick={(e) =>
+                        handleShare(product, "facebook", e)
+                      }
+                    >
+                      <Facebook className="mr-2 h-4 w-4" />
+                      Facebook
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      onClick={(e) =>
+                        handleShare(product, "email", e)
+                      }
+                    >
+                      <Mail className="mr-2 h-4 w-4" />
+                      Email
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      onClick={(e) =>
+                        handleShare(product, "copy", e)
+                      }
+                    >
+                      <Link className="mr-2 h-4 w-4" />
+                      Copy Link
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    ));
+  }, [products, currentUserId, formatDate, handleProductClick, handleShare]);
+
+  // Memoize the pagination controls
+  const paginationControls = useMemo(() => {
+    return (
+      <div className="mt-8 flex flex-col sm:flex-row items-center justify-between gap-4 px-2">
+        <div className="text-sm text-muted-foreground order-2 sm:order-1">
+          Showing {products.length} of {totalElements} items
+        </div>
+
+        <div className="flex items-center space-x-2 order-1 sm:order-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => handlePageChange(currentPage - 1)}
+            disabled={currentPage === 0}
+            className="w-24"
+          >
+            <ChevronLeft className="mr-2 h-4 w-4" />
+            Previous
+          </Button>
+
+          <div className="text-sm text-muted-foreground">
+            Page {currentPage + 1} of {totalPages}
+          </div>
+
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => handlePageChange(currentPage + 1)}
+            disabled={currentPage === totalPages - 1}
+            className="w-24"
+          >
+            Next
+            <ChevronRight className="ml-2 h-4 w-4" />
+          </Button>
+        </div>
+      </div>
+    );
+  }, [products.length, totalElements, currentPage, totalPages, handlePageChange]);
+
+  // Skeleton loading UI
   if (loading && products.length === 0) {
     return (
-      <div className="flex justify-center items-center min-h-[300px]">
-        <Loader2 className="h-12 w-12 animate-spin text-primary" />
+      <div className="container mx-auto px-4">
+        <div className="flex lg:hidden gap-2 mb-4">
+          <Skeleton className="h-9 w-1/2" />
+          <Skeleton className="h-9 w-1/2" />
+        </div>
+        
+        <div className="flex flex-col lg:flex-row gap-6">
+          <div className="hidden lg:block w-64">
+            <Skeleton className="h-[500px] w-full" />
+          </div>
+          
+          <div className="flex-1">
+            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
+              {Array(6).fill(0).map((_, index) => (
+                <div key={index} className="rounded-lg border">
+                  <Skeleton className="h-64 w-full" />
+                  <div className="p-4">
+                    <div className="flex justify-between mb-2">
+                      <Skeleton className="h-6 w-3/4" />
+                      <Skeleton className="h-6 w-16" />
+                    </div>
+                    <Skeleton className="h-4 w-full mb-3" />
+                    <Skeleton className="h-4 w-2/3 mb-4" />
+                    <div className="flex gap-2 pt-2">
+                      <Skeleton className="h-8 w-full" />
+                      <Skeleton className="h-8 w-full" />
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
       </div>
     );
   }
@@ -395,7 +747,7 @@ const ProductCard = ({
           {/* FilterComponent passing isMobileFilterOpen state */}
           <FilterComponent
             onFilterChange={handleFilterChange}
-            currentFilters={filters}
+            currentFilters={filterState}
             isFilterOpen={isMobileFilterOpen}
             setIsFilterOpen={setIsMobileFilterOpen}
             sortOptions={sortOptions}
@@ -406,8 +758,24 @@ const ProductCard = ({
 
           <div className="flex-1">
             {loading && products.length > 0 ? (
-              <div className="flex justify-center items-center min-h-[200px]">
-                <Loader2 className="h-8 w-8 animate-spin" />
+              <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6 opacity-60">
+                {Array(6).fill(0).map((_, index) => (
+                  <div key={index} className="rounded-lg border">
+                    <Skeleton className="h-64 w-full" />
+                    <div className="p-4">
+                      <div className="flex justify-between mb-2">
+                        <Skeleton className="h-6 w-3/4" />
+                        <Skeleton className="h-6 w-16" />
+                      </div>
+                      <Skeleton className="h-4 w-full mb-3" />
+                      <Skeleton className="h-4 w-2/3 mb-4" />
+                      <div className="flex gap-2 pt-2">
+                        <Skeleton className="h-8 w-full" />
+                        <Skeleton className="h-8 w-full" />
+                      </div>
+                    </div>
+                  </div>
+                ))}
               </div>
             ) : products.length === 0 ? (
               <div className="text-center py-8 bg-muted/30 rounded-lg">
@@ -431,310 +799,10 @@ const ProductCard = ({
             ) : (
               <>
                 <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
-                  {products.map((product) => (
-                    <div
-                      key={product.id}
-                      className="group relative overflow-hidden rounded-lg border bg-card transition-all hover:shadow-md cursor-pointer"
-                      onClick={() => handleProductClick(product.id)}
-                    >
-                      {/* Mobile view: horizontal card layout */}
-                      <div className="block sm:hidden">
-                        <div className="flex flex-row">
-                          {/* Left side: Image */}
-                          <div className="relative w-32 h-32">
-                            <img
-                              src={product.images?.[0]?.url}
-                              alt={product.name}
-                              className="h-full w-full object-cover"
-                            />
-                          </div>
-
-                          {/* Right side: Content */}
-                          <div className="flex-1 p-3">
-                            <div className="flex flex-col h-full justify-between">
-                              <div>
-                                <div className="flex items-start justify-between gap-2 mb-1">
-                                  <h3 className="font-semibold leading-tight text-foreground text-base line-clamp-2">
-                                    {product.name}
-                                  </h3>
-                                  <div
-                                    className={`text-base font-bold whitespace-nowrap ${
-                                      product.price === 0
-                                        ? "text-green-500"
-                                        : "text-primary"
-                                    }`}
-                                  >
-                                    {product.price === 0
-                                      ? "Free"
-                                      : `₹${product.price}`}
-                                  </div>
-                                </div>
-
-                                <div className="text-xs text-muted-foreground mb-2">
-                                  <div className="flex items-center gap-1 flex-wrap">
-                                    <Badge
-                                      variant="secondary"
-                                      className="font-normal text-xs"
-                                    >
-                                      {product.sellerName || "Unknown Seller"}
-                                    </Badge>
-                                    <span className="text-xs">•</span>
-                                    <span className="text-xs">
-                                      {formatDate(product.postDate)}
-                                    </span>
-                                    <span className="text-xs">•</span>
-                                    <Badge
-                                      variant="secondary"
-                                      className="font-normal text-xs"
-                                    >
-                                      {product.category}
-                                    </Badge>
-                                  </div>
-                                </div>
-                              </div>
-
-                              <div className="flex items-center justify-between gap-1 pt-1 border-t">
-                                <div className="flex-1">
-                                  {String(currentUserId) !==
-                                  String(product.sellerId) ? (
-                                    <ChatInitiator
-                                      productId={product.id}
-                                      sellerId={product.sellerId}
-                                      currentUserId={currentUserId}
-                                    />
-                                  ) : (
-                                    <Button
-                                      variant="ghost"
-                                      size="sm"
-                                      disabled
-                                      className="w-full h-7 px-1 py-0 text-xs text-muted-foreground hover:bg-muted cursor-default"
-                                    >
-                                      <MessageCircle className="mr-1 h-3 w-3 text-inherit" />
-                                      Your Product
-                                    </Button>
-                                  )}
-                                </div>
-                                <div className="flex-1">
-                                  <DropdownMenu>
-                                    <DropdownMenuTrigger asChild>
-                                      <Button
-                                        variant="ghost"
-                                        size="sm"
-                                        className="w-full h-7 px-1 py-0 text-xs text-foreground hover:bg-muted"
-                                        onClick={(e) => e.stopPropagation()}
-                                      >
-                                        <Share2 className="mr-1 h-3 w-3 text-inherit" />
-                                        Share
-                                      </Button>
-                                    </DropdownMenuTrigger>
-                                    <DropdownMenuContent
-                                      align="end"
-                                      className="w-48"
-                                    >
-                                      <DropdownMenuItem
-                                        onClick={(e) =>
-                                          handleShare(product, "whatsapp", e)
-                                        }
-                                      >
-                                        <MessageSquare className="mr-2 h-4 w-4" />
-                                        WhatsApp
-                                      </DropdownMenuItem>
-                                      <DropdownMenuItem
-                                        onClick={(e) =>
-                                          handleShare(product, "facebook", e)
-                                        }
-                                      >
-                                        <Facebook className="mr-2 h-4 w-4" />
-                                        Facebook
-                                      </DropdownMenuItem>
-                                      <DropdownMenuItem
-                                        onClick={(e) =>
-                                          handleShare(product, "email", e)
-                                        }
-                                      >
-                                        <Mail className="mr-2 h-4 w-4" />
-                                        Email
-                                      </DropdownMenuItem>
-                                      <DropdownMenuItem
-                                        onClick={(e) =>
-                                          handleShare(product, "copy", e)
-                                        }
-                                      >
-                                        <Link className="mr-2 h-4 w-4" />
-                                        Copy Link
-                                      </DropdownMenuItem>
-                                    </DropdownMenuContent>
-                                  </DropdownMenu>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Tablet and Desktop view: original card layout */}
-                      <div className="hidden sm:block">
-                        <div className="relative h-64 overflow-hidden">
-                          <img
-                            src={product.images?.[0]?.url}
-                            alt={product.name}
-                            className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
-                          />
-                        </div>
-
-                        <div className="p-4">
-                          <div className="mb-2 flex items-start justify-between gap-2">
-                            <h3 className="font-semibold leading-tight text-foreground text-xl line-clamp-2">
-                              {product.name}
-                            </h3>
-                            <div
-                              className={`text-xl font-bold whitespace-nowrap ${
-                                product.price === 0
-                                  ? "text-green-500"
-                                  : "text-primary"
-                              }`}
-                            >
-                              {product.price === 0
-                                ? "Free"
-                                : `₹${product.price}`}
-                            </div>
-                          </div>
-
-                          <div className="mb-3 text-sm text-muted-foreground">
-                            <div className="flex items-center gap-2">
-                              <Badge
-                                variant="secondary"
-                                className="font-normal"
-                              >
-                                {product.sellerName || "Unknown Seller"}
-                              </Badge>
-                              <span className="text-xs">•</span>
-                              <span className="text-xs">
-                                {formatDate(product.postDate)}
-                              </span>
-                              <span className="text-xs">•</span>
-                              <Badge
-                                variant="secondary"
-                                className="font-normal text-xs"
-                              >
-                                {product.category}
-                              </Badge>
-                            </div>
-                          </div>
-
-                          <div className="flex items-center justify-between gap-2 pt-2 border-t">
-                            <div className="flex-1">
-                              {String(currentUserId) !==
-                              String(product.sellerId) ? (
-                                <ChatInitiator
-                                  productId={product.id}
-                                  sellerId={product.sellerId}
-                                  currentUserId={currentUserId}
-                                />
-                              ) : (
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  disabled
-                                  className="w-full h-7 px-1 py-0 text-xs text-muted-foreground hover:bg-muted cursor-default"
-                                >
-                                  <MessageCircle className="mr-1 h-3 w-3 text-inherit" />
-                                  Your Product
-                                </Button>
-                              )}
-                            </div>
-                            <div className="flex-1">
-                              <DropdownMenu>
-                                <DropdownMenuTrigger asChild>
-                                  <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    className="w-full h-7 px-1 py-0 text-xs text-foreground hover:bg-muted"
-                                    onClick={(e) => e.stopPropagation()}
-                                  >
-                                    <Share2 className="mr-1 h-3 w-3 text-inherit" />
-                                    Share
-                                  </Button>
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent
-                                  align="end"
-                                  className="w-48"
-                                >
-                                  <DropdownMenuItem
-                                    onClick={(e) =>
-                                      handleShare(product, "whatsapp", e)
-                                    }
-                                  >
-                                    <MessageSquare className="mr-2 h-4 w-4" />
-                                    WhatsApp
-                                  </DropdownMenuItem>
-                                  <DropdownMenuItem
-                                    onClick={(e) =>
-                                      handleShare(product, "facebook", e)
-                                    }
-                                  >
-                                    <Facebook className="mr-2 h-4 w-4" />
-                                    Facebook
-                                  </DropdownMenuItem>
-                                  <DropdownMenuItem
-                                    onClick={(e) =>
-                                      handleShare(product, "email", e)
-                                    }
-                                  >
-                                    <Mail className="mr-2 h-4 w-4" />
-                                    Email
-                                  </DropdownMenuItem>
-                                  <DropdownMenuItem
-                                    onClick={(e) =>
-                                      handleShare(product, "copy", e)
-                                    }
-                                  >
-                                    <Link className="mr-2 h-4 w-4" />
-                                    Copy Link
-                                  </DropdownMenuItem>
-                                </DropdownMenuContent>
-                              </DropdownMenu>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
+                  {renderedProducts}
                 </div>
 
-                <div className="mt-8 flex flex-col sm:flex-row items-center justify-between gap-4 px-2">
-                  <div className="text-sm text-muted-foreground order-2 sm:order-1">
-                    Showing {products.length} of {totalElements} items
-                  </div>
-
-                  <div className="flex items-center space-x-2 order-1 sm:order-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handlePageChange(currentPage - 1)}
-                      disabled={currentPage === 0}
-                      className="w-24"
-                    >
-                      <ChevronLeft className="mr-2 h-4 w-4" />
-                      Previous
-                    </Button>
-
-                    <div className="text-sm text-muted-foreground">
-                      Page {currentPage + 1} of {totalPages}
-                    </div>
-
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handlePageChange(currentPage + 1)}
-                      disabled={currentPage === totalPages - 1}
-                      className="w-24"
-                    >
-                      Next
-                      <ChevronRight className="ml-2 h-4 w-4" />
-                    </Button>
-                  </div>
-                </div>
+                {paginationControls}
               </>
             )}
           </div>

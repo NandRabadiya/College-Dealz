@@ -1,9 +1,10 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo, useCallback } from "react";
 import { Plus, Edit2, Trash2, Aperture, Tag, Info, X } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import WantlistForm from "./WantlistForm";
 import { API_BASE_URL } from "../Api/api";
 import WantlistPageTour from "./WantlistPageTour";
+import { Skeleton } from "@/components/ui/skeleton";
 
 function Wantlist() {
   const navigate = useNavigate();
@@ -31,7 +32,7 @@ function Wantlist() {
     fetchWantlists();
   }, []);
 
-  const fetchWantlists = async () => {
+  const fetchWantlists = useCallback(async () => {
     setLoading(true);
     try {
       // Fetch all wantlist items
@@ -61,9 +62,9 @@ function Wantlist() {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
-  const handleSubmit = async (data) => {
+  const handleSubmit = useCallback(async (data) => {
     setIsSubmitting(true);
     try {
       if (editingItem) {
@@ -87,9 +88,9 @@ function Wantlist() {
       }, 2500);
       setIsSubmitting(false);
     }
-  };
+  }, [editingItem]);
 
-  const addItem = async (data) => {
+  const addItem = useCallback(async (data) => {
     try {
       const response = await fetch(`${API_BASE_URL}/api/wantlist/add`, {
         method: "POST",
@@ -101,16 +102,16 @@ function Wantlist() {
       });
       if (!response.ok) throw new Error("Failed to add item");
       const newItem = await response.json();
-      setMyWantlist([...myWantlist, newItem]);
-      setAllWantlist([...allWantlist, newItem]);
+      setMyWantlist(prevItems => [...prevItems, newItem]);
+      setAllWantlist(prevItems => [...prevItems, newItem]);
       return newItem;
     } catch (error) {
       console.error("Error adding item:", error);
       throw error;
     }
-  };
+  }, []);
 
-  const updateItem = async (id, data) => {
+  const updateItem = useCallback(async (id, data) => {
     try {
       const response = await fetch(`${API_BASE_URL}/api/wantlist/${id}`, {
         method: "PUT",
@@ -122,30 +123,30 @@ function Wantlist() {
       });
       if (!response.ok) throw new Error("Failed to update item");
       const updatedItem = await response.json();
-      setMyWantlist(
-        myWantlist.map((item) => (item.id === id ? updatedItem : item))
+      setMyWantlist(prevItems =>
+        prevItems.map((item) => (item.id === id ? updatedItem : item))
       );
-      setAllWantlist(
-        allWantlist.map((item) => (item.id === id ? updatedItem : item))
+      setAllWantlist(prevItems =>
+        prevItems.map((item) => (item.id === id ? updatedItem : item))
       );
       return updatedItem;
     } catch (error) {
       console.error("Error updating item:", error);
       throw error;
     }
-  };
+  }, []);
 
-  const handleEdit = (item) => {
+  const handleEdit = useCallback((item) => {
     setEditingItem(item);
     setShowForm(true);
-  };
+  }, []);
 
-  const initiateDelete = (id) => {
+  const initiateDelete = useCallback((id) => {
     setDeleteItemId(id);
     setShowDeleteDialog(true);
-  };
+  }, []);
 
-  const handleDelete = async (reason) => {
+  const handleDelete = useCallback(async (reason) => {
     if (!deleteItemId) return;
 
     setClickedButton(reason); // Store which button was clicked
@@ -153,8 +154,8 @@ function Wantlist() {
 
     try {
       await deleteItem(deleteItemId, reason);
-      setMyWantlist(myWantlist.filter((item) => item.id !== deleteItemId));
-      setAllWantlist(allWantlist.filter((item) => item.id !== deleteItemId));
+      setMyWantlist(prevItems => prevItems.filter((item) => item.id !== deleteItemId));
+      setAllWantlist(prevItems => prevItems.filter((item) => item.id !== deleteItemId));
 
       setDeleteFeedback({
         message: "Item removed successfully!",
@@ -178,8 +179,9 @@ function Wantlist() {
         setIsDeletingItem(false);
       }, 2500);
     }
-  };
-  const deleteItem = async (id, reason) => {
+  }, [deleteItemId]);
+
+  const deleteItem = useCallback(async (id, reason) => {
     const token = localStorage.getItem("jwt");
 
     if (!token) {
@@ -203,14 +205,15 @@ function Wantlist() {
     }
 
     return await response.text();
-  };
+  }, []);
 
-  const handlePostDeal = (wantlistData) => {
+  const handlePostDeal = useCallback((wantlistData) => {
     // Logic to navigate to post a deal page with wantlist data
     navigate(`/post-a-deal?wantlistId=${wantlistData.id}`);
-  };
+  }, [navigate]);
+
   // Format date
-  const formatDate = (dateString) => {
+  const formatDate = useCallback((dateString) => {
     try {
       const date = new Date(dateString);
       return date.toLocaleDateString("en-US", {
@@ -221,8 +224,33 @@ function Wantlist() {
     } catch (e) {
       return "Unknown date";
     }
-  };
-  const currentWantlist = activeTab === "all" ? allWantlist : myWantlist;
+  }, []);
+
+  const currentWantlist = useMemo(() => 
+    activeTab === "all" ? allWantlist : myWantlist
+  , [activeTab, allWantlist, myWantlist]);
+
+  const renderSkeletons = useMemo(() => {
+    return Array(4).fill(0).map((_, index) => (
+      <div key={`skeleton-${index}`} className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-4 sm:p-6">
+        <div className="flex items-start justify-between mb-4">
+          <Skeleton className="h-7 w-3/4" />
+          <div className="flex gap-2">
+            <Skeleton className="h-8 w-20" />
+          </div>
+        </div>
+        <div className="flex flex-wrap gap-2 mb-4">
+          <Skeleton className="h-6 w-24" />
+        </div>
+        <Skeleton className="h-16 w-full mb-4" />
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-4">
+          <Skeleton className="h-16 w-full" />
+          <Skeleton className="h-16 w-full" />
+          <Skeleton className="h-16 w-full col-span-2 sm:col-span-1" />
+        </div>
+      </div>
+    ));
+  }, []);
 
   return (
     <div className="wantlist-page">
@@ -284,11 +312,8 @@ function Wantlist() {
           </div>
 
           {loading ? (
-            <div className="flex justify-center items-center py-10 sm:py-12">
-              <Aperture className="animate-spin h-6 w-6 sm:h-8 sm:w-8 text-blue-600 dark:text-blue-400" />
-              <span className="ml-2 text-gray-600 dark:text-gray-300 text-sm sm:text-base">
-                Loading wantlist...
-              </span>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
+              {renderSkeletons}
             </div>
           ) : currentWantlist.length === 0 ? (
             <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6 sm:p-8 text-center">
