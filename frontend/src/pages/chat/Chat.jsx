@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from "react";
+import React, { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { messageService } from "./messageService";
 import { chatService } from "./chatService";
@@ -8,6 +8,7 @@ import { ArrowLeft, Send, Loader2, WifiOff } from "lucide-react";
 import ChatMessage from "./ChatMessage";
 import { useToast } from "@/hooks/use-toast";
 import { format, isSameDay, isYesterday, parseISO, isToday } from "date-fns";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const Chat = ({ chatId: propChatId, onBackClick }) => {
   const location = useLocation();
@@ -40,7 +41,22 @@ const Chat = ({ chatId: propChatId, onBackClick }) => {
     currentChatIdRef.current = chatId;
   }, [chatId]);
 
-  const groupMessagesByDate = (messages) => {
+  // Optimize date formatting with useMemo
+  const formatDate = useCallback((date) => {
+    if (isToday(date)) return "Today";
+    if (isYesterday(date)) return "Yesterday";
+    return format(date, "dd MMMM yyyy");
+  }, []);
+
+  const getFullTimestamp = useCallback((msg) => {
+    if (msg.timestamp) return new Date(msg.timestamp);
+    if (msg.createdAt && msg.createdTime)
+      return new Date(`${msg.createdAt}T${msg.createdTime}`);
+    return new Date();
+  }, []);
+  
+  // Optimize grouping messages by date with useMemo
+  const groupMessagesByDate = useCallback((messages) => {
     if (!messages || messages.length === 0) return [];
 
     const grouped = [];
@@ -85,19 +101,38 @@ const Chat = ({ chatId: propChatId, onBackClick }) => {
     }
 
     return grouped;
-  };
+  }, []);
 
-  const formatDate = (date) => {
-    if (isToday(date)) return "Today";
-    if (isYesterday(date)) return "Yesterday";
-    return format(date, "dd MMMM yyyy");
-  };
-  const getFullTimestamp = (msg) => {
-    if (msg.timestamp) return new Date(msg.timestamp);
-    if (msg.createdAt && msg.createdTime)
-      return new Date(`${msg.createdAt}T${msg.createdTime}`);
-    return new Date();
-  };
+  // Memoize grouped messages to prevent unnecessary re-renders
+  const groupedMessages = useMemo(() => {
+    return groupMessagesByDate(messages);
+  }, [messages, groupMessagesByDate]);
+
+  // Memoize other user's name for better performance
+  const otherUserName = useMemo(() => {
+    if (!chat) return "Chat";
+    return chat.senderId.toString() === currentUserId
+      ? chat.receiverName
+      : chat.senderName;
+  }, [chat, currentUserId]);
+
+  // Memoize connection status for better performance
+  const connectionStatus = useMemo(() => {
+    if (usingRESTFallback) {
+      return {
+        type: "offline",
+        icon: <WifiOff size={14} className="mr-1" />,
+        text: "Offline mode"
+      };
+    } else if (!isWebsocketConnected) {
+      return {
+        type: "connecting",
+        icon: <Loader2 size={14} className="animate-spin mr-1" />,
+        text: "Connecting..."
+      };
+    }
+    return null;
+  }, [usingRESTFallback, isWebsocketConnected]);
   
   const connectWebSocket = useCallback((newChatId) => {
     if (!newChatId) {
@@ -232,7 +267,7 @@ const Chat = ({ chatId: propChatId, onBackClick }) => {
     };
 
     messageService.connectWebSocket(onConnected, onDisconnected);
-  }, []);
+  }, [getFullTimestamp]);
 
   // Effect for handling WebSocket when chatId changes
   useEffect(() => {
@@ -430,7 +465,7 @@ const Chat = ({ chatId: propChatId, onBackClick }) => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  const handleSendMessage = async (e) => {
+  const handleSendMessage = useCallback(async (e) => {
     e.preventDefault();
     const trimmedMessage = messageInput.trim();
     if (!trimmedMessage || isSending) return;
@@ -537,24 +572,80 @@ const Chat = ({ chatId: propChatId, onBackClick }) => {
         setIsSending(false);
       }
     }
-  };
+  }, [messageInput, isSending, chatId, chat, currentUserId, chatStarted, receiverIdFromQuery, toast]);
 
-  // Loading state
-  if (isLoading) {
-    return (
-      <div className="flex justify-center items-center h-full">
-        <Loader2 className="animate-spin" />
+  // Loading skeleton component
+  const SkeletonLoading = () => (
+    <div className="flex flex-col h-full w-full">
+      {/* Skeleton header */}
+      <div className="p-3 border-b border-border/60 flex items-center bg-card sticky top-0 z-10 flex-shrink-0">
+        <div className="h-10 w-10 rounded-full mr-3 flex-shrink-0">
+          <Skeleton className="h-10 w-10 rounded-full" />
+        </div>
+        <div className="flex-1">
+          <Skeleton className="h-5 w-32 mb-2" />
+          <Skeleton className="h-3 w-48" />
+        </div>
       </div>
-    );
-  }
 
-  // Determine other user's name
-  const otherUserName =
-    chat && chat.senderId
-      ? chat.senderId.toString() === currentUserId
-        ? chat.receiverName
-        : chat.senderName
-      : "Chat";
+      {/* Skeleton messages */}
+      <div className="flex-1 overflow-y-auto bg-muted/30">
+        <div className="p-3 space-y-4">
+          <div className="text-center my-3">
+            <Skeleton className="h-5 w-20 mx-auto rounded-full" />
+          </div>
+          
+          {/* Simulate a conversation with multiple message types */}
+          <div className="flex justify-start">
+            <div className="max-w-[70%]">
+              <Skeleton className="h-12 w-64 rounded-lg" />
+            </div>
+          </div>
+          
+          <div className="flex justify-end">
+            <div className="max-w-[70%]">
+              <Skeleton className="h-8 w-48 rounded-lg" />
+            </div>
+          </div>
+          
+          <div className="flex justify-start">
+            <div className="max-w-[70%]">
+              <Skeleton className="h-16 w-72 rounded-lg" />
+            </div>
+          </div>
+          
+          <div className="flex justify-end">
+            <div className="max-w-[70%]">
+              <Skeleton className="h-10 w-56 rounded-lg" />
+            </div>
+          </div>
+          
+          <div className="text-center my-3">
+            <Skeleton className="h-5 w-20 mx-auto rounded-full" />
+          </div>
+          
+          <div className="flex justify-start">
+            <div className="max-w-[70%]">
+              <Skeleton className="h-14 w-80 rounded-lg" />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Skeleton input */}
+      <div className="p-3 border-t border-border/60 bg-card sticky bottom-0 z-10 flex-shrink-0">
+        <div className="flex w-full gap-2">
+          <Skeleton className="flex-1 h-10" />
+          <Skeleton className="h-10 w-10 rounded-full" />
+        </div>
+      </div>
+    </div>
+  );
+
+  // Show skeleton loading state
+  if (isLoading) {
+    return <SkeletonLoading />;
+  }
 
   return (
     <div className="flex flex-col h-full w-full">
@@ -593,17 +684,12 @@ const Chat = ({ chatId: propChatId, onBackClick }) => {
         </div>
 
         {/* Connection status indicator */}
-        {usingRESTFallback ? (
+        {connectionStatus && (
           <div className="flex items-center text-xs text-amber-500 ml-2">
-            <WifiOff size={14} className="mr-1" />
-            <span className="hidden sm:inline">Offline mode</span>
+            {connectionStatus.icon}
+            <span className="hidden sm:inline">{connectionStatus.text}</span>
           </div>
-        ) : !isWebsocketConnected ? (
-          <div className="flex items-center text-xs text-amber-500 ml-2">
-            <Loader2 size={14} className="animate-spin mr-1" />
-            <span className="hidden sm:inline">Connecting...</span>
-          </div>
-        ) : null}
+        )}
       </div>
 
       {/* Chat messages - scrollable area */}
@@ -617,7 +703,7 @@ const Chat = ({ chatId: propChatId, onBackClick }) => {
               <p>No messages yet. Start the conversation!</p>
             </div>
           ) : (
-            groupMessagesByDate(messages).map((item, index) => {
+            groupedMessages.map((item, index) => {
               if (item.type === "date") {
                 return (
                   <div key={`date-${index}`} className="text-center my-3">

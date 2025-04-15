@@ -52,6 +52,7 @@ export const login = (credentials) => async (dispatch) => {
           }
         );
         console.log("User details fetched:", userResponse.data);
+        localStorage.setItem("userId", userResponse.data.id);
         dispatch({ type: GET_USER_SUCCESS, payload: userResponse.data });
       } catch (error) {
         console.error("Error fetching user details:", error);
@@ -115,9 +116,8 @@ export const getUser = (token) => {
         },
       });
       const user = response.data;
-      // localStorage.setItem("userId",user.)
-      dispatch({ type: GET_USER_SUCCESS, payload: user });
       localStorage.setItem("userId", user.id);
+      dispatch({ type: GET_USER_SUCCESS, payload: user });
       console.log("req User ", user);
     } catch (error) {
       const errorMessage =

@@ -1,13 +1,28 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 import { AlertCircle, Check, Clock } from "lucide-react";
 
-const ChatMessage = ({ message, isCurrentUser, status }) => {
+const ChatMessage = ({ message, isCurrentUser, status, isNew }) => {
+  const [highlight, setHighlight] = useState(isNew);
+  
+  // Handle the highlight animation when a new message arrives
+  useEffect(() => {
+    if (isNew) {
+      setHighlight(true);
+      // Keep the highlight for a short duration, then fade it out
+      const timer = setTimeout(() => {
+        setHighlight(false);
+      }, 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [isNew]);
+
   const formattedTime = format(
     new Date(`${message.createdAt}T${message.createdTime}`),
     "hh:mm a"
   );
+  
   const renderStatusIndicator = () => {
     if (!isCurrentUser) return null;
     
@@ -22,19 +37,24 @@ const ChatMessage = ({ message, isCurrentUser, status }) => {
         return <Check size={12} className="ml-1 text-muted-foreground" />;
     }
   };
+  
   return (
     <div
       className={cn(
         "flex mb-2 w-full",
-        isCurrentUser ? "justify-end" : "justify-start"
+        isCurrentUser ? "justify-end" : "justify-start",
+        highlight && !isCurrentUser && "animate-pulse"
       )}
     >
       <div
         className={cn(
-          "max-w-[75%] break-words rounded-lg px-3 py-2 shadow-sm",
+          "max-w-[75%] break-words rounded-lg px-3 py-2 shadow-sm transition-all duration-300",
           isCurrentUser
             ? "bg-primary text-primary-foreground"
-            : "bg-muted dark:bg-muted/40"
+            : highlight 
+              ? "bg-blue-100 dark:bg-blue-900/30" 
+              : "bg-muted dark:bg-muted/40",
+          highlight && !isCurrentUser && "border-l-4 border-blue-500"
         )}
       >
         <p className="text-sm">{message.content}</p>
@@ -56,4 +76,4 @@ const ChatMessage = ({ message, isCurrentUser, status }) => {
   );
 };
 
-export default ChatMessage;
+export default React.memo(ChatMessage);

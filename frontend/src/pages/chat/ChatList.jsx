@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo, useCallback } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { chatService } from "./chatService";
 import { MessageCircle, Loader2 } from "lucide-react";
@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { formatDistanceToNow } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const ChatList = ({ onChatSelect, selectedChatId }) => {
   const [chats, setChats] = useState([]);
@@ -19,50 +20,52 @@ const ChatList = ({ onChatSelect, selectedChatId }) => {
   const currentUserId = localStorage.getItem("userId");
   const activeChatId = selectedChatId || urlChatId;
 
-  useEffect(() => {
-    const fetchChats = async () => {
-      try {
-        if (!currentUserId) {
-          navigate("/Authenticate", { state: { from: "/chats" } });
-          return;
-        }
+  // Fetch chats data
+  const fetchChats = useCallback(async () => {
+    try {
+      const chatsData = await chatService.getUserChats(currentUserId);
 
-        const chatsData = await chatService.getUserChats(currentUserId);
+      // Add lastMessage from the messages array and check for unread messages
+      const chatsWithLastMessage = chatsData.map((chat) => {
+        const messages = chat.messages || [];
+        const lastMessage = messages.length > 0 ? messages[messages.length - 1] : null;
+             
+        return { ...chat, lastMessage };
+      });
 
-        // Add lastMessage from the messages array
-        const chatsWithLastMessage = chatsData.map((chat) => {
-          const messages = chat.messages || [];
-          const lastMessage = messages.length > 0 ? messages[messages.length - 1] : null;
-          return { ...chat, lastMessage };
-        });
+      setChats(chatsWithLastMessage);
+      setFilteredChats(chatsWithLastMessage);
 
-        setChats(chatsWithLastMessage);
-        setFilteredChats(chatsWithLastMessage);
-
-        // Auto-select first chat on large screens if no chat selected
-        if (
-          chatsWithLastMessage.length > 0 &&
-          !activeChatId &&
-          window.innerWidth >= 1024
-        ) {
-          onChatSelect && onChatSelect(chatsWithLastMessage[0].chatId);
-        }
-      } catch (error) {
-        console.error("Error fetching chats:", error);
-        toast({
-          title: "Error",
-          description: "Failed to load chats. Please try again later.",
-          variant: "destructive",
-        });
-      } finally {
-        setIsLoading(false);
+      // Auto-select first chat on large screens if no chat selected
+      if (
+        chatsWithLastMessage.length > 0 &&
+        !activeChatId &&
+        window.innerWidth >= 1024
+      ) {
+        onChatSelect && onChatSelect(chatsWithLastMessage[0].chatId);
       }
-    };
-
-    fetchChats();
-  }, [currentUserId, navigate, toast, activeChatId, onChatSelect]);
+    } catch (error) {
+      console.error("Error fetching chats:", error);
+      toast({
+        title: "Error",
+        description: "Failed to load chats. Please try again later.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  }, [currentUserId, activeChatId, onChatSelect, toast]);
 
   useEffect(() => {
+    if (currentUserId) {
+      fetchChats();
+    } else {
+      setIsLoading(false);
+    }
+  }, [currentUserId, fetchChats]);
+
+  // Use memoized filtered chats
+  useMemo(() => {
     if (searchQuery.trim() === "") {
       setFilteredChats(chats);
     } else {
@@ -79,18 +82,36 @@ const ChatList = ({ onChatSelect, selectedChatId }) => {
     }
   }, [searchQuery, chats, currentUserId]);
 
-  const handleChatClick = (chatId) => {
+  const handleChatClick = useCallback((chatId) => {
+        
     if (onChatSelect) {
       onChatSelect(chatId);
     } else {
       navigate(`/chats/${chatId}`);
     }
-  };
+  }, [navigate, onChatSelect]);
 
   if (isLoading) {
     return (
-      <div className="flex justify-center items-center h-full">
-        <Loader2 className="animate-spin" />
+      <div className="flex flex-col h-full w-full">
+        <div className="p-3 border-b border-border/60 bg-card sticky top-0 z-10 flex-shrink-0">
+          <h1 className="text-xl font-bold mb-3">Chats</h1>
+        </div>
+        <div className="flex-1 overflow-y-auto">
+          {[1, 2, 3, 4, 5,6].map((i) => (
+            <div key={i} className="py-3 px-4 border-b border-border/30 flex items-start space-x-3">
+              <Skeleton className="h-12 w-12 rounded-full flex-shrink-0" />
+              <div className="flex-1">
+                <div className="flex justify-between items-start">
+                  <Skeleton className="h-5 w-32 mb-2" />
+                  <Skeleton className="h-4 w-16" />
+                </div>
+                <Skeleton className="h-4 w-full mb-2" />
+                <Skeleton className="h-3 w-24 mt-2" />
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
     );
   }
@@ -99,17 +120,6 @@ const ChatList = ({ onChatSelect, selectedChatId }) => {
     <div className="flex flex-col h-full w-full">
       <div className="p-3 border-b border-border/60 bg-card sticky top-0 z-10 flex-shrink-0">
         <h1 className="text-xl font-bold mb-3">Chats</h1>
-        {/* Optional Search Feature
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
-          <Input
-            type="text"
-            placeholder="Search chats..."
-            className="pl-10"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-          />
-        </div> */}
       </div>
 
       <div className="flex-1 overflow-y-auto">
@@ -151,7 +161,8 @@ const ChatList = ({ onChatSelect, selectedChatId }) => {
                   <div className="flex-1 min-w-0">
                     <div className="flex justify-between items-start">
                       <div className="flex items-center space-x-2">
-                        <h3 className="font-medium truncate">
+                        <h3 className={cn(
+                          "font-medium truncate")}>
                           {otherUserName}
                         </h3>
                         <span className="text-xs px-2 py-0.5 rounded-full bg-muted/80 text-muted-foreground">
@@ -169,9 +180,9 @@ const ChatList = ({ onChatSelect, selectedChatId }) => {
                     </div>
 
                     {lastMessage ? (
-                      <p className="text-sm text-muted-foreground truncate mt-1">
-                        {lastMessage.content}
-                      </p>
+                    <p className="text-sm text-muted-foreground truncate mt-1">
+                    {lastMessage.content}
+                  </p>
                     ) : (
                       <p className="text-sm text-muted-foreground italic mt-1">
                         No messages yet
