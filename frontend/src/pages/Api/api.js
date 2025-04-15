@@ -3,7 +3,8 @@
 import axios from 'axios';
 import { getApiBaseUrl } from './autoServer';
 
-let API_BASE_URL = 'https://college-dealz.duckdns.org';
+let API_BASE_URL = 'https://college-dealz.duckdns.org/app1'; // Default base URL
+//let API_BASE_URL = 'http://ec2-44-220-63-76.compute-1.amazonaws.com:8443';
 let api = null;
 
 // Call this ONCE at app startup
