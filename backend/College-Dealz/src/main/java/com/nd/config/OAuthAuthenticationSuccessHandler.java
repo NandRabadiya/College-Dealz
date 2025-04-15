@@ -80,7 +80,7 @@ public class OAuthAuthenticationSuccessHandler implements AuthenticationSuccessH
         final String frontendRedirectUrl = "http://localhost:5173/oauth-callback";
 
         final String vercelRedirectUrl = "https://college-dealz.vercel.app/oauth-callback";
-        final String duckRedirectUrl = "https://college-dealz.duckdns.org/oauth-callback";
+        final String duckRedirectUrl = "http://college-dealz.duckdns.org/oauth-callback";
 
         logger.info("OAuthAuthenicationSuccessHandler");
 
