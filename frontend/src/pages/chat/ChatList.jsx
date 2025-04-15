@@ -25,24 +25,39 @@ const ChatList = ({ onChatSelect, selectedChatId }) => {
     try {
       const chatsData = await chatService.getUserChats(currentUserId);
 
-      // Add lastMessage from the messages array and check for unread messages
+      // Add lastMessage from the messages array and timestamp for sorting
       const chatsWithLastMessage = chatsData.map((chat) => {
         const messages = chat.messages || [];
         const lastMessage = messages.length > 0 ? messages[messages.length - 1] : null;
-             
-        return { ...chat, lastMessage };
+        
+        // Create timestamp for sorting (or use a very old date if no messages)
+        let lastMessageTimestamp = new Date(0); // Jan 1, 1970
+        if (lastMessage) {
+          lastMessageTimestamp = new Date(`${lastMessage.createdAt}T${lastMessage.createdTime}`);
+        }
+        
+        return { 
+          ...chat, 
+          lastMessage,
+          lastMessageTimestamp 
+        };
       });
 
-      setChats(chatsWithLastMessage);
-      setFilteredChats(chatsWithLastMessage);
+      // Sort chats by last message timestamp (newest first)
+      const sortedChats = chatsWithLastMessage.sort((a, b) => 
+        b.lastMessageTimestamp - a.lastMessageTimestamp
+      );
+
+      setChats(sortedChats);
+      setFilteredChats(sortedChats);
 
       // Auto-select first chat on large screens if no chat selected
       if (
-        chatsWithLastMessage.length > 0 &&
+        sortedChats.length > 0 &&
         !activeChatId &&
         window.innerWidth >= 1024
       ) {
-        onChatSelect && onChatSelect(chatsWithLastMessage[0].chatId);
+        onChatSelect && onChatSelect(sortedChats[0].chatId);
       }
     } catch (error) {
       console.error("Error fetching chats:", error);
@@ -83,7 +98,6 @@ const ChatList = ({ onChatSelect, selectedChatId }) => {
   }, [searchQuery, chats, currentUserId]);
 
   const handleChatClick = useCallback((chatId) => {
-        
     if (onChatSelect) {
       onChatSelect(chatId);
     } else {
@@ -98,7 +112,7 @@ const ChatList = ({ onChatSelect, selectedChatId }) => {
           <h1 className="text-xl font-bold mb-3">Chats</h1>
         </div>
         <div className="flex-1 overflow-y-auto">
-          {[1, 2, 3, 4, 5,6].map((i) => (
+          {[1, 2, 3, 4, 5, 6].map((i) => (
             <div key={i} className="py-3 px-4 border-b border-border/30 flex items-start space-x-3">
               <Skeleton className="h-12 w-12 rounded-full flex-shrink-0" />
               <div className="flex-1">
@@ -120,6 +134,13 @@ const ChatList = ({ onChatSelect, selectedChatId }) => {
     <div className="flex flex-col h-full w-full">
       <div className="p-3 border-b border-border/60 bg-card sticky top-0 z-10 flex-shrink-0">
         <h1 className="text-xl font-bold mb-3">Chats</h1>
+        <Input
+          type="text"
+          placeholder="Search chats..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="w-full"
+        />
       </div>
 
       <div className="flex-1 overflow-y-auto">
@@ -180,9 +201,9 @@ const ChatList = ({ onChatSelect, selectedChatId }) => {
                     </div>
 
                     {lastMessage ? (
-                    <p className="text-sm text-muted-foreground truncate mt-1">
-                    {lastMessage.content}
-                  </p>
+                      <p className="text-sm text-muted-foreground truncate mt-1">
+                        {lastMessage.content}
+                      </p>
                     ) : (
                       <p className="text-sm text-muted-foreground italic mt-1">
                         No messages yet
