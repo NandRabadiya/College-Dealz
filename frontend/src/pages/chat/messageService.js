@@ -63,7 +63,7 @@ export const messageService = {
         heartbeatIncoming: 10000,
         heartbeatOutgoing: 10000,
         connectHeaders: {
-          Authorization: `Bearer ${token}`
+          Authorization: `Bearer ${token}`,
         },
         debug: function(str) {
           if(str.includes("error") || str.includes("failed")) {
@@ -122,9 +122,19 @@ export const messageService = {
     }
   },
 
-  // Subscribe to a chat topic with more robust error handling
+  // Subscribe to a chat topic with more robust error handling and user-specific channels
   subscribeToChat: (chatId, onMessageReceived) => {
-    console.log(`Attempting to subscribe to /topic/chat/${chatId}`);
+    // Get current user ID from local storage or session
+    const currentUserId = localStorage.getItem("userId") || sessionStorage.getItem("userId");
+    
+    if (!currentUserId) {
+      console.error("No user ID found in storage");
+      return {
+        unsubscribe: () => console.log("Dummy unsubscribe for missing user ID")
+      };
+    }
+    
+    console.log(`Attempting to subscribe to /user/${currentUserId}/queue/chat/${chatId}`);
     
     if (!stompClient) {
       console.warn("STOMP client not initialized, queueing subscription");
@@ -154,10 +164,10 @@ export const messageService = {
       };
     }
 
-    console.log(`Now subscribing to /topic/chat/${chatId}`);
+    console.log(`Now subscribing to /user/queue/chat/${chatId}`);
     try {
-      // Subscribe and handle messages
-      const subscription = stompClient.subscribe(`/topic/chat/${chatId}`, (message) => {
+      // Subscribe to user-specific destination
+      const subscription = stompClient.subscribe(`/user/queue/chat/${chatId}`, (message) => {
         try {
           const receivedMessage = JSON.parse(message.body);
           console.log("Message received for chat", chatId, ":", receivedMessage);
@@ -174,10 +184,10 @@ export const messageService = {
         Authorization: `Bearer ${localStorage.getItem("jwt")}`
       });
       
-      console.log(`Successfully subscribed to /topic/chat/${chatId}`);
+      console.log(`Successfully subscribed to /user/${currentUserId}/queue/chat/${chatId}`);
       return subscription;
     } catch (error) {
-      console.error(`Error subscribing to topic /topic/chat/${chatId}:`, error);
+      console.error(`Error subscribing to /user/${currentUserId}/queue/chat/${chatId}:`, error);
       return {
         unsubscribe: () => console.log("Dummy unsubscribe for failed subscription")
       };

@@ -41,6 +41,7 @@ const SignupForm = ({ onSuccess, onError }) => {
   const [isResending, setIsResending] = useState(false);
   const [countdown, setCountdown] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false); // New state for form submission
+  const [showPassword, setShowPassword] = useState(false); // State for password visibility toggle
 
   const {
     register,
@@ -97,13 +98,15 @@ const SignupForm = ({ onSuccess, onError }) => {
         setOtpSent(true);
         setStep("otp");
         startCountdown();
-    } else if (result.type === "SEND_OTP_FAILURE" && result.payload?.message === "Your Email is already registered Try Login") {
+      } else if (
+        result.type === "SEND_OTP_FAILURE" &&
+        result.payload?.message === "Your Email is already registered Try Login"
+      ) {
         onError(result.payload.message); // Show error message
         return; // Stop further processing
-    } else {
+      } else {
         onError(result.payload?.message || "Failed to send OTP");
-    }
-    
+      }
     } catch (error) {
       onError("Failed to send OTP");
     } finally {
@@ -122,7 +125,7 @@ const SignupForm = ({ onSuccess, onError }) => {
       if (result.type === "VERIFY_OTP_SUCCESS") {
         setStep("password");
         onSuccess(result.payload?.message || "OTP verified successfully");
-              } else {
+      } else {
         onError(result.payload?.message || "Failed to verify OTP");
       }
     } catch (error) {
@@ -141,7 +144,7 @@ const SignupForm = ({ onSuccess, onError }) => {
       if (result.type === "SEND_OTP_SUCCESS") {
         startCountdown();
         onSuccess(result.payload?.message || "OTP resent successfully");
-              } else {
+      } else {
         onError(result.payload?.message || "Failed to resend OTP");
       }
     } finally {
@@ -186,9 +189,7 @@ const SignupForm = ({ onSuccess, onError }) => {
           </Button>
         </div>
         {errors.email && (
-          <p className="text-sm text-destructive mt-1">
-            {errors.email.message}
-          </p>
+          <p className="text-sm text-destructive mt-1">{errors.email.message}</p>
         )}
       </div>
 
@@ -227,15 +228,11 @@ const SignupForm = ({ onSuccess, onError }) => {
                 : "Resend OTP"}
             </Button>
             {otpSent && (
-              <p className="text-sm text-muted-foreground">
-                OTP sent to your email
-              </p>
+              <p className="text-sm text-muted-foreground">OTP sent to your email</p>
             )}
           </div>
           {errors.otp && (
-            <p className="text-sm text-destructive mt-1">
-              {errors.otp.message}
-            </p>
+            <p className="text-sm text-destructive mt-1">{errors.otp.message}</p>
           )}
         </div>
       )}
@@ -243,16 +240,23 @@ const SignupForm = ({ onSuccess, onError }) => {
       {step === "password" && otpSent && (
         <div className="space-y-2">
           <Label htmlFor="password">Password</Label>
-          <Input
-            id="password"
-            type="password"
-            disabled={isSubmitting}
-            {...register("password")}
-          />
+          <div className="relative">
+            <Input
+              id="password"
+              type={showPassword ? "text" : "password"}
+              disabled={isSubmitting}
+              {...register("password")}
+            />
+            <button
+              type="button"
+              className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500"
+              onClick={() => setShowPassword((prev) => !prev)} // Toggle password visibility
+            >
+              {showPassword ? "Hide" : "Show"}
+            </button>
+          </div>
           {errors.password && (
-            <p className="text-sm text-destructive mt-1">
-              {errors.password.message}
-            </p>
+            <p className="text-sm text-destructive mt-1">{errors.password.message}</p>
           )}
           <Button
             type="submit"

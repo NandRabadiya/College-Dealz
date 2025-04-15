@@ -71,7 +71,14 @@ public class MessageController {
         MessageDTO messageDTO = messageService.createMessage(senderId, receiverId, content, chatId);
 
         // Send message to subscribers of this chat
-        messagingTemplate.convertAndSend("/topic/chat/" + chatId, messageDTO);
+        //messagingTemplate.convertAndSend("/topic/chat/" + chatId, messageDTO);
+        messagingTemplate.convertAndSendToUser(String.valueOf(senderId),
+                "/queue/chat/" + chatId,
+                messageDTO);
+        messagingTemplate.convertAndSendToUser(String.valueOf(receiverId),
+                "/queue/chat/" + chatId,
+                messageDTO);
+
     }
 
 }

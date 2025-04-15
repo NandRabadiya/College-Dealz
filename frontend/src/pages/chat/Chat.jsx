@@ -139,13 +139,16 @@ const Chat = ({ chatId: propChatId, onBackClick }) => {
       console.warn("Cannot connect WebSocket: No chat ID provided");
       return;
     }
-
+  
     console.log(`Initializing WebSocket connection for chat ${newChatId}`);
     websocketConnectionRef.current = true;
-
+  
     const onMessageReceived = (receivedMessage) => {
       console.log(`Message received for chat ${newChatId}:`, receivedMessage);
-
+      
+      // Add more detailed logging to debug message reception
+      console.log(`Message metadata - Chat ID: ${receivedMessage.chatId}, Sender: ${receivedMessage.senderId}, Current User: ${currentUserId}`);
+    
       // Only process messages for the currently active chat
       if (newChatId !== currentChatIdRef.current) {
         console.log(
@@ -153,7 +156,7 @@ const Chat = ({ chatId: propChatId, onBackClick }) => {
         );
         return;
       }
-
+    
       if (
         receivedMessage.chatId &&
         receivedMessage.chatId.toString() !== newChatId.toString()
@@ -163,7 +166,15 @@ const Chat = ({ chatId: propChatId, onBackClick }) => {
         );
         return;
       }
-
+    
+      // Mark received messages as "new" when they are from the other user
+      // This helps with visual indication that a new message arrived
+      const isFromOtherUser = receivedMessage.senderId.toString() !== currentUserId;
+      if (isFromOtherUser) {
+        receivedMessage.isNew = true; // This will be used for highlighting
+        console.log("Message from other user, marking as new");
+      }
+    
       setMessages((prevMessages) => {
         const messageExists = prevMessages.some((msg) => {
           // Check if message IDs match (most reliable method)
@@ -184,7 +195,6 @@ const Chat = ({ chatId: propChatId, onBackClick }) => {
               return Math.abs(msgTime - receivedTime) < 5000;
             } catch (e) {
               // If time comparison fails, fall back to just content + sender match
-              // This is less ideal but prevents errors
               console.error("Error comparing message timestamps:", e);
               return true; // Consider it a duplicate if content+sender match but time comparison fails
             }
@@ -198,14 +208,24 @@ const Chat = ({ chatId: propChatId, onBackClick }) => {
           return prevMessages;
         }
       
-        console.log("Adding new message to state");
-        return [...prevMessages, receivedMessage];
+        console.log("Adding new message to state:", receivedMessage);
+        
+        // Force re-render for receiver by creating a new array
+        const updatedMessages = [...prevMessages, receivedMessage];
+        
+        // After adding a message, ensure scrolling to bottom
+        setTimeout(() => {
+          messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+        }, 100);
+        
+        return updatedMessages;
       });
     };
-
+    
+  
     const onConnected = () => {
       console.log(`WebSocket connected successfully for chat ${newChatId}`);
-
+  
       // Only update connection status if this is still the active chat
       if (newChatId === currentChatIdRef.current) {
         setIsWebsocketConnected(true);
@@ -215,7 +235,7 @@ const Chat = ({ chatId: propChatId, onBackClick }) => {
           `Connected to inactive chat ${newChatId}, current is ${currentChatIdRef.current}`
         );
       }
-
+  
       // Clean up any existing subscription
       if (stompSubscription.current) {
         try {
@@ -228,7 +248,7 @@ const Chat = ({ chatId: propChatId, onBackClick }) => {
           console.error("Error unsubscribing from existing topic:", e);
         }
       }
-
+  
       // Add a small delay to ensure WebSocket is ready
       setTimeout(() => {
         if (
@@ -236,6 +256,8 @@ const Chat = ({ chatId: propChatId, onBackClick }) => {
           newChatId === currentChatIdRef.current
         ) {
           console.log(`Now subscribing to topic for chat ${newChatId}`);
+          // The messageService.subscribeToChat correctly handles subscribing to user-specific destination
+          // No changes needed here as messageService.js already has the correct implementation
           stompSubscription.current = messageService.subscribeToChat(
             newChatId,
             onMessageReceived
@@ -246,16 +268,16 @@ const Chat = ({ chatId: propChatId, onBackClick }) => {
         }
       }, 500);
     };
-
+  
     const onDisconnected = (error) => {
       console.log(`WebSocket disconnected for chat ${newChatId}:`, error);
-
+  
       // Only update UI state if this is still the active chat
       if (newChatId === currentChatIdRef.current) {
         setIsWebsocketConnected(false);
         setUsingRESTFallback(true);
       }
-
+  
       if (stompSubscription.current) {
         try {
           stompSubscription.current.unsubscribe();
@@ -265,7 +287,7 @@ const Chat = ({ chatId: propChatId, onBackClick }) => {
         }
       }
     };
-
+  
     messageService.connectWebSocket(onConnected, onDisconnected);
   }, [getFullTimestamp]);
 
