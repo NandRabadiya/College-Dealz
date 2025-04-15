@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Heart, Trash2, Tag } from "lucide-react";
 import { API_BASE_URL } from "../Api/api";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useNavigate } from "react-router-dom"; // Added import for navigation
 
 function Wishlist() {
@@ -92,10 +93,34 @@ function Wishlist() {
         </div>
 
         {loading ? (
-          <div className="text-center py-16 bg-white dark:bg-gray-800 rounded-xl shadow-sm">
-            <p className="text-xl text-gray-600 dark:text-gray-400">
-              Loading...
-            </p>
+          <div className="space-y-4">
+            {[1, 2, 3].map((item) => (
+              <div
+                key={item}
+                className="bg-white dark:bg-gray-800 rounded-xl shadow-sm overflow-hidden"
+              >
+                <div className="flex flex-col sm:flex-row">
+                  <div className="relative w-full sm:w-48 h-48 sm:h-auto">
+                    <Skeleton className="w-full h-full" />
+                  </div>
+                  <div className="flex-1 p-6">
+                    <div className="flex justify-between items-start mb-4">
+                      <div>
+                        <Skeleton className="h-6 w-48 mb-2" />
+                        <Skeleton className="h-4 w-32" />
+                      </div>
+                      <Skeleton className="h-7 w-20" />
+                    </div>
+                    <Skeleton className="h-4 w-full mb-2" />
+                    <Skeleton className="h-4 w-3/4 mb-4" />
+                    <div className="flex items-center justify-between">
+                      <Skeleton className="h-4 w-24" />
+                      <Skeleton className="h-9 w-28" />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
           </div>
         ) : wishlistItems.length === 0 ? (
           <div className="text-center py-16 bg-white dark:bg-gray-800 rounded-xl shadow-sm">
@@ -121,7 +146,6 @@ function Wishlist() {
                       src={getImageUrl(item)}
                       alt={item.name}
                       className="w-full h-full object-cover"
-                      
                     />
                     <div className="absolute top-2 left-2">
                       <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200">
