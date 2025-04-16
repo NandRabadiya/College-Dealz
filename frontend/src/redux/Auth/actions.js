@@ -30,6 +30,7 @@ export const loginFailure = (error) => ({
 });
 
 export const login = (credentials) => async (dispatch) => {
+  window.dispatchEvent(new CustomEvent('LOGIN_PROCESSING'));
   dispatch(loginRequest());
   try {
     console.log("Login - Making request with:", credentials);
@@ -87,6 +88,8 @@ export const signupFailure = (error) => ({
 
 // Modified signup action to include OTP verification
 export const signup = (details) => async (dispatch) => {
+  window.dispatchEvent(new CustomEvent('LOGIN_PROCESSING'));
+
   dispatch(signupRequest());
   try {
     // Send the signup request
@@ -138,8 +141,7 @@ export const signup = (details) => async (dispatch) => {
       await new Promise(resolve => setTimeout(resolve, 1000));
     
       dispatch(signupSuccess({ user: data }));
-    
-      // 🔧 TEMP PATCH: Login again to ensure backend issues fresh and valid session
+    localStorage.setItem("isLoginAfterSignup", true);
       await dispatch(login({ email: details.email, password: details.password }));
       window.dispatchEvent(new CustomEvent(AUTH_STATE_CHANGE_EVENT));
 

@@ -77,7 +77,7 @@ const ProductCard = ({
     maxPrice: 5000,
     categories: "",
   });
-  const [isLoginAfterSignup, setIsLoginAfterSignup] = useState(true);
+  const [isLoginAfterSignup, setIsLoginAfterSignup] = useState(localStorage.getItem("isLoginAfterSignup") === "true");  
 
   const [isAuthenticated, setIsAuthenticated] = useState(
     Boolean(localStorage.getItem("jwt"))
