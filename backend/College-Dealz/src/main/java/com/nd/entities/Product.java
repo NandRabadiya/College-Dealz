@@ -32,7 +32,6 @@ public class Product {
     @NotNull
     @Column(name = "name", nullable = false)
     private String name;
-
     @Lob
     @Column(name = "description")
     private String description;
