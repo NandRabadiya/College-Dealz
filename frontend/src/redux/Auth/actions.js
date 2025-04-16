@@ -40,6 +40,8 @@ export const login = (credentials) => async (dispatch) => {
 
     if (data.access_token) {
       localStorage.setItem("jwt", data.access_token);
+      await Promise.resolve();
+
       window.dispatchEvent(new CustomEvent(AUTH_STATE_CHANGE_EVENT));
       dispatch(loginSuccess({ user: data }));
       try {
@@ -59,6 +61,8 @@ export const login = (credentials) => async (dispatch) => {
         dispatch({ type: GET_USER_FAILURE, payload: error.message });
       }
       console.log("Login - Success dispatched");
+      window.dispatchEvent(new CustomEvent('LOGIN_AFTER_SIGNUP_COMPLETE'));
+
       return { type: "LOGIN_SUCCESS" };
     } else {
       throw new Error("No access token received");
@@ -93,35 +97,56 @@ export const signup = (details) => async (dispatch) => {
     
     const { data } = response;
     
+    // if (data.access_token) {
+    //   // Store the token in localStorage
+    //   localStorage.setItem("jwt", data.access_token);
+    //   const token = localStorage.getItem("jwt");
+    //   console.log("Signup - Token stored:", data.access_token);
+    //  await new Promise(resolve => setTimeout(resolve, 10000));
+    //   console.log("Signup - Wait complete");
+    //   dispatch(signupSuccess({ user: data }));
+
+    //   window.dispatchEvent(new CustomEvent(AUTH_STATE_CHANGE_EVENT));
+    //   // Trigger the auth state change event - this is important
+    //   // Fetch user details like in the login action
+    //   try {
+    //     const userResponse = await axios.get(
+    //       `${API_BASE_URL}/api/users/dashboard`,
+    //       {
+    //         headers: {
+    //           Authorization: `Bearer ${token}`,
+    //         },
+    //       }
+    //     );
+    //     console.log("User details fetched after signup:", userResponse.data);
+    //     localStorage.setItem("userId", userResponse.data.id);
+    //     dispatch({ type: GET_USER_SUCCESS, payload: userResponse.data });
+    //   } catch (error) {
+    //     console.error("Error fetching user details after signup:", error);
+    //     dispatch({ type: GET_USER_FAILURE, payload: error.message });
+    //   }
+      
+    //   // Dispatch signup success with user data
+    //   return { type: "SIGNUP_SUCCESS" };
+    // }
     if (data.access_token) {
-      // Store the token in localStorage
       localStorage.setItem("jwt", data.access_token);
-      
-      // Trigger the auth state change event - this is important
+      const token = localStorage.getItem("jwt");
+      console.log("Signup - Token stored:", data.access_token);
+    
+      // Wait if needed (remove this after testing)
+      await new Promise(resolve => setTimeout(resolve, 1000));
+    
+      dispatch(signupSuccess({ user: data }));
+    
+      // 🔧 TEMP PATCH: Login again to ensure backend issues fresh and valid session
+      await dispatch(login({ email: details.email, password: details.password }));
       window.dispatchEvent(new CustomEvent(AUTH_STATE_CHANGE_EVENT));
-      
-      // Fetch user details like in the login action
-      try {
-        const userResponse = await axios.get(
-          `${API_BASE_URL}/api/users/dashboard`,
-          {
-            headers: {
-              Authorization: `Bearer ${data.access_token}`,
-            },
-          }
-        );
-        console.log("User details fetched after signup:", userResponse.data);
-        localStorage.setItem("userId", userResponse.data.id);
-        dispatch({ type: GET_USER_SUCCESS, payload: userResponse.data });
-      } catch (error) {
-        console.error("Error fetching user details after signup:", error);
-        dispatch({ type: GET_USER_FAILURE, payload: error.message });
-      }
-      
-      // Dispatch signup success with user data
-      dispatch(signupSuccess({ user: data, message: data.message || "Signup successful!" }));
+
       return { type: "SIGNUP_SUCCESS" };
-    } else {
+    }
+    
+    else {
       throw new Error("No access token received from signup");
     }
   } catch (error) {

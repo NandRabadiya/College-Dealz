@@ -74,16 +74,14 @@ const SignupForm = ({ onSuccess, onError }) => {
     try {
       const resultAction = await dispatch(signup(data));
       if (resultAction.type === "SIGNUP_SUCCESS") {
-        onSuccess("Account created successfully! Redirecting to dashboard...");
-        reset();
+        onSuccess("Account created successfully!");
+       // reset();
       } else {
         onError(resultAction.payload?.message || "Signup failed");
       }
     } catch (error) {
       onError("Signup failed");
-    } finally {
-      setIsSubmitting(false);
-    }
+    } 
   };
 
   const handleSendOTP = async () => {

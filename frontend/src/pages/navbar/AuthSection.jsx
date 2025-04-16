@@ -16,6 +16,7 @@ const AuthSection = ({
 }) => {
   // Get the first character of the username if available
   const { user, isAuth } = useSelector((state) => state.auth);
+
   const userInitial = user?.username?.charAt(0)?.toUpperCase();
 
   return (
