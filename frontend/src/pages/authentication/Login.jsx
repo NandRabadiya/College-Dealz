@@ -1,14 +1,15 @@
 import React, { useState } from "react";
-import { useDispatch } from "react-redux"; // Use useDispatch to access Redux dispatch
+import { useDispatch } from "react-redux";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { login } from "../../redux/Auth/actions"; // Import login action
+import { login } from "../../redux/Auth/actions";
 
 const allowedDomains = ["ddu.ac.in", "gtu.ac.in", "gmail.com"];
+
 const loginSchema = z.object({
   email: z
     .string()
@@ -27,33 +28,52 @@ const loginSchema = z.object({
 });
 
 const LoginForm = ({ onSuccess, onError }) => {
-  const { register, handleSubmit, formState: { errors, isValid, isSubmitting } } = useForm({
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isValid, isSubmitting },
+  } = useForm({
     resolver: zodResolver(loginSchema),
-    mode: "onChange"
+    mode: "onChange",
   });
 
-  const dispatch = useDispatch(); // Initialize dispatch
-  const [showPassword, setShowPassword] = useState(false); // State for password visibility toggle
+  const dispatch = useDispatch();
+  const [showPassword, setShowPassword] = useState(false);
+  const [errorMessage, setErrorMessage] = useState(""); // Local error message state
+
+  const showError = (message) => {
+    setErrorMessage(message);
+    if (onError) onError(message);
+    setTimeout(() => {
+      setErrorMessage("");
+    }, 3000);
+  };
 
   const onSubmit = async (data) => {
     try {
-      const resultAction = await dispatch(login(data)); // Wait for the Redux action to resolve
-      if (resultAction.type === "LOGIN_SUCCESS") { // Check action type for success
-        onSuccess("Logged in successfully!"); // Call success callback
+      const resultAction = await dispatch(login(data));
+      if (resultAction.type === "LOGIN_SUCCESS") {
+        onSuccess("Logged in successfully!");
       } else {
-        onError(resultAction.payload?.message || "Login failed"); // Call error callback
+        showError(resultAction.payload?.message || "Login failed");
       }
     } catch (error) {
-      onError("Login failed"); // Fallback error
+      showError("Login failed");
     }
   };
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+      {errorMessage && (
+        <p className="text-sm text-destructive mb-2">{errorMessage}</p>
+      )}
+
       <div className="space-y-2">
         <Label htmlFor="email">Email</Label>
         <Input id="email" type="email" {...register("email")} />
-        {errors.email && <p className="text-sm text-destructive mt-1">{errors.email.message}</p>}
+        {errors.email && (
+          <p className="text-sm text-destructive mt-1">{errors.email.message}</p>
+        )}
       </div>
 
       <div className="space-y-2">
@@ -61,18 +81,20 @@ const LoginForm = ({ onSuccess, onError }) => {
         <div className="relative">
           <Input
             id="password"
-            type={showPassword ? "text" : "password"} // Conditionally set the type
+            type={showPassword ? "text" : "password"}
             {...register("password")}
           />
           <button
             type="button"
             className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500"
-            onClick={() => setShowPassword((prev) => !prev)} // Toggle password visibility
+            onClick={() => setShowPassword((prev) => !prev)}
           >
             {showPassword ? "Hide" : "Show"}
           </button>
         </div>
-        {errors.password && <p className="text-sm text-destructive mt-1">{errors.password.message}</p>}
+        {errors.password && (
+          <p className="text-sm text-destructive mt-1">{errors.password.message}</p>
+        )}
       </div>
 
       <Button type="submit" className="w-full" disabled={isSubmitting || !isValid}>

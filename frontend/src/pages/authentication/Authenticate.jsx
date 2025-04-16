@@ -89,11 +89,11 @@ const Authenticate = ({ isOpen, onClose }) => {
         </CardHeader>
 
         <CardContent>
-          {errorMessage && (
+          {/* {errorMessage && (
             <Alert variant="destructive" className="mb-4">
               <AlertDescription>{errorMessage}</AlertDescription>
             </Alert>
-          )}
+          )} */}
           {successMessage && (
             <Alert className="mb-4 bg-green-50 text-green-700 border-green-200">
               <AlertDescription>{successMessage}</AlertDescription>

@@ -21,9 +21,7 @@ const signupSchema = z.object({
     .email("Invalid email address")
     .refine(
       (email) => allowedDomains.some((domain) => email.endsWith(`@${domain}`)),
-      `Email must be from one of the following domains: ${allowedDomains.join(
-        ", "
-      )}`
+      `Email must be from one of the following domains: ${allowedDomains.join(", ")}`
     ),
   otp: z.string().length(6, "OTP must be 6 digits").optional(),
   password: z
@@ -40,8 +38,9 @@ const SignupForm = ({ onSuccess, onError }) => {
   const [otpSent, setOtpSent] = useState(false);
   const [isResending, setIsResending] = useState(false);
   const [countdown, setCountdown] = useState(0);
-  const [isSubmitting, setIsSubmitting] = useState(false); // New state for form submission
-  const [showPassword, setShowPassword] = useState(false); // State for password visibility toggle
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [errorMessage, setErrorMessage] = useState(""); // State for error message
 
   const {
     register,
@@ -69,26 +68,35 @@ const SignupForm = ({ onSuccess, onError }) => {
     }, 1000);
   };
 
+  const showError = (message) => {
+    setErrorMessage(message);
+    if (onError) onError(message);
+    setTimeout(() => {
+      setErrorMessage("");
+    }, 3000);
+  };
+
   const onSubmit = async (data) => {
     setIsSubmitting(true);
     try {
       const resultAction = await dispatch(signup(data));
       if (resultAction.type === "SIGNUP_SUCCESS") {
         onSuccess("Account created successfully!");
-       // reset();
       } else {
-        onError(resultAction.payload?.message || "Signup failed");
+        showError(resultAction.payload?.message || "Signup failed");
       }
     } catch (error) {
-      onError("Signup failed");
-    } 
+      showError("Signup failed");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleSendOTP = async () => {
     const email = watch("email");
     if (!email || errors.email) return;
 
-    setIsSubmitting(true); // Disable buttons during OTP send
+    setIsSubmitting(true);
     try {
       const result = await dispatch(sendOtp(email));
       if (result.type === "SEND_OTP_SUCCESS") {
@@ -99,13 +107,13 @@ const SignupForm = ({ onSuccess, onError }) => {
         result.type === "SEND_OTP_FAILURE" &&
         result.payload?.message === "Your Email is already registered Try Login"
       ) {
-        onError(result.payload.message); // Show error message
-        return; // Stop further processing
+        showError(result.payload.message);
+        return;
       } else {
-        onError(result.payload?.message || "Failed to send OTP");
+        showError(result.payload?.message || "Failed to send OTP");
       }
     } catch (error) {
-      onError("Failed to send OTP");
+      showError("Failed to send OTP");
     } finally {
       setIsSubmitting(false);
     }
@@ -116,17 +124,16 @@ const SignupForm = ({ onSuccess, onError }) => {
     const otp = watch("otp");
     if (!otp || errors.otp) return;
 
-    setIsSubmitting(true); // Disable buttons during OTP verification
+    setIsSubmitting(true);
     try {
       const result = await dispatch(verifyOtp(email, otp));
       if (result.type === "VERIFY_OTP_SUCCESS") {
         setStep("password");
-       // onSuccess(result.payload?.message || "OTP verified successfully");
       } else {
-        onError(result.payload?.message || "Failed to verify OTP");
+        showError(result.payload?.message || "Failed to verify OTP");
       }
     } catch (error) {
-      onError("Failed to verify OTP");
+      showError("Failed to verify OTP");
     } finally {
       setIsSubmitting(false);
     }
@@ -135,14 +142,14 @@ const SignupForm = ({ onSuccess, onError }) => {
   const handleResendOTP = async () => {
     const email = watch("email");
     setIsResending(true);
-    setIsSubmitting(true); // Disable buttons during OTP resend
+    setIsSubmitting(true);
     try {
       const result = await dispatch(resendOtp(email));
       if (result.type === "SEND_OTP_SUCCESS") {
         startCountdown();
         onSuccess(result.payload?.message || "OTP resent successfully");
       } else {
-        onError(result.payload?.message || "Failed to resend OTP");
+        showError(result.payload?.message || "Failed to resend OTP");
       }
     } finally {
       setIsResending(false);
@@ -152,14 +159,13 @@ const SignupForm = ({ onSuccess, onError }) => {
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+      {errorMessage && (
+        <p className="text-sm text-destructive mb-2">{errorMessage}</p>
+      )}
+
       <div className="space-y-2">
         <Label htmlFor="name">Full Name</Label>
-        <Input
-          id="name"
-          type="text"
-          disabled={isSubmitting}
-          {...register("name")}
-        />
+        <Input id="name" type="text" disabled={isSubmitting} {...register("name")} />
         {errors.name && (
           <p className="text-sm text-destructive mt-1">{errors.name.message}</p>
         )}
@@ -177,9 +183,7 @@ const SignupForm = ({ onSuccess, onError }) => {
           <Button
             type="button"
             onClick={handleSendOTP}
-            disabled={
-              !watch("email") || !!errors.email || otpSent || isSubmitting
-            }
+            disabled={!watch("email") || !!errors.email || otpSent || isSubmitting}
             className="whitespace-nowrap"
           >
             {isSubmitting ? "Sending..." : "Send OTP"}
@@ -210,7 +214,7 @@ const SignupForm = ({ onSuccess, onError }) => {
               {isSubmitting ? "Verifying..." : "Verify OTP"}
             </Button>
           </div>
-          {/* <div className="flex items-center justify-between mt-2">
+           {/* <div className="flex items-center justify-between mt-2">
             <Button
               type="button"
               variant="outline"
@@ -227,7 +231,7 @@ const SignupForm = ({ onSuccess, onError }) => {
             {otpSent && (
               <p className="text-sm text-muted-foreground">OTP sent to your email</p>
             )}
-          </div> */}
+          </div>  */}
           {errors.otp && (
             <p className="text-sm text-destructive mt-1">{errors.otp.message}</p>
           )}
@@ -247,7 +251,7 @@ const SignupForm = ({ onSuccess, onError }) => {
             <button
               type="button"
               className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500"
-              onClick={() => setShowPassword((prev) => !prev)} // Toggle password visibility
+              onClick={() => setShowPassword((prev) => !prev)}
             >
               {showPassword ? "Hide" : "Show"}
             </button>
