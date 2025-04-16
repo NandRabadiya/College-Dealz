@@ -1,10 +1,9 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
 import { useSelector } from "react-redux";
-
-
+import { Loader2 } from "lucide-react"; // Import for loading spinner
 
 const AuthSection = ({
   isMobile = false,
@@ -12,12 +11,26 @@ const AuthSection = ({
   isAuthenticated,
   handleAuthClick,
   handleProfile,
-  
 }) => {
-  // Get the first character of the username if available
-  const { user, isAuth } = useSelector((state) => state.auth);
+  const { user, isAuth, loading } = useSelector((state) => state.auth);
+  const [isProcessing, setIsProcessing] = useState(false);
+  
+  // Track login/signup processing state
+  useEffect(() => {
+    const handleLoginStart = () => setIsProcessing(true);
+    const handleLoginComplete = () => setIsProcessing(false);
+    
+    window.addEventListener('LOGIN_PROCESSING', handleLoginStart);
+    window.addEventListener('LOGIN_AFTER_SIGNUP_COMPLETE', handleLoginComplete);
+    
+    return () => {
+      window.removeEventListener('LOGIN_PROCESSING', handleLoginStart);
+      window.removeEventListener('LOGIN_AFTER_SIGNUP_COMPLETE', handleLoginComplete);
+    };
+  }, []);
 
   const userInitial = user?.username?.charAt(0)?.toUpperCase();
+  const isButtonDisabled = loading || isProcessing;
 
   return (
     <div className={cn("flex items-center", isMobile ? "w-full" : "space-x-2")}>
@@ -28,12 +41,20 @@ const AuthSection = ({
             handleAuthClick();
             onItemClick && onItemClick();
           }}
+          disabled={isButtonDisabled}
           className={cn(
             "rounded-full transition-all duration-300 hover:bg-primary hover:text-primary-foreground",
             isMobile ? "w-full" : ""
           )}
         >
-          Login/Signup
+          {isButtonDisabled ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              Processing...
+            </>
+          ) : (
+            "Login/Signup"
+          )}
         </Button>
       ) : (
         <Button

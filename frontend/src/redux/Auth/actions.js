@@ -30,6 +30,7 @@ export const loginFailure = (error) => ({
 });
 
 export const login = (credentials) => async (dispatch) => {
+  window.dispatchEvent(new CustomEvent('LOGIN_PROCESSING'));
   dispatch(loginRequest());
   try {
     console.log("Login - Making request with:", credentials);
@@ -87,6 +88,8 @@ export const signupFailure = (error) => ({
 
 // Modified signup action to include OTP verification
 export const signup = (details) => async (dispatch) => {
+  window.dispatchEvent(new CustomEvent('LOGIN_PROCESSING'));
+
   dispatch(signupRequest());
   try {
     // Send the signup request
