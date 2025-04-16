@@ -220,7 +220,9 @@ const ProductCard = ({
  useEffect(() => {
     const handleLoginComplete = () => {
       console.log("Login after signup completed");
+      localStorage.removeItem("isLoginAfterSignup");
       setIsLoginAfterSignup(false);
+      fetchProducts(0, currentSearch, sortField, sortDir, filters);
     };
     
     window.addEventListener('LOGIN_AFTER_SIGNUP_COMPLETE', handleLoginComplete);
@@ -228,15 +230,20 @@ const ProductCard = ({
     return () => {
       window.removeEventListener('LOGIN_AFTER_SIGNUP_COMPLETE', handleLoginComplete);
     };
-  }, []);
+  }, [fetchProducts]);
     // Main effect for fetching products
-    useEffect(() => {
-      if ((selectedUniversity || isAuthenticated) && !isLoginAfterSignup) {
-        console.log("Triggering product fetch. University:", selectedUniversity);
-        fetchProducts();
-      }
-    }, [fetchProducts, selectedUniversity, isAuthenticated, isLoginAfterSignup]);
+    // useEffect(() => {
+    //   if ((selectedUniversity || isAuthenticated) && !isLoginAfterSignup) {
+    //     console.log("Triggering product fetch. University:", selectedUniversity);
+    //     fetchProducts();
+    //   }
+    // }, [fetchProducts, selectedUniversity, isAuthenticated, isLoginAfterSignup]);
    
+    useEffect(() => {
+      console.log("Triggering product fetch. University:", selectedUniversity);
+      fetchProducts();
+    }, [fetchProducts, selectedUniversity, isAuthenticated]); 
+    
   // Handle filter changes
   const handleFilterChange = useCallback(
     (newFilters) => {

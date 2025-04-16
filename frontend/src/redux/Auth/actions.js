@@ -137,14 +137,14 @@ export const signup = (details) => async (dispatch) => {
       const token = localStorage.getItem("jwt");
       console.log("Signup - Token stored:", data.access_token);
     
-      // Wait if needed (remove this after testing)
-      await new Promise(resolve => setTimeout(resolve, 1000));
     
       dispatch(signupSuccess({ user: data }));
     localStorage.setItem("isLoginAfterSignup", true);
       await dispatch(login({ email: details.email, password: details.password }));
       window.dispatchEvent(new CustomEvent(AUTH_STATE_CHANGE_EVENT));
-
+ // Clear the flag after everything is done
+ localStorage.removeItem("isLoginAfterSignup");
+ window.dispatchEvent(new CustomEvent('LOGIN_AFTER_SIGNUP_COMPLETE'));
       return { type: "SIGNUP_SUCCESS" };
     }
     
