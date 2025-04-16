@@ -33,6 +33,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.security.oauth2.core.user.DefaultOAuth2User;
+import org.springframework.transaction.annotation.Transactional;
 
 import static com.nd.enums.Provider.GOOGLE;
 
@@ -71,6 +72,7 @@ public class OAuthAuthenticationSuccessHandler implements AuthenticationSuccessH
 
 
     @Override
+    @Transactional
     public void onAuthenticationSuccess(
             HttpServletRequest request,
             HttpServletResponse response,
@@ -196,7 +198,7 @@ logger.info("OAuthAuthenicationSuccessHandler: Google New user check before user
             authenticationService.saveUserToken(accessToken, refreshToken, user);
         }
 
-   //     response.sendRedirect(frontendRedirectUrl + "?token=" + accessToken);
+   //    response.sendRedirect(frontendRedirectUrl + "?token=" + accessToken);
    response.sendRedirect(vercelRedirectUrl + "?token=" + accessToken);
    //     response.sendRedirect(duckRedirectUrl + "?token=" + accessToken);
 

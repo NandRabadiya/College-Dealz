@@ -2,8 +2,8 @@
 // api.js
 import axios from 'axios';
 import { getApiBaseUrl } from './autoServer';
-let API_BASE_URL = 'http://localhost:8080'; // Default base URL for local development
-//let API_BASE_URL = 'https://college-dealz.duckdns.org/app1'; // Default base URL
+//let API_BASE_URL = 'http://localhost:8080'; // Default base URL for local development
+let API_BASE_URL = 'https://college-dealz.duckdns.org/app1'; // Default base URL
 let api = null;
 
 // Call this ONCE at app startup
