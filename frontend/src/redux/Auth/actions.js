@@ -141,8 +141,7 @@ export const signup = (details) => async (dispatch) => {
       await new Promise(resolve => setTimeout(resolve, 1000));
     
       dispatch(signupSuccess({ user: data }));
-    
-      // 🔧 TEMP PATCH: Login again to ensure backend issues fresh and valid session
+    localStorage.setItem("isLoginAfterSignup", true);
       await dispatch(login({ email: details.email, password: details.password }));
       window.dispatchEvent(new CustomEvent(AUTH_STATE_CHANGE_EVENT));
 

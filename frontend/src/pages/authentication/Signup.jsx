@@ -121,7 +121,7 @@ const SignupForm = ({ onSuccess, onError }) => {
       const result = await dispatch(verifyOtp(email, otp));
       if (result.type === "VERIFY_OTP_SUCCESS") {
         setStep("password");
-        onSuccess(result.payload?.message || "OTP verified successfully");
+       // onSuccess(result.payload?.message || "OTP verified successfully");
       } else {
         onError(result.payload?.message || "Failed to verify OTP");
       }
@@ -210,7 +210,7 @@ const SignupForm = ({ onSuccess, onError }) => {
               {isSubmitting ? "Verifying..." : "Verify OTP"}
             </Button>
           </div>
-          <div className="flex items-center justify-between mt-2">
+          {/* <div className="flex items-center justify-between mt-2">
             <Button
               type="button"
               variant="outline"
@@ -227,7 +227,7 @@ const SignupForm = ({ onSuccess, onError }) => {
             {otpSent && (
               <p className="text-sm text-muted-foreground">OTP sent to your email</p>
             )}
-          </div>
+          </div> */}
           {errors.otp && (
             <p className="text-sm text-destructive mt-1">{errors.otp.message}</p>
           )}

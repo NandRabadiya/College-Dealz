@@ -29,24 +29,34 @@ const Authenticate = ({ isOpen, onClose }) => {
   console.log("Authenticate - location state:", location.state);
   console.log("Authenticate - isAuthenticated:", isAuthenticated);
 
+  // React.useEffect(() => {
+  //   if (isAuthenticated) {
+  //     console.log("Authenticate - redirecting to:", from);
+  //     navigate(from, { replace: true });
+  //   }
+  // }, [isAuthenticated, navigate, location]);
+
   React.useEffect(() => {
     if (isAuthenticated) {
-      console.log("Authenticate - redirecting to:", from);
-      navigate(from, { replace: true });
+      navigate("/", { replace: true });
     }
-  }, [isAuthenticated, navigate, location]);
+  }, [isAuthenticated, navigate]);
 
+  // const handleAuthSuccess = (message) => {
+  //   setSuccessMessage(message);
+  //   setErrorMessage("");
+  //   const redirectProductId = sessionStorage.getItem("redirectProductId");
+  //   if (redirectProductId) {
+  //     sessionStorage.removeItem("redirectProductId"); // Clean up
+  //     navigate(`/product/${redirectProductId}`);
+  //   }
+  //   //navigate(from, { replace: true });
+  // };
   const handleAuthSuccess = (message) => {
     setSuccessMessage(message);
     setErrorMessage("");
-    const redirectProductId = sessionStorage.getItem("redirectProductId");
-    if (redirectProductId) {
-      sessionStorage.removeItem("redirectProductId"); // Clean up
-      navigate(`/product/${redirectProductId}`);
-    }
-    //navigate(from, { replace: true });
+    navigate("/", { replace: true });
   };
-
   const handleAuthError = (message) => {
     setErrorMessage(message);
     setSuccessMessage("");
