@@ -12,7 +12,7 @@ public interface WantlistService {
 
     List<WantlistDto> getAllWantlist();
     List<WantlistDto> getAllWantlistItemsByUserId(Integer userId);
-
+    public List<WantlistDto> getWantlistByUniversityId(String token);
 
     WantlistDto getWantlistById(Integer wantlistId);
 

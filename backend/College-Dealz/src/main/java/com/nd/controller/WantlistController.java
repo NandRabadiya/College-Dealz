@@ -61,4 +61,9 @@ public class WantlistController {
     public ResponseEntity<List<WantlistDto>> getAllWantlist() {
         return ResponseEntity.ok(wantlistService.getAllWantlist());
     }
+
+    @GetMapping("/all/university")
+    public ResponseEntity<List<WantlistDto>> getAllUniversity(@RequestHeader("Authorization") String token) {
+        return ResponseEntity.ok(wantlistService.getWantlistByUniversityId(token));
+    }
 }

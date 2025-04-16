@@ -9,6 +9,7 @@ import com.nd.exceptions.ResourceNotFoundException;
 import com.nd.repositories.ArchivedWantlistRepo;
 import com.nd.repositories.UserRepo;
 import com.nd.repositories.WantlistRepo;
+import com.nd.service.JwtService;
 import com.nd.service.NotificationService;
 import com.nd.service.WantlistService;
 import jakarta.persistence.EntityNotFoundException;
@@ -33,6 +34,8 @@ public class WantlistServiceImpl implements WantlistService {
     private final NotificationService notificationService;
 
     private final ArchivedWantlistRepo archivedWantlistRepository;
+
+    private final JwtService jwtService;
 
     @Override
     public WantlistDto addProductToWantlist(Integer userId, WantlistDto wantlistDto) {
@@ -109,6 +112,20 @@ public class WantlistServiceImpl implements WantlistService {
                 .stream()
                 .map(this::toDto)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<WantlistDto> getWantlistByUniversityId(String token) {
+
+        Integer universityId = jwtService.getUniversityIdFromToken(token);
+
+        List<Wantlist> wantlists=wantlistRepository.findAllByUniversityId(universityId);
+
+        return wantlists
+                .stream()
+                .map(this::toDto)
+                .collect(Collectors.toList());
+
     }
 
     @Override
