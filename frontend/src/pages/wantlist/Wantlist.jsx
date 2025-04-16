@@ -37,7 +37,7 @@ function Wantlist() {
     try {
       // Fetch all wantlist items
       const allResponse = await fetch(
-        `${API_BASE_URL}/api/wantlist/all-wantlist`,
+        `${API_BASE_URL}/api/wantlist/all/university`,
         {
           method: "GET",
           headers: {
