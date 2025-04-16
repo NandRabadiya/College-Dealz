@@ -138,7 +138,8 @@ public class SecurityConfig {
                 "http://college-dealz-nands-projects-9a72e00e.vercel.app",
                 "http://college-dealz.vercel.app",
                 "http://college-dealz-mdtgfjzaa-nands-projects-9a72e00e.vercel.app",
-
+                "http://college-dealz.duckdns.org",
+                "https://college-dealz.duckdns.org",
                 "https://college-dealz-git-main-nands-projects-9a72e00e.vercel.app"
         ));// Frontend origin
 
