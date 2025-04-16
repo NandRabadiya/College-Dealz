@@ -85,18 +85,45 @@ export const signupFailure = (error) => ({
 export const signup = (details) => async (dispatch) => {
   dispatch(signupRequest());
   try {
+    // Send the signup request
     const response = await axios.post(`${API_BASE_URL}/register`, {
       ...details,
       verified: true // Add this flag to indicate OTP verification is complete
     });
-    const user = response.data;
-    if (user.access_token) {
-      localStorage.setItem("jwt", user.access_token);
+    
+    const { data } = response;
+    
+    if (data.access_token) {
+      // Store the token in localStorage
+      localStorage.setItem("jwt", data.access_token);
+      
+      // Trigger the auth state change event - this is important
       window.dispatchEvent(new CustomEvent(AUTH_STATE_CHANGE_EVENT));
-      dispatch(getUser(user.access_token));
+      
+      // Fetch user details like in the login action
+      try {
+        const userResponse = await axios.get(
+          `${API_BASE_URL}/api/users/dashboard`,
+          {
+            headers: {
+              Authorization: `Bearer ${data.access_token}`,
+            },
+          }
+        );
+        console.log("User details fetched after signup:", userResponse.data);
+        localStorage.setItem("userId", userResponse.data.id);
+        dispatch({ type: GET_USER_SUCCESS, payload: userResponse.data });
+      } catch (error) {
+        console.error("Error fetching user details after signup:", error);
+        dispatch({ type: GET_USER_FAILURE, payload: error.message });
+      }
+      
+      // Dispatch signup success with user data
+      dispatch(signupSuccess({ user: data, message: data.message || "Signup successful!" }));
+      return { type: "SIGNUP_SUCCESS" };
+    } else {
+      throw new Error("No access token received from signup");
     }
-    dispatch(signupSuccess({ user, message: user.message || "Signup successful!" }));
-    return { type: "SIGNUP_SUCCESS" };
   } catch (error) {
     const errorMessage = error.response?.data?.message || "Signup failed";
     dispatch(signupFailure(errorMessage));
