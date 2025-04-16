@@ -70,21 +70,18 @@ const SignupForm = ({ onSuccess, onError }) => {
   };
 
   const onSubmit = async (data) => {
-    setIsSubmitting(true); // Set submitting state to true when form submission starts
+    setIsSubmitting(true);
     try {
       const resultAction = await dispatch(signup(data));
       if (resultAction.type === "SIGNUP_SUCCESS") {
         onSuccess("Account created successfully!");
-        reset(); // Reset form after successful submission
-        setStep("initial");
+       // reset();
       } else {
         onError(resultAction.payload?.message || "Signup failed");
       }
     } catch (error) {
       onError("Signup failed");
-    } finally {
-      setIsSubmitting(false); // Reset submitting state regardless of outcome
-    }
+    } 
   };
 
   const handleSendOTP = async () => {

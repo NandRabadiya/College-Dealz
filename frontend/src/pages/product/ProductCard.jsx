@@ -77,10 +77,12 @@ const ProductCard = ({
     maxPrice: 5000,
     categories: "",
   });
+  const [isLoginAfterSignup, setIsLoginAfterSignup] = useState(true);
 
   const [isAuthenticated, setIsAuthenticated] = useState(
     Boolean(localStorage.getItem("jwt"))
   );
+
 
   // Memoize filter state
   const filterState = useMemo(() => ({
@@ -214,15 +216,27 @@ const ProductCard = ({
       selectedUniversity,
     ]
   );
-
-  // Main effect for fetching products
-  useEffect(() => {
-    if (selectedUniversity || isAuthenticated) {
-      console.log("Triggering product fetch. University:", selectedUniversity);
-      fetchProducts();
-    }
-  }, [fetchProducts, selectedUniversity, isAuthenticated]);
-
+  
+ useEffect(() => {
+    const handleLoginComplete = () => {
+      console.log("Login after signup completed");
+      setIsLoginAfterSignup(false);
+    };
+    
+    window.addEventListener('LOGIN_AFTER_SIGNUP_COMPLETE', handleLoginComplete);
+    
+    return () => {
+      window.removeEventListener('LOGIN_AFTER_SIGNUP_COMPLETE', handleLoginComplete);
+    };
+  }, []);
+    // Main effect for fetching products
+    useEffect(() => {
+      if ((selectedUniversity || isAuthenticated) && !isLoginAfterSignup) {
+        console.log("Triggering product fetch. University:", selectedUniversity);
+        fetchProducts();
+      }
+    }, [fetchProducts, selectedUniversity, isAuthenticated, isLoginAfterSignup]);
+   
   // Handle filter changes
   const handleFilterChange = useCallback(
     (newFilters) => {
