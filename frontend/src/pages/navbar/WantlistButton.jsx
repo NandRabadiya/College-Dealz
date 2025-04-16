@@ -16,15 +16,16 @@ const WantlistButton = ({ isMobile = false, onItemClick, className, onClick }) =
       id="wantlist-button"
       className={cn(
         "wantlist-button rounded-md flex items-center gap-2 px-4 py-2",
-        isMobile ? "w-full justify-start" : "justify-center",
+        isMobile ? "w-auto px-2 py-2 justify-start" : "justify-center",
         className
       )}
       onClick={handleClick}
       aria-label="Wantlist"
     >
       <ClipboardList className="wantlist-button icon h-5 w-5" />
-      <span className="wantlist-button font-medium">Wantlist</span>
-    </button>
+      {!isMobile && (
+    <span className="wantlist-button font-medium">Wantlist</span>
+  )}    </button>
   );
 };
 

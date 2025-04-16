@@ -154,7 +154,7 @@ const PostADeal = ({ onClose, editDeal }) => {
   const handleImageUpload = useCallback((e) => {
     const files = Array.from(e.target.files);
     const totalImages = formData.images.length + files.length;
-
+  
     if (totalImages > 7) {
       setErrors((prev) => ({
         ...prev,
@@ -162,26 +162,82 @@ const PostADeal = ({ onClose, editDeal }) => {
       }));
       return;
     }
-
-    const newImages = files.map((file) => ({
-      file,
-      preview: URL.createObjectURL(file),
-    }));
-
-    setFormData((prevData) => ({
-      ...prevData,
-      images: [...prevData.images, ...newImages],
-    }));
-
-    if (errors.images) {
-      setErrors((prev) => {
-        const updatedErrors = { ...prev };
-        delete updatedErrors.images;
-        return updatedErrors;
+  
+    // Process each file with compression
+    const processFile = async (file) => {
+      // Only process image files
+      if (!file.type.startsWith('image/')) {
+        return {
+          file,
+          preview: URL.createObjectURL(file),
+        };
+      }
+  
+      // Create an image element
+      return new Promise((resolve) => {
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          const img = new Image();
+          img.onload = () => {
+            // Create canvas for compression
+            const canvas = document.createElement('canvas');
+            
+            // Calculate new dimensions (max 1200px width/height)
+            let width = img.width;
+            let height = img.height;
+            const maxSize = 1200;
+            
+            if (width > height && width > maxSize) {
+              height = (height * maxSize) / width;
+              width = maxSize;
+            } else if (height > maxSize) {
+              width = (width * maxSize) / height;
+              height = maxSize;
+            }
+            
+            canvas.width = width;
+            canvas.height = height;
+            
+            // Draw and compress
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0, width, height);
+            
+            // Convert to blob with reduced quality
+            canvas.toBlob((blob) => {
+              const compressedFile = new File([blob], file.name, {
+                type: 'image/jpeg',
+                lastModified: Date.now(),
+              });
+              
+              resolve({
+                file: compressedFile,
+                preview: URL.createObjectURL(compressedFile),
+              });
+            }, 'image/jpeg', 0.7); // Adjust quality (0.7 = 70%)
+          };
+          img.src = event.target.result;
+        };
+        reader.readAsDataURL(file);
       });
-    }
+    };
+  
+    // Process all files and update state
+    Promise.all(files.map(processFile))
+      .then((compressedImages) => {
+        setFormData((prevData) => ({
+          ...prevData,
+          images: [...prevData.images, ...compressedImages],
+        }));
+  
+        if (errors.images) {
+          setErrors((prev) => {
+            const updatedErrors = { ...prev };
+            delete updatedErrors.images;
+            return updatedErrors;
+          });
+        }
+      });
   }, [formData.images.length, errors.images]);
-
   const removeImage = useCallback((index) => {
     const imageToRemove = formData.images[index];
     

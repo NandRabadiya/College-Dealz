@@ -44,7 +44,7 @@ const AuthSection = ({
           disabled={isButtonDisabled}
           className={cn(
             "rounded-full transition-all duration-300 hover:bg-primary hover:text-primary-foreground",
-            isMobile ? "w-full" : ""
+            isMobile ? "w-auto px-2 text-sm" : ""  // Modified to reduce size
           )}
         >
           {isButtonDisabled ? (
