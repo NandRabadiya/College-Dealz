@@ -25,6 +25,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { API_BASE_URL } from "../Api/api";
 import WantlistDialog from "./WantlistDialog";
 import { useNavigate } from "react-router-dom";
+import { useSelector } from "react-redux";
+
 
 // Enum constants for reference types
 const REFERENCE_TYPES = {
@@ -209,12 +211,21 @@ const NotificationBell = ({ children, className = "", isMobile = false }) => {
   const [showWantlistDialog, setShowWantlistDialog] = useState(false);
   const navigate = useNavigate();
   const [wantlistLoading, setWantlistLoading] = useState(false);
+   const isAuthenticated = useSelector((state) => state.auth.isAuthenticated);
+ 
+  // Add this effect to redirect if not authenticated
+
 
   const handleOpenChange = useCallback((open) => {
+    if (open && !isAuthenticated) {
+      navigate("/authenticate");
+      return;
+    }
     setIsOpen(open);
-  }, []);
+  }, [isAuthenticated, navigate]);
 
   const fetchNotifications = useCallback(async () => {
+  
     try {
       setLoading(true);
       const token = localStorage.getItem("jwt");
@@ -242,17 +253,19 @@ const NotificationBell = ({ children, className = "", isMobile = false }) => {
       setLoading(false);
     }
   }, []);
-
   useEffect(() => {
+    const token = localStorage.getItem("jwt");
+    if (token && isAuthenticated) {
     fetchNotifications();
-
-    // Poll for new notifications
-    const pollInterval = setInterval(fetchNotifications, 300000); // 5 minutes
-
-    return () => {
-      clearInterval(pollInterval);
-    };
-  }, [fetchNotifications]);
+      
+      // Poll for new notifications
+      const pollInterval = setInterval(fetchNotifications, 300000); // 5 minutes
+      
+      return () => {
+        clearInterval(pollInterval);
+      };
+    }
+  }, [fetchNotifications, isAuthenticated]);
 
   const markAsRead = useCallback(async (notificationId) => {
     try {
@@ -307,7 +320,13 @@ const NotificationBell = ({ children, className = "", isMobile = false }) => {
   }, []);
 
   const handleNotificationClick = useCallback(
+
+   
     async (notification) => {
+      if (!isAuthenticated) {
+        navigate("/authenticate");
+        return Promise.resolve();
+      }
       // Mark notification as read (fixed this line to ensure it runs)
       await markAsRead(notification.id);
 
@@ -335,7 +354,7 @@ const NotificationBell = ({ children, className = "", isMobile = false }) => {
       // Return a promise to ensure loading state is handled properly
       return Promise.resolve();
     },
-    [markAsRead, fetchWantlistData, navigate]
+    [markAsRead, fetchWantlistData, navigate, isAuthenticated]
   );
 
   const unreadCount = useMemo(() => {
