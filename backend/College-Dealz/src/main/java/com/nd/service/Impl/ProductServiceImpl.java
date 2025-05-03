@@ -6,11 +6,14 @@ import com.nd.dto.SoldOutsideResponse;
 import com.nd.entities.*;
 import com.nd.dto.ProductDto;
 import com.nd.enums.Category;
+import com.nd.enums.NotificationType;
 import com.nd.enums.ProductStatus;
+import com.nd.enums.ReferenceType;
 import com.nd.exceptions.ProductException;
 import com.nd.exceptions.ResourceNotFoundException;
 import com.nd.repositories.*;
 import com.nd.service.JwtService;
+import com.nd.service.NotificationService;
 import com.nd.service.ProductService;
 import com.nd.service.S3ImageService;
 import jakarta.transaction.Transactional;
@@ -61,6 +64,8 @@ public class ProductServiceImpl implements ProductService {
 
     @Autowired
     private WishlistRepository wishlistRepository;
+    @Autowired
+    private NotificationService notificationService;
 
     @Override
     public ProductDto createProduct(ProductDto productDto, String authHeader) throws ResourceNotFoundException {
@@ -393,6 +398,7 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public void deleteProduct(Integer productId) {
         if (productRepo.existsById(productId)) {
+
             productRepo.deleteById(productId);
         } else {
             throw new RuntimeException("Product with ID " + productId + " not found.");
@@ -529,8 +535,12 @@ public class ProductServiceImpl implements ProductService {
 
         if(byUser)
         archived.setStatus(ProductStatus.REMOVED_BY_USER);
-        else
+        else {
             archived.setStatus(ProductStatus.REMOVED_BY_ADMIN);
+
+            notificationService.createNotificationForUser(product.getSeller().getId(),product.getName()+" was deleted by admin",
+                    removalReason, NotificationType.SYSTEM_NOTIFICATION , ReferenceType.NO_REFERENCE,0);
+        }
 
         archived.setReasonForRemoval(removalReason);
         archived.setStatusChangeDate(LocalDateTime.now());
