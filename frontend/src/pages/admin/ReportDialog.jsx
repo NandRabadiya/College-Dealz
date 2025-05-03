@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { AlertTriangle } from "lucide-react";
+import { AlertTriangle, Trash2 } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -10,7 +10,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 
-const ReportDialog = ({ type, id, onReport }) => {
+const ReportDialog = ({ type, id, onReport, onDelete, action = "warn" }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [reason, setReason] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -23,11 +23,20 @@ const ReportDialog = ({ type, id, onReport }) => {
 
     setIsSubmitting(true);
     try {
-      await onReport(id, reason);
+      if (action === "delete") {
+        await onDelete(id, reason);
+      } else {
+        await onReport(id, reason);
+      }
       setIsOpen(false);
       setReason("");
     } catch (error) {
-      console.error(`Error warning ${type.toLowerCase()}:`, error);
+      console.error(
+        `Error ${
+          action === "delete" ? "deleting" : "warning"
+        } ${type.toLowerCase()}:`,
+        error
+      );
     } finally {
       setIsSubmitting(false);
     }
@@ -35,28 +44,36 @@ const ReportDialog = ({ type, id, onReport }) => {
 
   return (
     <>
-      <Button 
-        variant="ghost" 
-        size="icon" 
+      <Button
+        variant="ghost"
+        size="icon"
         onClick={() => setIsOpen(true)}
         className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm hover:bg-white dark:hover:bg-gray-700 shadow-sm"
       >
-        <AlertTriangle className="h-5 w-5 text-red-500" />
+        {action === "delete" ? (
+          <Trash2 className="h-5 w-5 text-red-500" />
+        ) : (
+          <AlertTriangle className="h-5 w-5 text-red-500" />
+        )}{" "}
       </Button>
 
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>Warn {type}</DialogTitle>
+            <DialogTitle>
+              {action === "delete" ? `Delete ${type}` : `Warn ${type}`}
+            </DialogTitle>
           </DialogHeader>
           <div className="py-4">
             <label className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">
-              Reason for warning
+              Reason for {action === "delete" ? "deletion" : "warning"}
             </label>
             <Textarea
               value={reason}
               onChange={(e) => setReason(e.target.value)}
-              placeholder={`Enter reason for warning this ${type.toLowerCase()}...`}
+              placeholder={`Enter reason for ${
+                action === "delete" ? "deleting" : "warning"
+              } this ${type.toLowerCase()}...`}
               className="w-full resize-none min-h-[120px]"
               disabled={isSubmitting}
             />
@@ -76,9 +93,13 @@ const ReportDialog = ({ type, id, onReport }) => {
             <Button
               onClick={handleSubmit}
               disabled={isSubmitting || !reason.trim()}
-              className={isSubmitting ? "bg-primary/70" : ""}
+              className={`${isSubmitting ? "bg-primary/70" : ""} ${
+                action === "delete" ? "bg-red-600 hover:bg-red-700" : ""
+              }`}
             >
-              {isSubmitting ? "Sending..." : "Send Warning"}
+              {isSubmitting
+                ? `${action === "delete" ? "Deleting..." : "Sending..."}`
+                : `${action === "delete" ? "Delete" : "Send Warning"}`}{" "}
             </Button>
           </DialogFooter>
         </DialogContent>

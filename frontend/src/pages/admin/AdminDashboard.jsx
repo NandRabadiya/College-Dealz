@@ -137,7 +137,37 @@ function AdminDashboard() {
       setIsSubmitting(false);
     }
   };
-
+  const handleDeleteProduct = async (productId, reason) => {
+    try {
+      setIsSubmitting(true);
+      await axios.delete(
+        `${API_BASE_URL}/api/products/remove-by-admin/${productId}?reason=${encodeURIComponent(reason)}`,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("jwt")}`,
+          },
+        }
+      );
+      
+      toast({
+        title: "Product Deleted",
+        description: "Product was removed successfully",
+      });
+      
+      // Refresh the products list after deletion
+      await fetchProducts();
+      
+    } catch (error) {
+      console.error("Error deleting product:", error);
+      toast({
+        title: "Deletion Failed",
+        description: "Failed to delete product",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
   const handleReportProduct = async (productId, reason) => {
     try {
       setIsSubmitting(true);
@@ -437,6 +467,7 @@ function AdminDashboard() {
             currentImageIndexes={currentImageIndexes}
             setCurrentImageIndexes={setCurrentImageIndexes}
             handleReportProduct={handleReportProduct}
+            handleDeleteProduct={handleDeleteProduct}
           />
         )}
 
