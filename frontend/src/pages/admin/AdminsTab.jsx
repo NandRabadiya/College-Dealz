@@ -19,7 +19,7 @@ const AdminsTab = ({ admins, universities, handleToggleAdmin }) => {
                   Email
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                Community
+                  Community
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                   Actions
@@ -28,26 +28,20 @@ const AdminsTab = ({ admins, universities, handleToggleAdmin }) => {
             </thead>
             <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
               {admins.map((admin) => (
-                <tr key={admin.user_id} className="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors duration-150">
+                <tr
+                  key={admin.user_id}
+                  className="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors duration-150"
+                >
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center">
                       <img
                         className="h-10 w-10 rounded-full object-cover border border-gray-200 dark:border-gray-600"
-                        src={
-                          admin.profile_picture ||
-                          "account.png"
-                        }
+                        src={admin.profile_picture || "account.png"}
                         alt={admin.name || "Admin"}
                       />
                       <div className="ml-4">
                         <div className="text-sm font-medium text-gray-900 dark:text-white">
                           {admin.name}
-                        </div>
-                        <div className="text-sm text-gray-500 dark:text-gray-400">
-                          Admin since{" "}
-                          {new Date(
-                            admin.admin_since
-                          ).toLocaleDateString()}
                         </div>
                       </div>
                     </div>
@@ -61,9 +55,10 @@ const AdminsTab = ({ admins, universities, handleToggleAdmin }) => {
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                    {universities.find(
+                    {/* {universities.find(
                       (u) => u.id === admin.university_id
-                    )?.name || "N/A"}
+                    )?.name || "N/A"} */}
+                    {admin.universityName || "N/A"}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm">
                     <button
@@ -77,7 +72,10 @@ const AdminsTab = ({ admins, universities, handleToggleAdmin }) => {
               ))}
               {admins.length === 0 && (
                 <tr>
-                  <td colSpan="4" className="px-6 py-4 text-center text-sm text-gray-500 dark:text-gray-400">
+                  <td
+                    colSpan="4"
+                    className="px-6 py-4 text-center text-sm text-gray-500 dark:text-gray-400"
+                  >
                     No administrators found
                   </td>
                 </tr>

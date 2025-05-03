@@ -23,9 +23,6 @@ const UsersTab = ({ users, handleToggleAdmin, handleReportUser }) => {
                 Community
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                  Verification
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                   Actions
                 </th>
               </tr>
@@ -65,17 +62,7 @@ const UsersTab = ({ users, handleToggleAdmin, handleReportUser }) => {
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
                     {user.universityName || "N/A"}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <span
-                      className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                        user.email_verified
-                          ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
-                          : "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200"
-                      }`}
-                    >
-                      {user.email_verified ? "Verified" : "Pending"}
-                    </span>
-                  </td>
+                  
                   <td className="px-6 py-4 whitespace-nowrap text-sm">
                     <div className="flex items-center space-x-4">
                       <button
