@@ -247,6 +247,7 @@ public class ProductController {
     @DeleteMapping("/remove-by-admin/{productId}")
     public ResponseEntity<String> removeProductbyAdmin(@PathVariable Integer productId,
                                                 @RequestParam String reason ) throws ProductException {
+
         boolean archived = productService.removeProduct(productId, reason , false);//remove by admin then false
         if (archived)
             return ResponseEntity.ok("Product Removed Successfully");
