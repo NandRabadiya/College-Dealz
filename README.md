@@ -1,6 +1,6 @@
 # 🛍️ College Dealz – Community-Based Reselling Platform
 
-[![Live Demo](https://img.shields.io/badge/Live%20Demo-College%20Dealz-blue?style=for-the-badge&logo=internet-explorer)](https://college-dealz.vercel.app/)
+[![Demo](https://img.shields.io/badge/Demo-College%20Dealz-blue?style=for-the-badge&logo=internet-explorer)](https://drive.google.com/file/d/1RnacIhkwju0lFp-iG7TfbVP8FpRYwolU/view?usp=drive_link)
 
 
 ---
