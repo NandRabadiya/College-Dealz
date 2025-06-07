@@ -4,7 +4,7 @@
 
 ---
 
-## 🚀 Overview (Rephrased)
+## 🚀 Overview
 
 **College Dealz** is a community-based platform that makes it easy for students to buy and sell used products within universities. It supports everything — from login, product posting, and real-time chat, to feedback and admin controls.
 
